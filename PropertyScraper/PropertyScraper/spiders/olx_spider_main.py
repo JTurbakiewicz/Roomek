@@ -53,10 +53,10 @@ class OlxSpiderMain(scrapy.Spider):
 
     def parse_olx_offer(self, response):
         loader = OlxOfferLoader(item=OLXOfferItem(), response=response)
-        loader.add_xpath('offer_name', '//*[@id="offerdescription"]/div[3]/table/tr[1]/td[1]/table/tr/td/strong/a/text()')
+        loader.add_xpath('offer_name', '//*[@id="offerdescription"]/div[2]/h1/text()')
         loader.add_xpath('price', '//*[@id="offeractions"]/div[1]/strong/text()')
         loader.add_xpath('offer_location', '//*[@id="offerdescription"]/div[2]/div[1]/a/strong/text()')
-        loader.add_xpath('date_of_the_offer', '//*[@id="offerdescription"]/div[2]/div[1]/em/text()')
+        loader.add_xpath('date_of_the_offer', '//*[@id="offerdescription"]/div[2]/div[1]/em')
         loader.add_xpath('offer_id', '//*[@id="offerdescription"]/div[2]/div[1]/em/small/text()')
         loader.add_xpath('offer_text', '//*[@id="textContent"]/text()')
         item = loader.load_item()
