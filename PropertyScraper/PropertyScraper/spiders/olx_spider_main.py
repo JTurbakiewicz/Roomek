@@ -3,6 +3,7 @@ from PropertyScraper.itemloaders import OlxOfferLoader
 from PropertyScraper.items import OLXOfferItem
 from scrapy.linkextractors import LinkExtractor
 
+
 OLX_extractor_subpage = LinkExtractor(allow=('olx.pl/oferta'), deny=(';promoted'), unique=True)
 OLX_extractor_otodom = LinkExtractor(allow=('otodom'), unique=True)
 OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=23|page=33'), unique=True,
@@ -58,7 +59,28 @@ class OlxSpiderMain(scrapy.Spider):
         loader.add_xpath('offer_location', '//*[@id="offerdescription"]/div[2]/div[1]/a/strong/text()')
         loader.add_xpath('date_of_the_offer', '//*[@id="offerdescription"]/div[2]/div[1]/em')
         loader.add_xpath('offer_id', '//*[@id="offerdescription"]/div[2]/div[1]/em/small/text()')
-        loader.add_xpath('offer_text', '//*[@id="textContent"]/text()')
+        loader.add_xpath('offer_text', '//*[@id="textContent"]')
+
+        ###OLXtable
+
+        OLX_table_fields = {
+            'Oferta od': 'offer_from',
+            'Poziom': 'apartment_level',
+            'Umeblowane': 'furniture',
+            'Rodzaj zabudowy': 'type_of_building',
+            'Powierzchnia': 'area',
+            'Liczba pokoi': 'amount_of_rooms',
+            'Czynsz (dodatkowo)': 'additional_rent',
+            'Cena za m²': 'price_per_m2',
+            'Rynek': 'type_of_market',
+        }
+        for column in range (1,5):
+            for row in range (1,3):
+                field_name = response.xpath(r'//*[@id="offerdescription"]/div[3]/table/tr[{}]/td[{}]/table/tr/th/text()'.format(column,row)).extract_first()
+                if field_name is not None:
+                    loader.add_xpath(OLX_table_fields[field_name], r'//*[@id="offerdescription"]/div[3]/table/tr[{}]/td[{}]/table/tr/td/strong'.format(column,row))
+        ###/OLXtable
+
         item = loader.load_item()
         print (item)
         yield item

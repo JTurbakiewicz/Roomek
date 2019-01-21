@@ -67,7 +67,6 @@ ROBOTSTXT_OBEY = True
 ITEM_PIPELINES = {
    'PropertyScraper.pipelines.OLXOfferItemPipeline': 300,
 }
-
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True
