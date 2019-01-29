@@ -1,6 +1,6 @@
 import scrapy
-from PropertyScraper.itemloaders import OlxOfferLoader
-from PropertyScraper.items import OLXOfferItem
+from itemloaders import OlxOfferLoader
+from items import OLXOfferItem
 from scrapy.linkextractors import LinkExtractor
 
 
