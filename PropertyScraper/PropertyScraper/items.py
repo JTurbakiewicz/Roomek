@@ -8,6 +8,9 @@ from scrapy.item import BaseItem
 # https://doc.scrapy.org/en/latest/topics/items.html
 
 class OLXOfferItem(dict, BaseItem):
+    city = scrapy.Field()
+    offer_type = scrapy.Field()
+    offer_url = scrapy.Field()
     offer_name = scrapy.Field()
     price = scrapy.Field()
     offer_location = scrapy.Field()

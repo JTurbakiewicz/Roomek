@@ -4,9 +4,20 @@ from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
 from scrapy.utils.project import get_project_settings
 
-urls_OLX = [
-    'https://www.olx.pl/nieruchomosci/mieszkania/poznan/',
-]
+base_string = 'https://www.olx.pl/nieruchomosci'
+offer_types = ['mieszkania']
+cities = ['poznan', 'warszawa', 'leszno', 'plewiska', 'lodz']
+
+urls_OLX = []
+
+for type in offer_types:
+    for city in cities:
+        urls_OLX.append('/'.join([base_string,type,city,'']))
+
+# urls_OLX = [
+#     'https://www.olx.pl/nieruchomosci/mieszkania/poznan/',
+#     'https://www.olx.pl/nieruchomosci/mieszkania/warszawa/',
+# ]
 s = get_project_settings()
 configure_logging()
 runner = CrawlerRunner(s)
