@@ -6,7 +6,7 @@ from scrapy.utils.project import get_project_settings
 
 base_string = 'https://www.olx.pl/nieruchomosci'
 offer_types = ['mieszkania']
-cities = ['poznan', 'warszawa', 'leszno', 'plewiska', 'lodz']
+cities = ['poznan','warszawa']
 
 urls_OLX = []
 
@@ -14,10 +14,6 @@ for type in offer_types:
     for city in cities:
         urls_OLX.append('/'.join([base_string,type,city,'']))
 
-# urls_OLX = [
-#     'https://www.olx.pl/nieruchomosci/mieszkania/poznan/',
-#     'https://www.olx.pl/nieruchomosci/mieszkania/warszawa/',
-# ]
 s = get_project_settings()
 configure_logging()
 runner = CrawlerRunner(s)

@@ -7,10 +7,11 @@ from scrapy.item import BaseItem
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/items.html
 
-class OLXOfferItem(dict, BaseItem):
+class OfferItem(dict, BaseItem):
     city = scrapy.Field()
     offer_type = scrapy.Field()
     offer_url = scrapy.Field()
+    offer_thumbnail_url = scrapy.Field()
     offer_name = scrapy.Field()
     price = scrapy.Field()
     offer_location = scrapy.Field()
@@ -26,3 +27,13 @@ class OLXOfferItem(dict, BaseItem):
     additional_rent = scrapy.Field()
     price_per_m2 = scrapy.Field()
     type_of_market = scrapy.Field()
+
+    security_deposit = scrapy.Field()
+    building_material = scrapy.Field()
+    windows = scrapy.Field()
+    heating = scrapy.Field()
+    building_year = scrapy.Field()
+    fit_out = scrapy.Field()
+    ready_from = scrapy.Field()
+    type_of_ownership = scrapy.Field()
+    rental_for_students = scrapy.Field()

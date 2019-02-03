@@ -78,8 +78,6 @@ def create_offer(item):
             values.append(val[0])
         cursor.execute(add_player, values)
         cnx.commit()
-        # print ('[LOG-DBSQL-INFO] Added offer using the following data: {}, {}, {}, {}, {}, {}, {},{}, {}, {}, {}, '
-        #        '{}, {}, {},{}, {}'.format(*data_player))
     except mysql.connector.IntegrityError as err:
         print("[LOG-DBSQL-ERROR] Error: {}".format(err))
 
@@ -101,11 +99,12 @@ db_tables['offers'] = (
     "  `offer_url` varchar(700) NOT NULL,"
     "  `city` varchar(50) NOT NULL,"
     "  `offer_type` varchar(50) NOT NULL,"
-    "  `offer_name` varchar(500),"
+    "  `offer_name` varchar(200),"
+    "  `offer_thumbnail_url` varchar(400),"    
     "  `price` int(1),"
     "  `offer_location` varchar(50),"
     "  `date_of_the_offer` DATETIME ,"
-    "  `offer_id` int(1) NOT NULL,"
+    "  `offer_id` int(1),"
     "  `offer_text` LONGTEXT,"
     "  `offer_from` varchar(25),"
     "  `apartment_level` smallint(1),"
@@ -116,6 +115,16 @@ db_tables['offers'] = (
     "  `additional_rent` int(1),"
     "  `price_per_m2` int(1),"
     "  `type_of_market` varchar(25),"
+
+    "  `security_deposit` SMALLINT	(1),"
+    "  `building_material` varchar(25),"
+    "  `windows` varchar(25),"
+    "  `heating` varchar(50),"
+    "  `building_year` SMALLINT	(1),"
+    "  `fit_out` varchar(50),"
+    "  `ready_from` DATETIME,"
+    "  `type_of_ownership` varchar(50),"
+    "  `rental_for_students` varchar(25),"
     "  `creation_time` datetime default current_timestamp,"
     "  `modification_time` datetime on update current_timestamp,"
     "  PRIMARY KEY (`offer_url`)"
