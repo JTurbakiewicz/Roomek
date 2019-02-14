@@ -1,5 +1,6 @@
 import mysql.connector
 from mysql.connector import errorcode
+import re
 # from code import tokens
 # from signal import signal, SIGPIPE, SIG_DFL
 
@@ -86,7 +87,7 @@ def get_all(fields_to_get):
     query =  """SELECT %s
              FROM offers
              """ % (fields_to_get)
-    cursor.execute(query)
+    cursor.execute(query, fields_to_get)
     result = cursor.fetchall()
     return [item[0] for item in result]
 
@@ -102,7 +103,7 @@ db_tables['offers'] = (
     "  `offer_name` varchar(200),"
     "  `offer_thumbnail_url` varchar(400),"    
     "  `price` int(1),"
-    "  `offer_location` varchar(50),"
+    "  `offer_location` varchar(100),"
     "  `date_of_the_offer` DATETIME ,"
     "  `offer_id` int(1),"
     "  `offer_text` LONGTEXT,"
@@ -139,9 +140,44 @@ local_config = {
     'host': 'localhost',
     'raise_on_warnings': True
 }
+def get(fields_to_get = '*', amount_of_items = 1, fields_to_compare = [], value_to_compare_to = [], comparator = []):
+    fields_to_get_str = str(fields_to_get)
+    fields_to_get_clean = re.sub("""[[']|]""", '', fields_to_get_str)
+    if type(fields_to_compare) is not list:
+        fields_to_compare = [fields_to_compare]
+    if type(value_to_compare_to) is not list:
+        value_to_compare_to = [value_to_compare_to]
+    if type(comparator) is not list:
+        comparator = [comparator]
 
-#
+    comparative_string = ' '.join([str(fields_to_compare[0]), str(comparator[0]), ''.join(["""'""",str(value_to_compare_to[0]),"""'"""])])
+    for i in range (1, len(fields_to_compare)):
+        try:
+            comparative_string = ' '.join([comparative_string, 'and', str(fields_to_compare[i]),
+                                          str(comparator[i]), ''.join(["""'""",str(value_to_compare_to[i]),"""'"""])])
+        except:
+            print ('Input data inconsistent')
+
+    query = """SELECT 
+                    %s
+                FROM 
+                    offers
+                WHERE
+	                %s
+                """ % (fields_to_get_clean, comparative_string)
+    cursor.execute(query)
+    result = cursor.fetchall()
+    if amount_of_items < len(result):
+        return [result[item] for item in range(amount_of_items)]
+    else:
+        return [result[item] for item in range(len(result))]
+
 # signal(SIGPIPE, SIG_DFL)
 cnx = connect_to_db(local_config)
 create_database()
 create_tables()
+
+print(get(amount_of_items = 3, fields_to_get = ['city', 'price'], fields_to_compare=['price', 'city'], value_to_compare_to = [3000, 'poznan'], comparator= ['>', '=']))
+print(get(amount_of_items = 3, fields_to_get = 'city', fields_to_compare='city', value_to_compare_to = 'poznan', comparator= '='))
+
+#get(amount_of_items = 3, fields_to_get = ['city', 'price'], fields_to_compare='price', value_to_compare_to = 3000, comparator= '=')
