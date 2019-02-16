@@ -37,3 +37,8 @@ class OfferItem(dict, BaseItem):
     ready_from = scrapy.Field()
     type_of_ownership = scrapy.Field()
     rental_for_students = scrapy.Field()
+
+    media = scrapy.Field()
+    security_measures = scrapy.Field()
+    additonal_equipment = scrapy.Field()
+    additional_information = scrapy.Field()

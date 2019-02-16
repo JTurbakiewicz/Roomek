@@ -75,7 +75,7 @@ def create_offer(item):
             values.append(val[0])
         cursor.execute(add_player, values)
         cnx.commit()
-        print ('[LOG-DBSQL-INFO] Added an offer with values: %s' % (values))
+        #print ('[LOG-DBSQL-INFO] Added an offer with values: %s' % (values))
     except mysql.connector.IntegrityError as err:
         print("[LOG-DBSQL-ERROR] Error: {}".format(err))
 
@@ -140,7 +140,6 @@ db_tables['offers'] = (
     "  `additional_rent` int(1),"
     "  `price_per_m2` int(1),"
     "  `type_of_market` varchar(25),"
-
     "  `security_deposit` SMALLINT	(1),"
     "  `building_material` varchar(25),"
     "  `windows` varchar(25),"
@@ -150,6 +149,10 @@ db_tables['offers'] = (
     "  `ready_from` DATETIME,"
     "  `type_of_ownership` varchar(50),"
     "  `rental_for_students` varchar(25),"
+    "  `media` varchar(200),"
+    "  `security_measures` varchar(200),"
+    "  `additonal_equipment` varchar(200),"
+    "  `additional_information` varchar(200),"
     "  `creation_time` datetime default current_timestamp,"
     "  `modification_time` datetime on update current_timestamp,"
     "  PRIMARY KEY (`offer_url`)"

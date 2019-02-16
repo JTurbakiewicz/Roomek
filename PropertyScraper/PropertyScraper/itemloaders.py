@@ -42,7 +42,8 @@ def remove_unnecessary_spaces(input):
     yield re.sub(r' {2,}', '', input)
 
 def swap_unnecessary_spaces(input):
-    yield re.sub(r' {2,}', ' ', input)
+    line = re.sub(r' {2,}', ' ', input)
+    yield re.sub(r' , ', ', ', line).strip()
 
 def remove_border_spaces(input):
     yield input.strip()
@@ -50,6 +51,8 @@ def remove_border_spaces(input):
 def response_to_string(input):
     yield re.sub(r'<200 |>', '', str(input))
 
+def delist_string(input):
+    yield re.sub("""[[']|]""", '', input)
 
 def datetime_it_OLX(input):
     """Returns in a datetime prepared format."""
@@ -146,3 +149,7 @@ class OtodomOfferLoader(OlxOfferLoader):
     ready_from_in = MapCompose(datetime_it_Otodom)
     type_of_ownership_in = MapCompose()
     rental_for_students_in = MapCompose()
+    media_in = MapCompose(delist_string, swap_unnecessary_spaces)
+    security_measures_in = MapCompose(delist_string, swap_unnecessary_spaces)
+    additonal_equipment_in = MapCompose(delist_string, swap_unnecessary_spaces)
+    additional_information_in = MapCompose(delist_string, swap_unnecessary_spaces)

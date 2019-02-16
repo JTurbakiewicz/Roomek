@@ -158,12 +158,23 @@ class OlxSpiderMain(scrapy.Spider):
             'Forma własności': 'type_of_ownership',
             'Wynajmę również studentom': 'rental_for_students',
             'Rynek': 'type_of_market',
+
+            'Wyposażenie': 'media',
+            'Zabezpieczenia': 'security_measures',
+            'Media': 'additonal_equipment',
+            'Informacje dodatkowe': 'additional_information',
         }
 
-        Otodom_table = response.xpath(r'/html[1]/body[1]/div[1]/section[6]/div[1]/div[1]/div[1]/ul[1]/li[1]/ul[2]/li').getall()
-        for line in Otodom_table:
+        Otodom_table1 = response.xpath(r'/html[1]/body[1]/div[1]/section[6]/div[1]/div[1]/div[1]/ul[1]/li[1]/ul[2]/li').getall()
+        for line in Otodom_table1:
             line = re.sub(r'<.*?>', '', line).split(':')
             loader.add_value(Otodom_table_fields[line[0]], line[1][1:])
+
+        Otodom_table2 = response.xpath(r'/html/body/div[1]/section[6]/div/div/div/ul/li').getall()
+        for ln in range(1,len(Otodom_table2)-1):
+            line = re.sub(r'</ul>|</li>|<h4>|</h4>| <ul class="dotted-list">|\n', '', Otodom_table2[ln])
+            line = re.sub(r' {2,}', ' ', line).split('<li>')
+            loader.add_value(Otodom_table_fields[line[1].strip()], str(line[2:]))
         item = loader.load_item()
         yield item
 
