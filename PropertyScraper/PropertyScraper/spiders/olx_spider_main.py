@@ -97,7 +97,7 @@ class OlxSpiderMain(scrapy.Spider):
         loader.add_xpath('offer_thumbnail_url', '//*[@id="photo-gallery-opener"]/img')
         loader.add_xpath('offer_name', '//*[@id="offerdescription"]/div[2]/h1/text()')
         loader.add_xpath('price', '//*[@id="offeractions"]/div[1]/strong/text()')
-        loader.add_xpath('offer_location', '//*[@id="offerdescription"]/div[2]/div[1]/a/strong/text()')
+        loader.add_xpath('district', '//*[@id="offerdescription"]/div[2]/div[1]/a/strong/text()')
         loader.add_xpath('date_of_the_offer', '//*[@id="offerdescription"]/div[2]/div[1]/em')
         loader.add_xpath('offer_id', '//*[@id="offerdescription"]/div[2]/div[1]/em/small/text()')
         loader.add_xpath('offer_text', '//*[@id="textContent"]')
@@ -133,7 +133,6 @@ class OlxSpiderMain(scrapy.Spider):
         loader.add_xpath('offer_name', '/html/body/div[1]/section[2]/div/div/header/h1/text()')
         loader.add_xpath('offer_thumbnail_url', '/html/body/div[1]/section[3]/div/div/div/div[2]')
         loader.add_xpath('price', '/html/body/div[1]/section[2]/div/div/div/div[1]/strong/text()')
-        loader.add_xpath('offer_location', '/html[1]/body[1]/div[1]/section[2]/div[1]/div[1]/header[1]/address[1]/p[1]/a/text()')
         loader.add_xpath('date_of_the_offer', '/html/body/div[1]/section[11]/div/div/div/div/div[2]/p[2]/text()')
         loader.add_xpath('offer_id', '/html/body/div[1]/section[11]/div/div/div/div/div[1]/p[1]/text()')
         loader.add_xpath('offer_text', '/html/body/div[1]/section[7]/div/div/div/div/div/div[1]')
@@ -175,6 +174,12 @@ class OlxSpiderMain(scrapy.Spider):
             line = re.sub(r'</ul>|</li>|<h4>|</h4>| <ul class="dotted-list">|\n', '', Otodom_table2[ln])
             line = re.sub(r' {2,}', ' ', line).split('<li>')
             loader.add_value(Otodom_table_fields[line[1].strip()], str(line[2:]))
+
+        offer_location_response = response.xpath(r'/html/body/div[1]/section[2]/div/div/header/address/p[1]/a/text()').getall()
+        loader.add_value('district', offer_location_response[3])
+        if len(offer_location_response) == 5:
+            loader.add_value('street', offer_location_response[4])
+
         item = loader.load_item()
         yield item
 

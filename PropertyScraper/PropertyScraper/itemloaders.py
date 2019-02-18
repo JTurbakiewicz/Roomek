@@ -54,6 +54,9 @@ def response_to_string(input):
 def delist_string(input):
     yield re.sub("""[[']|]""", '', input)
 
+def street_it(input):
+    yield re.sub(r'ul. ', '', str(input)).title()
+
 def datetime_it_OLX(input):
     """Returns in a datetime prepared format."""
     months_dict = {
@@ -122,7 +125,8 @@ class OlxOfferLoader(ItemLoader):
     offer_thumbnail_url_in = MapCompose(find_image_url)
     offer_name_in = MapCompose(remove_html_tags, remove_unnecessary_spaces)
     price_in = MapCompose(just_numbers,integer_the_price)
-    offer_location_in = MapCompose(remove_html_tags, remove_unnecessary_spaces)
+    street_in = MapCompose(street_it)
+    district_in = MapCompose(lambda input: input.title().split(',')[2].strip())
     date_of_the_offer_in = MapCompose(remove_html_tags,remove_unnecessary_spaces, datetime_it_OLX)
     offer_id_in = MapCompose(just_numbers)
     offer_text_in = MapCompose(remove_unnecessary_spaces, remove_html_tags, swap_unnecessary_spaces)
@@ -137,8 +141,7 @@ class OlxOfferLoader(ItemLoader):
     type_of_market_in = MapCompose(remove_html_tags)
 
 class OtodomOfferLoader(OlxOfferLoader):
-    offer_location_in = Join()
-    offer_location_out = MapCompose(lambda input: ', '.join(input.split(' ')[4:]))
+    district_in = MapCompose(lambda input: input.title())
     date_of_the_offer_in = MapCompose(datetime_it_Otodom)
     security_deposit_in = MapCompose(just_numbers,integer_the_price)
     building_material_in = MapCompose()

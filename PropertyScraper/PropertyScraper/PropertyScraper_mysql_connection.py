@@ -6,7 +6,7 @@ import re
 """Funtion definition"""
 
 def create_database():
-    cursor = cnx.cursor()
+    cursor = cnx.cursor(dictionary=True)
     DB_NAME = 'PropertyScraper$Offers'
     try:
         cursor.execute("CREATE DATABASE {} ".format(DB_NAME))
@@ -37,7 +37,7 @@ def connect_to_db(connection_config):
     global cursor
     try:
         cnx = mysql.connector.connect(**connection_config)
-        cursor = cnx.cursor(buffered=True)
+        cursor = cnx.cursor(buffered=True, dictionary=True)
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("[LOG-DBSQL-ERROR] Something is wrong with your user name or password")
@@ -85,33 +85,42 @@ def get_all(fields_to_get):
              """ % (fields_to_get)
     cursor.execute(query)
     result = cursor.fetchall()
-    return [item[0] for item in result]
+    return [item['offer_url'] for item in result]
 
-def get(fields_to_get = '*', amount_of_items = 1, fields_to_compare = [], value_to_compare_to = [], comparator = []):
+def get(fields_to_get = '*', amount_of_items = 5, fields_to_compare = [], value_to_compare_to = [], comparator = []):
     fields_to_get_str = str(fields_to_get)
     fields_to_get_clean = re.sub("""[[']|]""", '', fields_to_get_str)
     if type(fields_to_compare) is not list:
         fields_to_compare = [fields_to_compare]
-    if type(value_to_compare_to) is not list:
-        value_to_compare_to = [value_to_compare_to]
+    for value in range(len(value_to_compare_to)):
+        if type(value_to_compare_to[value]) is not list:
+            value_to_compare_to[value] = [value_to_compare_to[value]]
+    for compar in range(len(comparator)):
+        if type(comparator[compar]) is not list:
+            comparator[compar] = [comparator[compar]]
     if type(comparator) is not list:
         comparator = [comparator]
-    try:
-        comparative_string = ' '.join(['where', str(fields_to_compare[0]), str(comparator[0]), ''.join(["""'""",str(value_to_compare_to[0]),"""'"""])])
-    except:
-        comparative_string = '' #no comparatorison was given
-    for i in range (1, len(fields_to_compare)):
-        try:
-            comparative_string = ' '.join([comparative_string, 'and', str(fields_to_compare[i]),
-                                          str(comparator[i]), ''.join(["""'""",str(value_to_compare_to[i]),"""'"""])])
-        except:
-            print('[LOG-DBSQL-DEBUG] Input data inconsistent')
+
+    comparative_string = ''
+
+    if len(fields_to_compare) != 0:
+        comparative_string = ''.join([comparative_string, 'where'])
+        for field in range(len(fields_to_compare)):
+            for value in range(len(value_to_compare_to[field])):
+                comparative_string = ' '.join([comparative_string, fields_to_compare[field], comparator[field][value]])
+                comparative_string = ''.join([comparative_string,"""'""",str(value_to_compare_to[field][value]),"""'"""])
+                if value != len(value_to_compare_to[field])-1:
+                    comparative_string = ' '.join([comparative_string, 'or'])
+            if field != len(value_to_compare_to[field]):
+                comparative_string = ' '.join([comparative_string, 'and'])
+
     query = """SELECT 
                     %s
                 FROM 
                     offers
                 %s
                 """ % (fields_to_get_clean, comparative_string)
+    # TODO -> change in a MySQL secure way
     cursor.execute(query)
     return cursor.fetchmany(amount_of_items)
 
@@ -127,7 +136,8 @@ db_tables['offers'] = (
     "  `offer_name` varchar(200),"
     "  `offer_thumbnail_url` varchar(400),"    
     "  `price` int(1),"
-    "  `offer_location` varchar(200),"
+    "  `street` varchar(50),"
+    "  `district` varchar(50),"
     "  `date_of_the_offer` DATETIME ,"
     "  `offer_id` int(1),"
     "  `offer_text` LONGTEXT,"
@@ -168,7 +178,8 @@ local_config = {
     'raise_on_warnings': True
 }
 
-
 cnx = connect_to_db(local_config)
 create_database()
 create_tables()
+
+#print (get(fields_to_get=['district','price'],amount_of_items=10,fields_to_compare = ['district','price'], value_to_compare_to=[['Wilda','Stare Miasto'],10000], comparator=[['=', '!='],'<']))
