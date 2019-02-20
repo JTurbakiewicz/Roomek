@@ -9,12 +9,15 @@ import PropertyScraper_mysql_connection as db
 already_scraped_urls = db.get_all('offer_url')
 OLX_extractor_subpage = LinkExtractor(allow=('olx.pl/oferta'), deny=(';promoted'), unique=True)
 OLX_extractor_otodom = LinkExtractor(allow=('otodom'), unique=True)
-OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=23|page=33'), unique=True,
-                                    restrict_xpaths=(['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
-                                                      '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a']))
-# OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=2|page=3'), unique=True,
+# OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=23|page=33'), unique=True,
 #                                     restrict_xpaths=(['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
 #                                                       '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a']))
+OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=2|page=3|page=4|page=5'), unique=True,
+                                    restrict_xpaths=(['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
+                                                      '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a',
+                                                      '//*[@id="body-container"]/div[3]/div/div[8]/span[5]/a',
+                                                      '//*[@id="body-container"]/div[3]/div/div[8]/span[6]/a']))
+
 links_to_main_page = set()
 links_to_olx_offers = set()
 links_to_otodom_offers = set()

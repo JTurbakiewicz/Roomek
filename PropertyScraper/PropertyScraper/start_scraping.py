@@ -6,7 +6,7 @@ from scrapy.utils.project import get_project_settings
 
 base_string = 'https://www.olx.pl/nieruchomosci'
 offer_types = ['mieszkania']
-cities = ['poznan','warszawa']
+cities = ['warszawa', 'krakow', 'lodz', 'wroclaw', 'poznan', 'gdansk', 'szczecin', 'bydgoszcz', 'lublin', 'bialystok']
 
 urls_OLX = []
 
