@@ -6,6 +6,11 @@ import re
 """Funtion definition"""
 
 def create_database():
+    """ Creates a database.
+
+    A function, by design called at the module import, creates the database
+
+    """
     cursor = cnx.cursor(dictionary=True)
     DB_NAME = 'PropertyScraper$Offers'
     try:
@@ -34,6 +39,17 @@ def create_database():
         print('[LOG-DBSQL-INFO] Failed to changed= UTF')
 
 def connect_to_db(connection_config):
+    """ Connects to MySQL.
+
+    A function, by design called at the module import, creates a connection to the database.
+    It return a connection object and creates a global cursor object used to perform DB operations.
+
+    Args:
+        connection_config: A dictionary containing data required to establish the connection.
+
+    Returns:
+        Connection object.
+    """
     global cursor
     try:
         cnx = mysql.connector.connect(**connection_config)
@@ -49,6 +65,11 @@ def connect_to_db(connection_config):
         return cnx
 
 def create_tables():
+    """ Creates all of the defined DB tables. .
+
+    A function that creates all of the required tables at the script startup. Such a way guarantees
+    a clear and repetitive DB structure.
+    """
     for table_name in db_tables:
         table_description = db_tables[table_name]
         try:
@@ -63,6 +84,14 @@ def create_tables():
             print("OK")
 
 def create_offer(item):
+    """ Creates an offer DB record.
+
+    A function that reads the offer object received from the Scrapy framework, read all of the object
+    data and inputs the data into the MySQL table.
+
+    Args:
+        item: A scrapy.item object, that contains all of the scraped data.
+    """
     try:
         fields_to_insert = str(list(item.keys()))
         fields_to_insert = re.sub("""[[']|]""", '', fields_to_insert)
@@ -79,15 +108,77 @@ def create_offer(item):
     except mysql.connector.IntegrityError as err:
         print("[LOG-DBSQL-ERROR] Error: {}".format(err))
 
-def get_all(fields_to_get):
+def get_all(fields_to_get = '*'):
+    """ Gets all off rows from DB.
+
+    A function that wraps MySQL query into a python function. It lets you to easly return
+    all rows of the specified fields from the DB
+
+    Args:
+        fields_to_get: A list of strings containing all of fields, that you want to return:
+        e.g. fields_to_get = ['offer_url', 'price']
+
+    Returns:
+        A list of dictionaries, that cover all of the fields required by the input.
+        e.g. input of fields_to_get = ['offer_url', 'price'] would return:
+        [{'offer_url': 'abc.html', 'price': 1500}, {'offer_url': 'def.html', 'price': 2000},...]
+    """
+
+    fields_to_get_str = str(fields_to_get)
+    fields_to_get_clean = re.sub("""[[']|]""", '', fields_to_get_str)
     query =  """SELECT %s
              FROM offers
-             """ % (fields_to_get)
+             """ % (fields_to_get_clean)
     cursor.execute(query)
     result = cursor.fetchall()
-    return [item['offer_url'] for item in result]
+    return result
 
 def get(fields_to_get = '*', amount_of_items = 5, fields_to_compare = [], value_to_compare_to = [], comparator = []):
+    """ Gets rows from DB that meet the specific criteria.
+
+    A function that wraps MySQL query into a python function. It lets you to easly return
+    rows of the specified fields from the DB, that meet the specific criteria set up by the user.
+
+    A function call of:
+
+    get(fields_to_get = ['city', 'price'], amount_of_items = 5, fields_to_compare = ['city', 'price'],
+        value_to_compare_to = [['lodz', 'poznan'], 1500], comparator = [['=', '='], '<'])
+
+    would generate a MySQL query of:
+
+    SELECT
+        city, price
+    FROM
+        offers
+    WHERE
+        city = 'lodz' OR city = 'poznan' AND price < 1500
+
+    and would return something similar to:
+
+    [{'city': 'lodz', 'price': 1000}, {'city': 'poznan', 'price': 750},...]
+
+    Args:
+        fields_to_get: A list of strings containing all of fields, that you want to return:
+        e.g. fields_to_get = ['offer_url', 'price']
+
+        amount_of_items: An integer number that specifies how many items should be returned.
+
+        fields_to_compare: a list of strings that name the fields you want to compare
+        e.g. fields_to_compare = ['city', 'price']
+
+        value_to_compare_to: a list of values and/or lists of values that specifies the values you want to compare
+        your fields to
+        e.g. value_to_compare_to = [['lodz', 'poznan'], 1500] would compare fields_to_compare[0] to either
+        'lodz' OR 'poznan' and fields_to_compare[1] to 1500
+
+        comparator: a list of strings and/or lists of strings that specifies the way you want to compare
+        e.g. comparator = comparator = [['=', '='], '<'] would compare fields_to_compare[0] to either
+        something EQUALTO or something EQUALTO and fields_to_compare[1] to something LESS THAN
+
+    Returns:
+        A list of dictionaries, that cover all of the fields required by the input.
+    """
+
     fields_to_get_str = str(fields_to_get)
     fields_to_get_clean = re.sub("""[[']|]""", '', fields_to_get_str)
     if type(fields_to_compare) is not list:
@@ -181,5 +272,3 @@ local_config = {
 cnx = connect_to_db(local_config)
 create_database()
 create_tables()
-
-#print (get(fields_to_get=['district','price'],amount_of_items=10,fields_to_compare = ['district','price'], value_to_compare_to=[['Wilda','Stare Miasto'],10000], comparator=[['=', '!='],'<']))

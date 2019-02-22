@@ -126,7 +126,7 @@ class OlxOfferLoader(ItemLoader):
     offer_name_in = MapCompose(remove_html_tags, remove_unnecessary_spaces)
     price_in = MapCompose(just_numbers,integer_the_price)
     street_in = MapCompose(street_it)
-    district_in = MapCompose(lambda input: input.title().split(',')[2].strip())
+    district_in = MapCompose(lambda input: input.title().split(',')[2].strip()) #TODO -> FIX THE FUNCTION FOR INPUT SUCH AS 'Lublin, Lubelskie', currently it's out of range
     date_of_the_offer_in = MapCompose(remove_html_tags,remove_unnecessary_spaces, datetime_it_OLX)
     offer_id_in = MapCompose(just_numbers)
     offer_text_in = MapCompose(remove_unnecessary_spaces, remove_html_tags, swap_unnecessary_spaces)

@@ -6,7 +6,11 @@ from scrapy.linkextractors import LinkExtractor
 import PropertyScraper_mysql_connection as db
 
 
-already_scraped_urls = db.get_all('offer_url')
+already_scraped_urls_dicts = db.get_all('offer_url')
+already_scraped_urls = []
+for url in already_scraped_urls_dicts:
+    already_scraped_urls.append(url['offer_url'])
+
 OLX_extractor_subpage = LinkExtractor(allow=('olx.pl/oferta'), deny=(';promoted'), unique=True)
 OLX_extractor_otodom = LinkExtractor(allow=('otodom'), unique=True)
 # OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=23|page=33'), unique=True,
@@ -179,7 +183,11 @@ class OlxSpiderMain(scrapy.Spider):
             loader.add_value(Otodom_table_fields[line[1].strip()], str(line[2:]))
 
         offer_location_response = response.xpath(r'/html/body/div[1]/section[2]/div/div/header/address/p[1]/a/text()').getall()
-        loader.add_value('district', offer_location_response[3])
+        try:
+            loader.add_value('district', offer_location_response[3])
+        except:
+            print ('Fix it!')
+            #TODO -> fix if the amount of urls is not consistent
         if len(offer_location_response) == 5:
             loader.add_value('street', offer_location_response[4])
 
