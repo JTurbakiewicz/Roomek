@@ -15,7 +15,7 @@ import logging
 from flask import Flask, request
 # import from own modules:
 if database: from Databases import mysql_connection as db
-from Bot.bot_responses import *
+from Bot.bot_logic import *
 from Bot.facebook_webhooks import verify_fb_token
 
 #disable Flask server logs unless errors:

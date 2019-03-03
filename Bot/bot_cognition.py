@@ -8,13 +8,37 @@ import logging
 from flask import Flask, request
 # import from own modules:
 from Flask_app import local_tokens, database, witai
-if local_tokens: from Bot import tokens_local as tokens
-else: from Bot import tokens
+if local_tokens: from Bot.tokens import tokens_local as tokens
+else: from Bot.tokens import tokens
 if database: from Databases import mysql_connection as db
 from Bot.bot_responses import *
 from Bot.facebook_webhooks import Bot
 
 log = logging.getLogger(os.path.basename(__file__))
+
+#Set of intents and patterns to recognize them:
+pattern_dictionary = {
+        'greetings': [r'\b(hi|h[ea]+l+?o|h[ea]+[yj]+|yo+|welcome|(good)?\s?(morning?|evenin?)|hola|howdy|shalom|salam|czesc|witaj|siemk?a|marhaba|salut)\b'],
+        #'greetings': [r'\b(hi|h[ea]+l+?o|h[ea]+[yj]+|yo+|welcome|(good)?\s?(morning?|evenin?)|hola|howdy|shalom|salam|czesc|witaj|siemk?a|marhaba|salut)\b', r'(\🖐|\🖖|\👋|\🤙)'],     #🖐🏻,🖖🏻,👋🏻,🤙🏻,🖐🏼,🖖🏼,👋🏼,🤙🏼,🖐🏽,🖖🏽,👋🏽,🤙🏽,🖐🏾,🖖🏾,👋🏾,🤙🏾,🖐🏿,🖖🏿,👋🏿,🤙🏿
+        'yes': r'\b(yes|si|ok|kk|ok[ae]y|su+re|affirmative|confirm|good)\b',
+        #'yes': [r'\b(yes|si|ok|kk|ok[ae]y|confirm)\b',r'(\✔️|\☑️|\👍|\👌)'],    #👍🏻,👌🏻,👍🏼,👌🏼,👍🏽,👌🏽,👍🏾,👌🏾,👍🏿,👌🏿
+        'no': r'\b(n+o+|decline|negative|n+o+pe)\b',
+        #'no': [r'\b(n+o+|decline|negative|n+o+pe)\b', r'\👎'],    #👎🏻,👎🏼,👎🏽,👎🏾,👎🏿
+        'maybe' : r'\b(don\'?t\sknow?|maybe|perhaps?|not\ssure|y+)\b',
+        'curse' : [r'\b(fuck|kurwa)\b', r'pierd[oa]l', r'\bass'],
+        #'curse' : [r'\b(fuck|kurwa)\b', r'pierd[oa]l', r'\bass', r'\🖕'],  #🖕🏻,🖕🏼,🖕🏽,🖕🏾,🖕🏿
+        'uname' : [r'y?o?ur\sname\??', r'(how|what)[\s\S]{1,15}call(ing)?\sy?o?u\??'],
+        'ureal' : r'\by?o?u\s(real|true|bot|ai|human|person|man)\b',
+        "secret" : r'(secret|password|key)',
+        "rpsgame" : [r'start', r'play', r'game', r'rock ?paper ?scissors', r'rock', r'✊', r'paper', r'✋', r'scissors', r'✌'],
+        "love" : r'love',
+        #"love" : [r'love',r'(\❤️|\🧡|\💛|\💚|\💙|\💜|\🖤)'],
+        'test_list_message': r'list message',
+        'test_button_message': r'button message',
+        'test_generic_message': r'generic message',
+        'test_quick_replies': r'quick replies',
+        'bye': r'(bye|exit|quit|end)'
+    }
 
 def regex_pattern_matcher(str, pat_dic=pattern_dictionary):
     """Regular Expression pattern finder that searches for intents from patternDictionary."""
@@ -52,32 +76,6 @@ def best_entity(message, minimum=0.90):
             return None
     except:
         return None
-
-
-#Set of intents and patterns to recognize them:
-pattern_dictionary = {
-        'greetings': [r'\b(hi|h[ea]+l+?o|h[ea]+[yj]+|yo+|welcome|(good)?\s?(morning?|evenin?)|hola|howdy|shalom|salam|czesc|witaj|siemk?a|marhaba|salut)\b'],
-        #'greetings': [r'\b(hi|h[ea]+l+?o|h[ea]+[yj]+|yo+|welcome|(good)?\s?(morning?|evenin?)|hola|howdy|shalom|salam|czesc|witaj|siemk?a|marhaba|salut)\b', r'(\🖐|\🖖|\👋|\🤙)'],     #🖐🏻,🖖🏻,👋🏻,🤙🏻,🖐🏼,🖖🏼,👋🏼,🤙🏼,🖐🏽,🖖🏽,👋🏽,🤙🏽,🖐🏾,🖖🏾,👋🏾,🤙🏾,🖐🏿,🖖🏿,👋🏿,🤙🏿
-        'yes': r'\b(yes|si|ok|kk|ok[ae]y|confirm|good)\b',
-        #'yes': [r'\b(yes|si|ok|kk|ok[ae]y|confirm)\b',r'(\✔️|\☑️|\👍|\👌)'],    #👍🏻,👌🏻,👍🏼,👌🏼,👍🏽,👌🏽,👍🏾,👌🏾,👍🏿,👌🏿
-        'no': r'\b(n+o+|decline|negative|n+o+pe)\b',
-        #'no': [r'\b(n+o+|decline|negative|n+o+pe)\b', r'\👎'],    #👎🏻,👎🏼,👎🏽,👎🏾,👎🏿
-        'maybe' : r'\b(don\'?t\sknow?|maybe|perhaps?|not\ssure|y+)\b',
-        'curse' : [r'\b(fuck|kurwa)\b', r'pierd[oa]l', r'\bass'],
-        #'curse' : [r'\b(fuck|kurwa)\b', r'pierd[oa]l', r'\bass', r'\🖕'],  #🖕🏻,🖕🏼,🖕🏽,🖕🏾,🖕🏿
-        'uname' : [r'y?o?ur\sname\??', r'(how|what)[\s\S]{1,15}call(ing)?\sy?o?u\??'],
-        'ureal' : r'\by?o?u\s(real|true|bot|ai|human|person|man)\b',
-        "secret" : r'(secret|password|key)',
-        "rpsgame" : [r'start', r'play', r'game', r'rock ?paper ?scissors', r'rock', r'✊', r'paper', r'✋', r'scissors', r'✌'],
-        "love" : r'love',
-        #"love" : [r'love',r'(\❤️|\🧡|\💛|\💚|\💙|\💜|\🖤)'],
-        'test_list_message': r'list message',
-        'test_button_message': r'button message',
-        'test_generic_message': r'generic message',
-        'test_quick_replies': r'quick replies',
-        'bye': r'(bye|exit|quit|end)'
-    }
-
 
 def recognize_sticker(sticker_id):
     if sticker_id.startswith('369239263222822'):  sticker_name = 'thumb'

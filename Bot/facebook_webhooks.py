@@ -11,13 +11,14 @@ from time import sleep
 import hashlib
 import hmac
 import six
+import os
 import random
 import logging
 from flask import Flask, request
 # import from own modules:
 from Flask_app import local_tokens, database, witai
-if local_tokens: from Bot import tokens_local as tokens
-else: from Bot import tokens
+if local_tokens: from Bot.tokens import tokens_local as tokens
+else: from Bot.tokens import tokens
 if database: from Databases import mysql_connection as db
 
 log = logging.getLogger(os.path.basename(__file__))

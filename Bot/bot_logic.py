@@ -10,9 +10,10 @@ import logging
 from flask import Flask, request
 # import from own modules:
 from Flask_app import local_tokens, database, witai
-if local_tokens: from Bot import tokens_local as tokens
-else: from Bot import tokens
+if local_tokens: from Bot.tokens import tokens_local as tokens
+else: from Bot.tokens import tokens
 if database: from Databases import mysql_connection as db
+from Bot.bot_cognition import *
 from Bot.bot_responses import *
 from Bot.facebook_webhooks import Bot
 
@@ -44,7 +45,7 @@ def handle_messages(user_message):
                     try:
                         mids = deli.get('mids')
                     except:
-                        mids = "DELIXXXXXXXXXXXXXX"
+                        mids = "DELI-MID"
                     if int(message['recipient']['id']) == int(tokens.fb_bot_id):
                         mid=""
                         for m in mids:
@@ -68,7 +69,7 @@ def handle_messages(user_message):
                     try:
                         mid = message.get('mid')
                     except:
-                        mid = "TEXTXXXXXXXXXXXXXX"
+                        mid = "TEXT-MID"
                     if int(senderid) != int(tokens.fb_bot_id):
                         if message.get('text'):
                             log.info("Message '{0}' from user {1}:  '{2}'".format(str(mid)[0:7], str(senderid)[0:5], user_message))
@@ -97,7 +98,7 @@ def add_new_user(user_id):
         users.append(user_id)
     else:
         #TODO withdraw more info from the database.
-        if database: db.query(user_id, (first_name,last_name))
+        if database: db.query(user_id, ('first_name','last_name'))
 
 def handle_text(message, userid, bot):
     """ React when the user sends any text. """
@@ -106,7 +107,7 @@ def handle_text(message, userid, bot):
     try:
         mid = message.get('mid')
     except:
-        mid = "RECOGNITIONXXXXXXXXXXXXXX"
+        mid = "RECOGNITION-MID"
     if entity == "" or entity is None:
         entity = regex_pattern_matcher(user_message)   #no entity from NLP so try to find with regex
         log.info("Message '{0}' from {1} recognized as '{2}' using REGEX.".format(str(mid)[0:7], str(userid)[0:5], entity))
@@ -127,12 +128,13 @@ def handle_sticker(message, userid, bot):
     bot.fb_fake_typing(userid, 0.5)
     sticker_id = str(message.get('sticker_id'))
     sticker_name = recognize_sticker(sticker_id)
-    response = sticker_response(sticker_name)
-    bot.fb_send_text_message(userid, response)
+    response = sticker_response(sticker_name, userid, bot)
+    if response != "already sent":
+        bot.fb_send_text_message(userid, response)
     try:
         mid = message.get('mid')
     except:
-        mid = "STICKERXXXXXXXXXXXXXX"
+        mid = "STICKER-MID"
     if database: db.add_conversation(userid,'User', '<sticker_{0}_{1}>'.format(sticker_name, str(sticker_id)))
     if database: db.add_conversation(userid,'Bot', response)
     log.info("Message '{0}' from {1} recognized as '{1}' sticker (id={2})".format(str(mid)[0:7], str(userid)[0:5], sticker_name, str(sticker_id)))
