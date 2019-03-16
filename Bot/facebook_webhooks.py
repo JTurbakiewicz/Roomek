@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 This code contains functions for sending FB messages and other actions.
 It mostly contains modified version of Davidchua's pymessenger(https://github.com/davidchua/pymessenger).
@@ -16,7 +18,7 @@ import random
 import logging
 from flask import Flask, request
 # import from own modules:
-from Flask_app import local_tokens, database, witai
+from Dispatcher_app import local_tokens, database, witai
 if local_tokens: from Bot.tokens import tokens_local as tokens
 else: from Bot.tokens import tokens
 if database: from Databases import mysql_connection as db

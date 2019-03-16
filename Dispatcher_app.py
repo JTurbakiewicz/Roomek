@@ -1,8 +1,6 @@
-
-""" Flask app that handles json webhook messages. """
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+""" Flask app that handles json webhook messages. """
 
 local_tokens = True    #change to False if you want to use main tokens file
 database = False        #turns the database connection on and off
