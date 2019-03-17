@@ -21,7 +21,19 @@ log = logging.getLogger(os.path.basename(__file__))
 #Set of responses for particular intents:
 def responder(intent, user_message="", userid="", bot=""):
     switcher = {
-        "greetings":   greetings,
+        #dodane przez WIT:
+        "offering":         yes,     #TEMP
+        "looking for":      yes,     #TEMP
+        "boolean":          yes,     #TEMP
+        "business_type":     rent,    #TEMP
+        "housing_type":      rent,    #TEMP
+        "person_type":       rent,    #TEMP
+        "wit/number":        rent,    #TEMP
+        "wit/datetime":      rent,    #TEMP
+        "wit/location":      rent,    #TEMP
+        "wit/amount_of_money":   rent,    #TEMP
+        #dodane REGEXem:
+        "greeting":    greeting,
         "yes":         yes,
         "no":          no,
         "maybe":       maybe,
@@ -29,6 +41,7 @@ def responder(intent, user_message="", userid="", bot=""):
         "uname":       uname,
         "ureal":       ureal,
         "thanks":      thanks,
+        #wbudowane w facebookowe NLP (nie działają przy włączonym WIT):
         "datetime":    datetime,
         "money":       money,
         "phone":       phone,
@@ -40,11 +53,12 @@ def responder(intent, user_message="", userid="", bot=""):
         "duration":    duration,
         "url":         url,
         "sentiment":   sentiment,
+        "bye":          bye,
+        # testowe komendy:
         "test_list_message":    test_list_message,
         "test_button_message":  test_button_message,
         "test_generic_message": test_generic_message,
-        "test_quick_replies":   test_quick_replies,
-        "bye":          bye
+        "test_quick_replies":   test_quick_replies
     }
     # Get the function from switcher dictionary
     func = switcher.get(intent, default_message)
@@ -63,7 +77,15 @@ def default_message(user_message, userid="", bot="", language="PL"):
                 "Sorry, I don't get it",
                 "pardon me?"]
 
-def greetings(user_message, userid="", bot="", language="PL"):
+def rent(user_message, userid="", bot="", language="PL"):
+    if language=="PL":
+        return ["Rozumiem, już szukam ofert.",
+                "zatem poszukajmy czegoś na wynajem"]
+    elif language=="EN":
+        return ["Ok, let's look for something.",
+                "let me look for it"]
+
+def greeting(user_message, userid="", bot="", language="PL"):
     if language=="PL":
         return ["{0}! Jak mogę Ci pomóc?".format(user_message.split(' ', 1)[0].capitalize()),
                 "{0}! Co u Ciebie?".format(user_message.split(' ', 1)[0].capitalize())]
