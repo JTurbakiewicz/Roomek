@@ -39,8 +39,8 @@ def receive_message():
         token_sent = request.args.get("hub.verify_token")
         return verify_fb_token(request, token_sent)
     else:                                   # if type is not 'GET' it must be 'POST' - we have a message
-        user_message = request.get_json()   # read message as json
-        handle_messages(user_message)       # process the message and respond
+        json_message = request.get_json()   # read message as json
+        handle_messages(json_message)       # process the message and respond
     return "Message Processed"
 
 #If the program is executed (double-clicked), it will set name to main, thus run app:
