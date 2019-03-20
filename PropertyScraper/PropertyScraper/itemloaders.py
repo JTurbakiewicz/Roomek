@@ -52,7 +52,7 @@ def response_to_string(input):
     yield re.sub(r'<200 |>', '', str(input))
 
 def delist_string(input):
-    yield re.sub("""[[']|]""", '', input)
+    yield re.sub("""[[]|]""", '', input)
 
 def street_it(input):
     yield re.sub(r'ul. ', '', str(input)).title()
@@ -83,40 +83,42 @@ def datetime_it_OLX(input):
 
 def datetime_it_Otodom(input):
     """Returns in a datetime prepared format."""
-    months_dict = {
-        'Stycznia': '1',
-        'Lutego': '2',
-        'Marca': '3',
-        'Kwietnia': '4',
-        'Maja': '5',
-        'Czerwca': '6',
-        'Lipca': '7',
-        'Sierpnia': '8',
-        'Września': '9',
-        'Października': '10',
-        'Listopada': '11',
-        'Grudnia': '12',
-    }
+    now = datetime.datetime.now()
     just_date = re.sub(r'Data aktualizacji: ', '', input)
-    normalized_date = re.sub(r' ', '.', just_date)
-    split_string = normalized_date.split('.')
-    try:
-        split_string[1] = months_dict[split_string[1]]
-    except:
-        pass
-    try:
-        l_dt = [split_string[-1], split_string[-2], split_string[-3]]
-        yield datetime.datetime(int(l_dt[0]),int(l_dt[1]),int(l_dt[2]))
-    except:
-        yield datetime.datetime(1970,1,1) #too old of an offer
+    just_date_split = just_date.split(' ')
+    if just_date_split[0] == 'in':
+        if just_date_split[2] =='minutes':
+            yield now + datetime.timedelta(minutes=int(just_date_split[1])) - datetime.timedelta(minutes=60)
+        elif just_date_split[2] =='hour':
+            yield now + datetime.timedelta(hours=1)
+    elif just_date_split[1] == 'minutes' and just_date_split[2] == 'ago':
+        yield now - datetime.timedelta(minutes=int(just_date_split[0])) - datetime.timedelta(minutes=60)
+    elif just_date_split[3] == 'seconds':
+        yield now
+    else:
+        print ('FIX IT ', just_date_split)
+
+
 
 def get_inside_tags(input):
-
     string_wo_br = re.sub(r'<br>', ' ', input)
     pattern = re.compile(r'(>.*<)')
     inside_tags = pattern.findall(string_wo_br)
     # yield ''.join(inside_tags)
     yield re.sub(r'<.*?>', '', string_wo_br)
+
+def district(input):
+    split_input = input.title().split(',')
+    if len(split_input) > 2:
+        yield split_input[2].strip()
+    else:
+        yield None
+
+def district_otodom(input):
+    split_input = input.title().split(',')
+    if len(split_input) == 2:
+        yield split_input[1].strip()
+
 
 class OlxOfferLoader(ItemLoader):
     city_in = MapCompose()
@@ -126,7 +128,7 @@ class OlxOfferLoader(ItemLoader):
     offer_name_in = MapCompose(remove_html_tags, remove_unnecessary_spaces)
     price_in = MapCompose(just_numbers,integer_the_price)
     street_in = MapCompose(street_it)
-    district_in = MapCompose(lambda input: input.title().split(',')[2].strip()) #TODO -> FIX THE FUNCTION FOR INPUT SUCH AS 'Lublin, Lubelskie', currently it's out of range
+    district_in = MapCompose(district)
     date_of_the_offer_in = MapCompose(remove_html_tags,remove_unnecessary_spaces, datetime_it_OLX)
     offer_id_in = MapCompose(just_numbers)
     offer_text_in = MapCompose(remove_unnecessary_spaces, remove_html_tags, swap_unnecessary_spaces)
@@ -141,7 +143,7 @@ class OlxOfferLoader(ItemLoader):
     type_of_market_in = MapCompose(remove_html_tags)
 
 class OtodomOfferLoader(OlxOfferLoader):
-    district_in = MapCompose(lambda input: input.title())
+    district_in = MapCompose(district_otodom)
     date_of_the_offer_in = MapCompose(datetime_it_Otodom)
     security_deposit_in = MapCompose(just_numbers,integer_the_price)
     building_material_in = MapCompose()
@@ -152,7 +154,7 @@ class OtodomOfferLoader(OlxOfferLoader):
     ready_from_in = MapCompose(datetime_it_Otodom)
     type_of_ownership_in = MapCompose()
     rental_for_students_in = MapCompose()
-    media_in = MapCompose(delist_string, swap_unnecessary_spaces)
-    security_measures_in = MapCompose(delist_string, swap_unnecessary_spaces)
-    additonal_equipment_in = MapCompose(delist_string, swap_unnecessary_spaces)
-    additional_information_in = MapCompose(delist_string, swap_unnecessary_spaces)
+    media_in = MapCompose(delist_string)
+    security_measures_in = MapCompose(delist_string)
+    additional_equipment_in = MapCompose(delist_string)
+    additional_information_in = MapCompose(delist_string)
