@@ -18,8 +18,8 @@ import random
 import logging
 from flask import Flask, request
 # import from own modules:
-from Dispatcher_app import local_tokens, database, witai
-if local_tokens: from Bot.tokens import tokens_local as tokens
+from Dispatcher_app import tokens_local, database, witai
+if tokens_local: from Bot.tokens import tokens_local as tokens
 else: from Bot.tokens import tokens
 if database: from Databases import mysql_connection as db
 
