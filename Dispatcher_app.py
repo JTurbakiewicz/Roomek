@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """ Flask app that handles json webhook messages. """
 
-local_tokens = True    #change to False if you want to use main tokens file
+tokens_local = True    #change to False if you want to use main tokens file
 database = False        #turns the database connection on and off
 witai = False           #turns the NLP connection on and off
 
@@ -45,5 +45,5 @@ def receive_message():
 
 #If the program is executed (double-clicked), it will set name to main, thus run app:
 if __name__ == "__main__":
-    log.info("Main app has been restarted. New Flask app initialized (local_tokens: "+str(local_tokens)+", database: "+str(database)+", witai: "+str(witai)+").")
+    log.info("Main app has been restarted. New Flask app initialized (tokens_local: "+str(tokens_local)+", database: "+str(database)+", witai: "+str(witai)+").")
     app.run()
