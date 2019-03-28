@@ -140,17 +140,17 @@ class OlxSpiderMain(scrapy.Spider):
         OfferItem_loader.add_value('city', response.meta['city'])
         OfferItem_loader.add_value('offer_type', response.meta['offer_type'])
         OfferItem_loader.add_value('offer_url', response)
-        OfferItem_loader.add_xpath('offer_name', '//*[@id="root"]/div/article/div[1]/header/div[1]/h1/text()')
+        OfferItem_loader.add_xpath('offer_name', '//*[@id="root"]/div/article/header/div[1]/h1/text()')
         OfferItem_loader.add_xpath('offer_thumbnail_url', '//*[@id="root"]/div/article/section/div[1]/div/div[1]/div/div[2]/div/div[2]/div/picture/img')
-        OfferItem_loader.add_xpath('price', '//*[@id="root"]/div/article/div[1]/header/div[3]/div[1]/text()')
-        OfferItem_loader.add_xpath('date_of_the_offer', '//*[@id="root"]/div/article/div[2]/div[1]/div[3]/div/div[2]/text()[2]')
-        OfferItem_loader.add_xpath('offer_id', '//*[@id="root"]/div/article/div[2]/div[1]/div[3]/div/div[1]/text()')
+        OfferItem_loader.add_xpath('price', '//*[@id="root"]/div/article/header/div[3]/div[1]/text()')
+        OfferItem_loader.add_xpath('date_of_the_offer', '//*[@id="root"]/div/article/div[2]/div[1]/div[2]/div/div[2]/text()[2]')
+        OfferItem_loader.add_xpath('offer_id', '//*[@id="root"]/div/article/div[2]/div[1]/div[2]/div/div[1]/text()[1]')
         OfferItem_loader.add_xpath('offer_text', '//*[@id="root"]/div/article/div[2]/div[1]/section[2]/div/div[1]')
-        OfferItem_loader.add_xpath('price_per_m2', '//*[@id="root"]/div/article/div[1]/header/div[3]/div[2]/text()')
+        OfferItem_loader.add_xpath('price_per_m2', '//*[@id="root"]/div/article/header/div[3]/div[2]/text()')
         OfferItem_loader.add_xpath('area', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[2]/span/strong/text()')
         OfferItem_loader.add_xpath('amount_of_rooms', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[3]/span/strong/text()')
         OfferItem_loader.add_xpath('apartment_level', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[4]/span/strong/text()')
-        OfferItem_loader.add_xpath('district', '//*[@id="root"]/div/article/div[1]/header/div[1]/div/div/a/text()')
+        OfferItem_loader.add_xpath('district', '//*[@id="root"]/div/article/header/div[1]/div/a/text()')
 
         ###Otodometable
 
