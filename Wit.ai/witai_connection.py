@@ -19,8 +19,6 @@ def response_status(rsp):
         logging.debug(rsp.content)
         return rsp
 
-def
-
 def send_message(message, context = None, msg_id = None, thread_id = None, n = None, verbose = None):
     meth = 'GET'
     path = '/message'
