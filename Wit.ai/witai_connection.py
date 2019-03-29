@@ -6,6 +6,11 @@ import logging
 WIT_API_HOST = os.getenv('WIT_URL', 'https://api.wit.ai')
 WIT_API_VERSION = os.getenv('WIT_API_VERSION', '20160516')
 access_token = 'KSDIFR7JNR5BA2YVBX7QHO4IDIKIJS3Y'  #TESTING APP TOKEN -> TO CHANGE
+headers = {
+    'Authorization': 'Bearer ' + access_token,
+    'Accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
+    'Content-Type': 'application/json',
+}
 
 logging.basicConfig(level='DEBUG')
 
@@ -23,10 +28,6 @@ def send_message(message, context = None, msg_id = None, thread_id = None, n = N
     meth = 'GET'
     path = '/message'
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
     params = {}
     params['q'] =  message
     if context:
@@ -55,10 +56,6 @@ def get_available_entities():
     meth = 'GET'
     path = '/entities'
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
 
     logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers))
 
@@ -74,11 +71,6 @@ def create_new_entity(entity_name, entity_description = None):
     meth = 'POST'
     path = '/entities'
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'Accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-        'Content-Type': 'application/json',
-    }
     data = {}
     data["id"] = entity_name
     if entity_description:
@@ -99,10 +91,6 @@ def retrive_entity_values(entity_name):
     meth = 'GET'
     path = '/entities/' + entity_name
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
 
     logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers))
 
@@ -118,11 +106,6 @@ def update_entity(entity_name, entity_description = None, lookups = None, values
     meth = 'PUT'
     path = '/entities/' + entity_name
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
-
     data = {}
     data["id"] = entity_name
     if entity_description:
@@ -147,10 +130,6 @@ def delete_entity(entity_name):
     meth = 'DELETE'
     path = '/entities/' + entity_name
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
 
     logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers))
 
@@ -166,10 +145,6 @@ def delete_role(entity_name, role_name):
     meth = 'DELETE'
     path = '/entities/' + entity_name + ':' + role_name
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
 
     logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers))
 
@@ -186,10 +161,6 @@ def add_entity_value(entity_name, value, expressions = None, metadata = None):
     meth = 'POST'
     path = '/entities/' + entity_name + '/values'
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
 
     data = {}
     data["value"] = str(value)
@@ -214,10 +185,6 @@ def delete_entity_value(entity_name, value):
     meth = 'DELETE'
     path = '/entities/' + entity_name + '/values/' + value
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
 
     logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers))
 
@@ -235,11 +202,6 @@ def create_expression(entity_name, value, expression = None):
     meth = 'POST'
     path = '/entities/' + entity_name + '/values/' + value + '/expressions'
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
-
     data = {}
     data["expression"] = str(expression)
 
@@ -258,10 +220,6 @@ def delete_expression(entity_name, value, expression):
     meth = 'DELETE'
     path = '/entities/' + entity_name + '/values/' + value + '/expressions/' + expression
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
 
     logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers))
 
@@ -276,7 +234,6 @@ def delete_expression(entity_name, value, expression):
 def get_samples(limit = 1, offset = None, entity_ids = None, entity_values = None, negative = None):
     meth = 'GET'
     path = '/samples?limit=' + str(limit)
-
     if offset:
         path = path + '&offset=' + str(offset)
     if entity_ids:
@@ -286,10 +243,6 @@ def get_samples(limit = 1, offset = None, entity_ids = None, entity_values = Non
     if negative:
         path = path + '&negative=true'
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
 
     logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers))
 
@@ -301,27 +254,46 @@ def get_samples(limit = 1, offset = None, entity_ids = None, entity_values = Non
 
     return response_status(rsp)
 
-def train(entity_name, entity_value, text):
+def train(messages, entities, entity_values, start_chars = None, end_chars = None, subentities = None):
     meth = 'POST'
     path = '/samples'
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'Accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-        'Content-Type': 'application/json',
-    }
-    entity = {
-        "entity": entity_name,
-        "value": entity_value,
-        "start": 14,
-        "end": 17
-    }
-    data = {
-        "text": text,
-        "entities": [entity]
-    }
     json_list = []
-    json_list.append(data)
+    if not isinstance(messages, (list,)):
+        messages = [messages]
+    if not isinstance(entities, (list,)):
+        entities = [entities]
+    if not isinstance(entity_values, (list,)):
+        entity_values = [entity_values]
+
+    if len (entities) < len (messages):
+        missing_entities = []
+        for entity in range(len(entities), len(messages)):
+            print(entity)
+            missing_entities.append(entities[-1])
+        entities = entities + missing_entities
+
+    for message in range(len(messages)):
+        entity = {}
+        entity["entity"] = entities[message]
+        entity["value"] = str(entity_values[message])
+        if start_chars:
+            if not isinstance(start_chars, (list,)):
+                start_chars = [start_chars]
+            entity["start"] = int(start_chars[message])
+        if end_chars:
+            if not isinstance(end_chars, (list,)):
+                end_chars = [end_chars]
+            entity["end"] = int(end_chars[message])
+        if subentities:
+            if not isinstance(subentities, (list,)):
+                subentities = [subentities]
+            entity["subentities"] = subentities[message]
+        data = {
+            "text": messages[message],
+            "entities": [entity]
+        }
+        json_list.append(data)
 
     logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers)+ ' | ' + str(data))
 
@@ -338,10 +310,6 @@ def delete_samples(messages):
     meth = 'DELETE'
     path = '/samples'
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
     if not isinstance(messages, (list,)):
         messages = [messages]
     messages_array = []
@@ -365,10 +333,6 @@ def get_all_apps(limit = 1, offset = None):
     if offset:
         path = path + '&offset=' + str(offset)
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
 
     logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers))
 
@@ -384,10 +348,6 @@ def get_app_info(app_id):
     meth = 'GET'
     path = '/apps/' + app_id
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
 
     logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers))
 
@@ -403,11 +363,6 @@ def create_new_app(app_name, app_lang, app_privacy, app_description = None):
     meth = 'POST'
     path = '/apps'
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'Accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-        'Content-Type': 'application/json',
-    }
     data = {}
     data["name"] = app_name
     data["lang"] = app_lang
@@ -430,11 +385,6 @@ def update_app(app_id, app_name=None, app_lang=None, app_privacy=None, app_timez
     meth = 'PUT'
     path = '/apps/' + app_id
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'Accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-        'Content-Type': 'application/json',
-    }
     data = {}
     if app_name:
         data["name"] = app_name.replace(" ", "")
@@ -462,10 +412,6 @@ def delete_app(app_id):
     meth = 'DELETE'
     path = '/apps/' + app_id
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
 
     logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers))
 
@@ -481,10 +427,6 @@ def get_app_zip():
     meth = 'GET'
     path = '/export'
     full_url = WIT_API_HOST + path
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
-    }
 
     logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers))
 
@@ -495,4 +437,3 @@ def get_app_zip():
     )
 
     return response_status(rsp)
-
