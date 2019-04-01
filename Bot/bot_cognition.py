@@ -1,23 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """ Functions enabling the Bot to understand messages and intents. """
-
-# import public modules:
-import os
-import random
-import logging
-from flask import Flask, request
-# import from own modules:
-from Dispatcher_app import tokens_local, database, witai
-if tokens_local: from Bot.tokens import tokens_local as tokens
-else: from Bot.tokens import tokens
-if database: from Databases import mysql_connection as db
+from geopy.geocoders import Nominatim
+from geopy.point import Point
 from Bot.bot_responses import *
-from Bot.facebook_webhooks import Bot
-
 log = logging.getLogger(os.path.basename(__file__))
 
-#Set of intents and patterns to recognize them:
+# Set of intents and patterns to recognize them:
 pattern_dictionary = {
         'greeting': [r'\b(hi|h[ea]+l+?o|h[ea]+[yj]+|yo+|welcome|(good)?\s?(morning?|evenin?)|hola|howdy|shalom|salam|czesc|cześć|hejka|witaj|siemk?a|marhaba|salut)\b', r'(\🖐|\🖖|\👋|\🤙)'],
         'yes': [r'\b(yes|si|ok|kk|ok[ae]y|confirm)\b',r'\b(tak|oczywiście|dobra|dobrze)\b',r'(\✔️|\☑️|\👍|\👌)'],
@@ -32,6 +21,7 @@ pattern_dictionary = {
         'test_quick_replies': r'quick replies',
         'bye': r'(bye|exit|quit|end)'
     }
+
 
 def regex_pattern_matcher(str, pat_dic=pattern_dictionary):
     """Regular Expression pattern finder that searches for intents from patternDictionary."""
@@ -51,26 +41,9 @@ def regex_pattern_matcher(str, pat_dic=pattern_dictionary):
 
     return intent
 
-def best_entity(message, minimum=0.90):
-    """ Return best matching entity from NLP or None. """
-    try:
-        entities = list(message.get('nlp').get('entities').keys())
-        #entities.remove("sentiment")
-        confidence = []
-        for c in list(message.get('nlp').get('entities').values()):
-            confidence.append(c[0]['confidence'])
-        if max(confidence)>minimum:
-            # create dictionary entity:confidence:
-            iterable = zip(entities, confidence)
-            pairs = {key: value for (key, value) in iterable}
-            best_match = max(pairs, key=pairs.get)
-            return [best_match, str(max(confidence))]
-        else:
-            return None
-    except:
-        return None
 
 def recognize_sticker(sticker_id):
+    sticker_id = str(sticker_id)
     if sticker_id.startswith('369239263222822'):  sticker_name = 'thumb'
     elif sticker_id.startswith('369239343222814'):  sticker_name = 'thumb+'
     elif sticker_id.startswith('369239383222810'): sticker_name = 'thumb++'
@@ -92,3 +65,12 @@ def recognize_sticker(sticker_id):
     elif sticker_id.startswith('30261'):  sticker_name = 'sloth'
     else:  sticker_name = 'unknown'
     return sticker_name
+
+
+def recognize_location(location):
+    geolocator = Nominatim(user_agent="Roomek")
+    loc = geolocator.geocode(location, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'])
+    return(loc.address)
+    # print((loc.latitude, loc.longitude))
+    # print(loc.raw)
+    # print(loc.raw['boundingbox'])

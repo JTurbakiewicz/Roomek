@@ -5,7 +5,6 @@ This code contains functions for sending FB messages and other actions.
 It mostly contains modified version of Davidchua's pymessenger(https://github.com/davidchua/pymessenger).
 """
 
-# import public modules:
 from enum import Enum
 import requests
 from requests_toolbelt import MultipartEncoder
@@ -16,20 +15,21 @@ import six
 import os
 import random
 import logging
-from flask import Flask, request
-# import from own modules:
-from Dispatcher_app import tokens_local, database, witai
-if tokens_local: from Bot.tokens import tokens_local as tokens
-else: from Bot.tokens import tokens
-if database: from Databases import mysql_connection as db
-
+from Dispatcher_app import use_local_tokens, use_database, use_witai
+if use_local_tokens:
+    from Bot.tokens import tokens_local as tokens
+else:
+    from Bot.tokens import tokens
+if use_database:
+    from Databases import mysql_connection as db
 log = logging.getLogger(os.path.basename(__file__))
 
-#TODO add a 'tag' NON_PROMOTIONAL_SUBSCRIPTION
-#TODO add a 'messaging_type' TYPE_MESSAGE_TYPE
+# TODO add a 'tag' NON_PROMOTIONAL_SUBSCRIPTION
+# TODO add a 'messaging_type' TYPE_MESSAGE_TYPE
 # https://developers.facebook.com/docs/messenger-platform/send-messages/message-tags
 
-DEFAULT_API_VERSION = 3.2   #2.6
+DEFAULT_API_VERSION = 3.2   # 2.6
+
 
 def verify_fb_token(request, token_sent):
     """Take token sent by facebook and verify if it matches"""
@@ -40,10 +40,12 @@ def verify_fb_token(request, token_sent):
         log.warning("Failed to verify FB token.")
         return 'Invalid verification token'
 
+
 class NotificationType(Enum):
     regular = "REGULAR"
     silent_push = "SILENT_PUSH"
     no_push = "NO_PUSH"
+
 
 class Bot:
     def __init__(self, access_token, **kwargs):
@@ -147,7 +149,7 @@ class Bot:
             Response from API as <dict>
         """
         if type(message) == list: message = random.choice(message)
-        #log.info("Bot's message ??? to {1}: {0}".format(message, str(userid)))
+        # log.info("Bot's message ??? to {1}: {0}".format(message, str(userid)))
         return self.fb_send_message(userid, {
             'text': message
         }, notification_type)
@@ -175,7 +177,8 @@ class Bot:
             }
         }, notification_type)
 
-    # def fb_send_list_message(self, userid, element_titles=['a', 'b'], button_titles=['a', 'b'], notification_type=NotificationType.regular):
+    # def fb_send_list_message(self, userid, element_titles=['a', 'b'],
+    #   button_titles=['a', 'b'], notification_type=NotificationType.regular):
     #     """Send generic messages to the specified recipient.
     #     https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
     #     Input:
@@ -200,7 +203,6 @@ class Bot:
     #             }
     #         }
     #     }, notification_type)
-
 
     def fb_send_list_message(self, userid, element_titles=['a', 'b'], button_titles=['a', 'b'], notification_type=NotificationType.regular):
         """TEST"""
@@ -285,12 +287,12 @@ class Bot:
             buttons.append({
                 "title": str(b),
                 "type": "web_url",
-                #"type":"postback",
+                # "type":"postback",
                 "url": "http://www.olx.com"
-                #"messenger_extensions": "true",
-                #"webview_height_ratio": "tall",
-                #"payload":"DEVELOPER_DEFINED_PAYLOAD"
-                #"fallback_url": "http://www.olx.com"
+                # "messenger_extensions": "true",
+                # "webview_height_ratio": "tall",
+                # "payload":"DEVELOPER_DEFINED_PAYLOAD"
+                # "fallback_url": "http://www.olx.com"
             })
         return buttons
 
@@ -359,7 +361,7 @@ class Bot:
         Output:
             Response from API as <dict>
         """
-        #TODO add icon near quick replies: {...,"image_url":"http://example.com/img/red.png"}
+        # TODO add icon near quick replies: {...,"image_url":"http://example.com/img/red.png"}
         reply_options = []
         for option in replies:
             content = {
@@ -388,7 +390,7 @@ class Bot:
 
     def fb_fake_typing(self, userid, duration=0.6):
         """ Pretend the bot is typing for n seconds. """
-        #TODO shouldn't it be waiting a but before typing? sleep(duration/2)
+        # TODO shouldn't it be waiting a but before typing? sleep(duration/2)
         self.fb_send_action(userid, 'typing_on')
         sleep(duration)
         self.fb_send_action(userid, 'typing_off')
@@ -541,6 +543,7 @@ class Bot:
     #       ]
     #     }
 
+
 def validate_hub_signature(app_secret, request_payload, hub_signature_header):
     """
         @inputs:
@@ -565,6 +568,7 @@ def validate_hub_signature(app_secret, request_payload, hub_signature_header):
         if hub_signature == generated_hash:
             return True
     return False
+
 
 def generate_appsecret_proof(access_token, app_secret):
     """

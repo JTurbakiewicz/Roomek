@@ -2,6 +2,8 @@
 /Bot/tokens/
 /ignore_me/
 /IgnoreMe/
+/.idea/
+/.git/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
