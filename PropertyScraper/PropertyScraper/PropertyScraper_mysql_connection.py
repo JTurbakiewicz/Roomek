@@ -230,6 +230,38 @@ def get(fields_to_get = '*', amount_of_items = 5, fields_to_compare = [], value_
     cursor.execute(query)
     return cursor.fetchmany(amount_of_items)
 
+def get_like(like_field, like_phrase, fields_to_get = '*'):
+    fields_to_get_str = str(fields_to_get)
+    fields_to_get_clean = re.sub("""[[']|]""", '', fields_to_get_str)
+    like_phrase = "'" + like_phrase + "'"
+    query = """SELECT 
+                        %s
+                    FROM 
+                        offers
+                    WHERE
+                        %s
+                    LIKE
+                        %s
+                    """ % (fields_to_get_clean, like_field, like_phrase)
+    cursor.execute(query)
+    return cursor.fetchall()
+
+def get_custom(sql_query):
+    query = sql_query
+    cursor.execute(query)
+    return cursor.fetchall()
+
+def update_field(table_name, field_name, field_value, where_field, where_value, if_null_required = False):
+    query = """
+       UPDATE {}
+       SET {}=%s
+       WHERE {}=%s
+    """.format(table_name, field_name, where_field)
+    if if_null_required:
+        query = query + 'AND ' + field_name + ' IS NULL'
+    cursor.execute(query, (field_value,where_value))
+    cnx.commit()
+
 """DATA"""
 
 DB_NAME = 'offers'
@@ -305,6 +337,15 @@ db_tables['offer_features'] = (
     "  PRIMARY KEY (`offer_url`)"
     ") ENGINE=InnoDB")
 
+db_tables['parsed_data'] = (
+    "CREATE TABLE `parsed_data` ("
+    "  `offer_url` varchar(700) NOT NULL,"
+    "  `internet` BOOLEAN,"
+    "  `creation_time` datetime default current_timestamp,"
+    "  `modification_time` datetime on update current_timestamp,"
+    "  PRIMARY KEY (`offer_url`)"
+    ") ENGINE=InnoDB")
+
 
 """SETUP"""
 
@@ -318,3 +359,4 @@ local_config = {
 cnx = connect_to_db(local_config)
 create_database()
 create_tables()
+update_field('offers','security_deposit',0,'offer_url','https://m.olx.pl/oferta/2-pokoje-52m-lublin-czuby-CID3-IDzlLJd.html')
