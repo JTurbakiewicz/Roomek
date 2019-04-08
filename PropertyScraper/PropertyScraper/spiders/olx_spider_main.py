@@ -5,6 +5,7 @@ from items import OfferItem
 from items import OfferFeaturesItem
 from scrapy.linkextractors import LinkExtractor
 import PropertyScraper_mysql_connection as db
+from util import offer_features, offer_data
 
 
 already_scraped_urls_dicts = db.get_all('offer_url')
@@ -99,6 +100,8 @@ class OlxSpiderMain(scrapy.Spider):
 
     def parse_olx_offer(self, response):
         OfferItem_loader = OlxOfferLoader(item=OfferItem(), response=response)
+        OfferFeaturesItem_loader = OtodomOfferLoader(item=OfferFeaturesItem(), response=response)
+        OfferFeaturesItem_loader.add_value('offer_url', response)
         OfferItem_loader.add_value('city', response.meta['city'])
         OfferItem_loader.add_value('offer_type', response.meta['offer_type'])
         OfferItem_loader.add_value('offer_url', response)
@@ -131,7 +134,9 @@ class OlxSpiderMain(scrapy.Spider):
         ###/OLXtable
 
         OfferItem_item = OfferItem_loader.load_item()
+        OfferFeaturesItem_item = OfferFeaturesItem_loader.load_item()
         yield OfferItem_item
+        yield OfferFeaturesItem_item
 
     def parse_otodom_offer(self, response):
         OfferItem_loader = OtodomOfferLoader(item=OfferItem(), response=response)
@@ -183,36 +188,6 @@ class OlxSpiderMain(scrapy.Spider):
             line = re.sub(r'<.*?>', '', line).split(':')
             OfferItem_loader.add_value(Otodom_table_fields[line[0]], line[1][1:])
 
-        Otodom_table_fields_2 = {
-            'internet': 'internet',
-            'telewizja kablowa': 'cable_tv',
-            'teren zamknięty': 'closed_terrain',
-            'monitoring / ochrona': 'monitoring_or_security',
-            'domofon / wideofon': 'entry_phone',
-            'drzwi / okna antywłamaniowe': 'antibulglar_doors_windows',
-            'system alarmowy': 'alarm_system',
-            'rolety antywłamaniowe': 'antibulglar_blinds',
-            'zmywarka': 'dishwasher',
-            'kuchenka': 'cooker',
-            'lodówka': 'fridge',
-            'piekarnik': 'oven',
-            'pralka': 'washing_machine',
-            'telewizor': 'tv',
-            'winda': 'elevator',
-            'telefon': 'phone',
-            'klimatyzacja': 'AC',
-            'ogródek': 'garden',
-            'pom. użytkowe': 'utility_room',
-            'garaż/miejsce parkingowe': 'parking_space',
-            'taras': 'terrace',
-            'balkon': 'balcony',
-            'tylko dla niepalących': 'non_smokers_only',
-            'oddzielna kuchnia': 'separate_kitchen',
-            'piwnica': 'basement',
-            'wirtualny spacer': 'virtual_walk',
-            'dwupoziomowe': 'two_level_apartment'
-        }
-
         Otodom_table2 = response.xpath(r'//*[@id="root"]/div/article/div[2]/div[1]/section[3]/div/ul/li').getall()
 
         for line in Otodom_table2:
@@ -221,8 +196,8 @@ class OlxSpiderMain(scrapy.Spider):
                 OfferItem_loader.add_value('furniture', 'Tak')
             elif line == 'wynajmę również studentom':
                 OfferItem_loader.add_value('rental_for_students', 'Tak')
-            elif line in Otodom_table_fields_2:
-                OfferFeaturesItem_loader.add_value(Otodom_table_fields_2[line], True)
+            elif line in offer_features:
+                OfferFeaturesItem_loader.add_value(offer_features[line], True)
             else:
                 print ('DODAC ' + line)
 

@@ -5,13 +5,15 @@ import logging
 from time import sleep
 from math import ceil
 from PropertyScraper.PropertyScraper.items import OfferItem
+from PropertyScraper.PropertyScraper.util import offer_features
 import inspect
+import clean_output as cn
 
-logging.basicConfig(level='ERROR')
+logging.basicConfig(level='DEBUG')
 
 class Parser():
 
-    def __init__(self, relevant_word, sql_column_name):
+    def __init__(self, relevant_word = 'def', sql_column_name = 'offer_text'):
         self.relevant_word = relevant_word
         self.sql_column_name = sql_column_name
         self.sql_train_data = sql.get_custom(
@@ -20,27 +22,16 @@ class Parser():
         self.sql_parse_data = sql.get_custom(
             """select offer_url, offer_text from offers where {0} is Null and offer_text like '%{1}%'""".format(sql_column_name,relevant_word))
         self.parse_batch_size = len(self.sql_parse_data)
+        self.sql_parse_features_data = sql.get_custom("""select offer_url, offer_text from offers""")
         wit.create_new_entity(sql_column_name, entity_description = 'Created via OfferParser')
         wit.update_entity(sql_column_name, lookups = ["free-text", 'keywords'])
 
-    def divide_chunks(list, size):
+    def divide_chunks(self, list, size):
         for i in range(0, len(list), size):
             yield list[i:i + size]
 
-    def clean_input(self, input, type):
-        if type.upper() == 'INT':
-            only_numbers = re.sub(r'[^0123456789,.]', '', input)
-            if '.' in only_numbers or ',' in only_numbers:
-                only_numbers = only_numbers.split('.')
-                if len(only_numbers[-1]) == 2:
-                    only_numbers = ''.join(only_numbers[:-1])
-                only_numbers = only_numbers.split(',')
-                if len(only_numbers[-1]) == 2:
-                    only_numbers = ''.join(only_numbers[:-1])
-
-            return only_numbers
-
     def prepare_input(self, data_to_prepare, values_present):
+        logging.debug(data_to_prepare)
         sent_end_pattern = re.compile(r'\. ')
         capital_pattern = re.compile(r'[A-Z]')
         final_sentences = []
@@ -49,19 +40,41 @@ class Parser():
         end_chars = []
         offer_urls = []
         for record in data_to_prepare:
+            url = record['offer_url']
             if values_present:
                 value = record[self.sql_column_name]
             else:
                 value = 'Value not available'
-                url = record['offer_url']
+
             record = record['offer_text']
             sentences = re.split(sent_end_pattern, record)
             sentence_missing = True
             for sentence in sentences:
                 if (self.relevant_word.lower() in sentence.lower()) and sentence_missing:
+                    sentence_index = sentences.index(sentence)
+                    try:
+                        sentence = sentence + ' ' + sentences[sentence_index+1]
+                    except:
+                        pass
+
+
                     word_position = sentence.lower().find(self.relevant_word.lower())
                     sentence_end = re.split(capital_pattern, sentence[word_position + 1:])[0]
-                    sentence = sentence[:word_position + 1] + sentence_end
+                    new_sentence = sentence[:word_position + 1] + sentence_end
+
+                    rest_of_the_sentence = sentence[len(new_sentence):]
+                    rest_of_the_sentence_split = rest_of_the_sentence.split(' ')
+                    for part in rest_of_the_sentence_split:
+                        try:
+                            if part[0].isupper():
+                                new_sentence = new_sentence + part + ' '
+                            else:
+                                break
+                        except:
+                            break
+
+                    sentence = new_sentence
+
                     word_position = sentence.lower().find(self.relevant_word.lower())
                     string_to_word_position = sentence[:word_position]
                     capital_letter_positions = capital_pattern.finditer(string_to_word_position)
@@ -84,7 +97,7 @@ class Parser():
 
         return final_sentences, final_values, start_chars, end_chars, offer_urls
 
-    def parse(self, expected_input_type = None, confidence_req = 0.9):
+    def parse_wit(self, confidence_req = 0.9, output_processing_funtion = None):
         self.parse_sentences, *rest = self.prepare_input(data_to_prepare=self.sql_parse_data, values_present=False)
         self.offer_urls = rest[-1]
 
@@ -109,24 +122,54 @@ class Parser():
                     value = response_json['entities'][self.sql_column_name][0]['value']
                     offer_url = self.offer_urls[self.parse_sentences.index(sentence)]
                     try:
-                        if expected_input_type:
-                            value = self.clean_input(value, expected_input_type)
-                        print(value, offer_url)
+                        if output_processing_funtion:
+                            value = output_processing_funtion(value)
+                        logging.info('Parsed sentence: ' + sentence)
+                        logging.info('Updated offer: ' + offer_url + ' column: ' + self.sql_column_name + ' with: ' + str(value))
                         sql.update_field(table_name='offers', field_name=self.sql_column_name, field_value=value,
                                          where_field='offer_url', where_value=offer_url, if_null_required=True)
                     except Exception  as e:
                         print('Error is ', e)
 
+    def parse_simple(self):
+
+        results = {
+            'records_to_parse': len(self.sql_parse_features_data),
+            'amount_of_updated_sentences' : 0,
+            'amount_of_updated_values': 0,
+        }
+
+        sent_end_pattern = re.compile(r'\. ')
+        for record in self.sql_parse_features_data:
+            sentence_updated = False
+            url = record['offer_url']
+            record = record['offer_text']
+            if record is None: continue
+            sentences = re.split(sent_end_pattern, record)
+            for sentence in sentences:
+                for key in offer_features.keys():
+                    if key.upper() in sentence.upper():
+                        if not sentence_updated:
+                            sentence_updated = True
+                            results['amount_of_updated_sentences'] = results['amount_of_updated_sentences'] + 1
+                        results['amount_of_updated_values'] = results['amount_of_updated_values'] + 1
+                        logging.info('Parsed sentence: ' + sentence)
+                        logging.info('Updated offer: ' + url + ' column: ' + offer_features[key] + ' with: ' + 'True')
+                        sql.update_field(table_name='offer_features', field_name=offer_features[key], field_value=1,
+                                         where_field='offer_url', where_value=url, if_null_required=True)
+
+        return results
+
     def train(self, train_percent):
         self.train_percent = train_percent
-        self.train_sentences, self.train_values, self.start_chars, self.end_chars = self.prepare_input(self.sql_train_data, values_present=True)
-
-        sentences_to_train= list(divide_chunks(self.train_sentences[:int(self.train_batch_size*self.train_percent/100)], 200))
-        values_to_train = list(divide_chunks(self.train_values[:int(self.train_batch_size*self.train_percent/100)], 200))
+        self.train_sentences, self.train_values, self.start_chars, self.end_chars, *rest = self.prepare_input(self.sql_train_data, values_present=True)
+        sentences_to_train= list(self.divide_chunks(self.train_sentences[:int(self.train_batch_size*self.train_percent/100)], 200))
+        values_to_train = list(self.divide_chunks(self.train_values[:int(self.train_batch_size*self.train_percent/100)], 200))
         start_chars_to_train = list(
-            divide_chunks(self.start_chars[:int(self.train_batch_size * self.train_percent / 100)], 200))
+            self.divide_chunks(self.start_chars[:int(self.train_batch_size * self.train_percent / 100)], 200))
         end_chars_to_train = list(
-            divide_chunks(self.end_chars[:int(self.train_batch_size * self.train_percent / 100)], 200))
+            self.divide_chunks(self.end_chars[:int(self.train_batch_size * self.train_percent / 100)], 200))
+
         for batch in range(len(sentences_to_train)):
             wit.train(sentences_to_train[batch], self.sql_column_name, values_to_train[batch], start_chars=start_chars_to_train[batch], end_chars=end_chars_to_train[batch])
             if batch == len(sentences_to_train) -1:
@@ -144,6 +187,7 @@ class Parser():
             'correct_value': 0,
             'wrong_value': 0
         }
+        logging.info('Verify sample size is: ' + str(results['verify_sample_size']) + '. The check will take around: ' + str(results['verify_sample_size']) + ' s.')
         for sentence in self.train_sentences[int(self.train_batch_size*(100-self.verify_percent)/100):]:
             response = wit.send_message(sentence)
             response_json = response.json()
@@ -167,5 +211,35 @@ class Parser():
                 else:
                     results['wrong_entity'] += 1
 
-        print(results)
+        return results
+
+def batch_parse(min_accuracy):
+
+    simple_parse = Parser()
+    simple_parsing_results = simple_parse.parse_simple()
+    logging.info(simple_parsing_results)
+
+    fields_to_parse_wit = {
+        'security_deposit' : {'relevant_word':['kaucj'], 'confidence_req' : 0.9, 'output_processing_funtion': cn.to_int},
+        'street': {'relevant_word': ['ul'], 'confidence_req': 0.9, 'output_processing_funtion': cn.to_nominative}
+    }
+
+    for sql_field, parse_data in fields_to_parse_wit.items():
+        for relevant_word in parse_data['relevant_word']:
+            logging.info('Creating parser for: ' + str(sql_field) + '; keyword: ' + relevant_word)
+            parser = Parser(relevant_word, sql_field)
+            logging.info('Training parser for: ' + str(sql_field) + ' keyword: ' + relevant_word)
+            parser.train(80)
+            logging.info('Verifing parser for: ' + str(sql_field) + '; keyword: ' + relevant_word)
+            res = parser.verify(20)
+            entity_correct = res['correct_entity'] / (res['correct_entity']+res['wrong_entity'])
+            value_correct = res['correct_value'] / (res['correct_value'] + res['wrong_value'])
+            logging.info('Entity check is correct in: ' + str(entity_correct))
+            logging.info('Value check is correct in: ' + str(value_correct))
+            if entity_correct > min_accuracy and value_correct > min_accuracy:
+                logging.info('Checks approved. Starting parsing for: ' +  str(sql_field) + ' key word: ' + relevant_word)
+                parser.parse_wit(output_processing_funtion=parse_data['output_processing_funtion'], confidence_req=parse_data['confidence_req'])
+            else:
+                logging.info('Checks disapproved. Closing parsing for: ' + str(sql_field) + ' key word: ' + relevant_word)
+
 
