@@ -148,8 +148,10 @@ class Bot:
         Output:
             Response from API as <dict>
         """
-        if type(message) == list: message = random.choice(message)
-        # log.info("Bot's message ??? to {1}: {0}".format(message, str(userid)))
+        if type(message) == list:
+            message = random.choice(message)
+        if use_database: db.add_conversation(str(userid), 'User', message)
+        log.info("Bot's message ??? to {1}: {0}".format(message, str(userid)))
         return self.fb_send_message(userid, {
             'text': message
         }, notification_type)
@@ -370,6 +372,9 @@ class Bot:
                 "payload" : "<POSTBACK_PAYLOAD>"
             }
             reply_options.append(content)
+
+        if use_database: db.add_conversation(str(userid), 'User', message)
+        log.info("Bot sends quick replies to {1}: {0}".format(str(reply_message) + " : " + str(replies), str(userid)))
 
         return self.fb_send_message(userid, {
             "text": reply_message,

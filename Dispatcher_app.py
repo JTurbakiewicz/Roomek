@@ -19,7 +19,7 @@ log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 # set logging parameters:
 log = logging.getLogger(os.path.basename(__file__))
-logging.basicConfig(level=logging.INFO,  # levels in order: DEBUG, INFO, WARNING, EXCEPTION, ERROR, CRITICAL
+logging.basicConfig(level=logging.DEBUG,  # levels in order: DEBUG, INFO, WARNING, EXCEPTION, ERROR, CRITICAL
                     # filename='/folder/myapp.log',
                     # filemode='w',
                     format='%(asctime)s %(levelname)s from %(name)s: %(message)s',

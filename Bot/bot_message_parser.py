@@ -9,7 +9,15 @@ from Dispatcher_app import use_local_tokens
 from Bot.bot_cognition import recognize_sticker
 if use_local_tokens: from Bot.tokens import tokens_local as tokens
 else: from Bot.tokens import tokens
+# TODO if use_database: from Databases.... import update_user
 log = logging.getLogger(os.path.basename(__file__))
+
+# in the future fetch user ids from the DB:
+users = {}  # { userID : User() }
+if use_database:
+    users_in_db = db.get_all(table_name='users', fields_to_get='facebook_id')
+    for user_in_db in users_in_db:
+        users[user['facebook_id']] = user_in_db
 
 
 class Message:
@@ -28,6 +36,12 @@ class Message:
             self.timestamp = date.fromtimestamp(float(self.messaging['timestamp'])/1000).strftime('%Y-%m-%d %H:%M:%S')
             self.senderID = self.messaging['sender']['id']
             self.recipientID = self.messaging['recipient']['id']
+            if self.senderID not in users:
+                # create new user and add to the dictionary (in class creator)
+                self.user = User(self.senderID)
+            else:
+                # assign existing user to this object
+                self.user = users[self.senderID]
             if 'delivery' in self.messaging: self.type = "Delivery"
             elif 'read' in self.messaging: self.type = "ReadConfirmation"
             elif 'message' in self.messaging:
@@ -85,6 +99,7 @@ class Message:
             self.sender = "bot"
 
         # logs:
+        # TODO: zmienne maja zle nazwy
         if self.sender == "user":
             if self.type == "UnknownType":
                 log.warning("This wasn't a message, perhaps it's an info request. Content:  \n"+str(user_message))
@@ -112,9 +127,97 @@ class Message:
             elif self.type == "MessageWithAttachment":
                 log.info("Bot's message to user {0}:  '<GIF link={1}>'".format(str(self.senderID)[0:5], self.url ))
             elif self.type == "TextMessage":
-                log.info("Bot's message '{0}' to user {1}:  '{2}'".format(self.text, str(self.recipientID)[0:5], self.messaging))
+                log.info("Bot's message '{0}' to user {1}:  '{2}'".format(self.text, str(self.recipientID)[0:5], self.text))
             else:
                 log.error("Unknown message type! Content: " + self.messaging)
         else:
             pass
             # log.error("Unknown sender! Content: " + str(self.messaging))
+
+
+class User:
+    """ All user info that we also store in db """
+
+    def __init__(self, facebook_id):
+        self.facebook_id = facebook_id
+        self.first_name = None
+        self.last_name = None
+        self.gender = None
+        self.business_type = None
+        self.housing_type = None
+        self.price_limit = None
+        self.city = None
+        self.country = None
+        self.location = None
+        self.features = []      # ["dla studenta", "nieprzechodni", "niepalacy"]
+        self.add_more = True
+        self.confirmed_data = False
+        if facebook_id not in users:
+            users[facebook_id] = self
+
+        # if facebook_id not in BAZA:
+        #     create_user(facebook_id)
+
+    # TODO universal setter
+    # def set_field(self, field_name, filed_value):
+        # self.FIELD_NAME = FIELD.VALUE
+
+    def set_facebook_id(self, facebook_id):
+        self.facebook_id = str(facebook_id)
+        # update_user(self.facebook_id, "facebook_id", facebook_id)
+
+    def set_first_name(self, first_name):
+        self.first_name = str(first_name)
+        # update_user(self.facebook_id, "first_name", first_name)
+
+    def set_last_name(self, last_name):
+        self.last_name = str(last_name)
+        # update_user(self.facebook_id, "last_name", last_name)
+
+    def set_gender(self, gender):
+        self.gender = str(gender)
+        # update_user(self.facebook_id, "gender", gender)
+
+    def set_business_type(self, business_type):
+        self.business_type = str(business_type)
+        # update_user(self.facebook_id, "business_type", business_type)
+        
+    def set_housing_type(self, housing_type):
+        self.housing_type = str(housing_type)
+        # update_user(self.facebook_id, "housing_type", housing_type)
+        
+    def set_gender(self, gender):
+        self.gender = str(gender)
+        # update_user(self.facebook_id, "gender", gender)
+        
+    def set_price_limit(self, price_limit):
+        self.price_limit = int(price_limit)
+        # update_user(self.facebook_id, "price_limit", int(price_limit))
+
+    def set_city(self, city):
+        self.city = str(city)
+        # update_user(self.facebook_id, "city", city)
+        
+    def set_country(self, country):
+        self.country = str(country)
+        # update_user(self.facebook_id, "country", country)
+
+    def set_location(self, x, y):
+        self.location = [float(x), float(y)]
+        # update_user(self.facebook_id, "location_latitude", float(x))
+        # update_user(self.facebook_id, "location_longitude", float(y))
+
+    # TODO debug me
+    def add_feature(self, feature):
+        self.features.append(feature)
+        # current = get_user(self.facebook_id)[0]["features"]
+        # appended = str(current)+"&"+str(feature)
+        # update_user(self.facebook_id, "feature", appended)
+
+    def set_add_more(self, add_more):
+        self.add_more = add_more
+        # update_user(self.facebook_id, "add_more", add_more)
+
+    def set_confirmed_data(self, confirmed_data):
+        self.confirmed_data = confirmed_data
+        # update_user(self.facebook_id, "confirmed_data", confirmed_data)
