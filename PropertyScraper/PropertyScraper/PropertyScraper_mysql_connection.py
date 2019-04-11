@@ -123,7 +123,7 @@ def create_offer(item):
     except mysql.connector.IntegrityError as err:
         print(" [LOG-DBSQL-ERROR] Error: {}".format(err))
 
-def get_all(fields_to_get = '*'):
+def get_all(table_name = 'offers', fields_to_get = '*'):
     """ Gets all off rows from DB.
 
     A function that wraps MySQL query into a python function. It lets you to easly return
@@ -142,8 +142,8 @@ def get_all(fields_to_get = '*'):
     fields_to_get_str = str(fields_to_get)
     fields_to_get_clean = re.sub("""[[']|]""", '', fields_to_get_str)
     query =  """SELECT %s
-             FROM offers
-             """ % (fields_to_get_clean)
+             FROM %s
+             """ % (fields_to_get_clean, table_name)
     cursor.execute(query)
     result = cursor.fetchall()
     return result
@@ -262,6 +262,40 @@ def update_field(table_name, field_name, field_value, where_field, where_value, 
     cursor.execute(query, (field_value,where_value))
     cnx.commit()
 
+def update_user(facebook_id, field_to_update, field_value, if_null_required = False):
+    query = """
+       UPDATE users
+       SET {}=%s
+       WHERE facebook_id=%s
+    """.format(field_to_update)
+    if if_null_required:
+        query = query + 'AND ' + field_to_update + ' IS NULL'
+    cursor.execute(query, (field_value,facebook_id))
+    cnx.commit()
+
+def get_user(facebook_id):
+    query =  """SELECT *
+             FROM users
+             WHERE facebook_id = %s
+             """ % (facebook_id)
+    cursor.execute(query)
+    return cursor.fetchone()
+
+def create_user(facebook_id):
+    add_query = ("INSERT INTO users "
+                "(facebook_id) "
+                "VALUES (%s)")
+    cursor.execute(add_query, facebook_id)
+    cnx.commit()
+
+# def create_conversation(facebook_id):
+#     add_conversation = ("INSERT INTO conversations "
+#                         "(facebook_id, message_content, who_said_it, message_timestamp, message_intent) "
+#                         "VALUES (%s, %s, %s, %s, %s)")
+#     data_conversation = (facebook_id, message_content, who_said_it, message_timestamp, message_intent)
+#     cursor.execute(add_conversation, data_conversation)
+#     cnx.commit()
+
 """DATA"""
 
 DB_NAME = 'offers'
@@ -337,15 +371,41 @@ db_tables['offer_features'] = (
     "  PRIMARY KEY (`offer_url`)"
     ") ENGINE=InnoDB")
 
-db_tables['parsed_data'] = (
-    "CREATE TABLE `parsed_data` ("
-    "  `offer_url` varchar(700) NOT NULL,"
-    "  `internet` BOOLEAN,"
+db_tables['user'] = (
+    "CREATE TABLE `users` ("
+    "  `facebook_id` char(100) NOT NULL,"
+    "  `first_name` varchar(100),"
+    "  `last_name` varchar(100),"
+    "  `gender` enum('Female','Male'),"
+    "  `business_type` varchar(100),"
+    "  `price_limit` int(1),"
+    "  `location_latidue` Decimal(9,6),"
+    "  `location_longitude` Decimal(9,6),"
+    "  `city` varchar(100),"  
+    "  `country` varchar(100),"  
+    "  `housing_type` varchar(100),"
+    "  `features` varchar(1000),"
+    "  `confirmed_data` BOOLEAN,"
+    "  `add_more` BOOLEAN,"
     "  `creation_time` datetime default current_timestamp,"
     "  `modification_time` datetime on update current_timestamp,"
-    "  PRIMARY KEY (`offer_url`)"
+    "  PRIMARY KEY (`facebook_id`)"
     ") ENGINE=InnoDB")
 
+db_tables['conversations'] = (
+    "CREATE TABLE `conversations` ("
+    "  `conversation_no` int(1) NOT NULL AUTO_INCREMENT,"
+    "  `facebook_id` char(100) NOT NULL,"
+    "  `text` varchar(999),"
+    "  `sticker_id` varchar(999),"
+    "  `nlp_intent` varchar(999),"
+    "  `nlp_entity` varchar(999),"
+    "  `nlp_value` varchar(999),"
+    "  `message_time` date,"
+    "  PRIMARY KEY (`facebook_id`,`conversation_no`), KEY `conversation_no` (`conversation_no`),"
+    "  CONSTRAINT `conversation_ibfk_1` FOREIGN KEY (`facebook_id`) "
+    "     REFERENCES `users` (`facebook_id`) ON DELETE CASCADE"
+    ") ENGINE=InnoDB")
 
 """SETUP"""
 
@@ -359,4 +419,4 @@ local_config = {
 cnx = connect_to_db(local_config)
 create_database()
 create_tables()
-update_field('offers','security_deposit',0,'offer_url','https://m.olx.pl/oferta/2-pokoje-52m-lublin-czuby-CID3-IDzlLJd.html')
+

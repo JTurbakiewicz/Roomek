@@ -12,7 +12,7 @@ headers = {
     'Content-Type': 'application/json',
 }
 
-logging.basicConfig(level='INFO')
+logging.basicConfig(level='DEBUG')
 
 def response_status(rsp):
     if rsp.status_code == 409:

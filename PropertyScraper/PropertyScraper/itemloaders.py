@@ -93,6 +93,12 @@ def datetime_it_Otodom(input):
             yield now + datetime.timedelta(hours=1)
     elif just_date_split[1] == 'minutes' and just_date_split[2] == 'ago':
         yield now - datetime.timedelta(minutes=int(just_date_split[0])) - datetime.timedelta(minutes=60)
+    elif just_date_split[1] == 'hours' and just_date_split[2] == 'ago':
+        yield now - datetime.timedelta(hours=int(just_date_split[0])) - datetime.timedelta(minutes=60)
+    elif just_date_split[1] == 'hour' and just_date_split[2] == 'ago':
+        yield now - datetime.timedelta(hours=1) - datetime.timedelta(minutes=60)
+    elif just_date_split[1] == 'days' and just_date_split[2] == 'ago':
+        yield now - datetime.timedelta(days=int(just_date_split[0])) - datetime.timedelta(minutes=60)
     elif just_date_split[3] == 'seconds':
         yield now
     else:

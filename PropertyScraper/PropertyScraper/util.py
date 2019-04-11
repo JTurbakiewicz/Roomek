@@ -1,26 +1,3 @@
-otodom_offer_data = {
-    'Czynsz - dodatkowo': 'additional_rent',
-    'Kaucja': 'security_deposit',
-    'Rodzaj zabudowy': 'type_of_building',
-    'Materiał budynku': 'building_material',
-    'Okna': 'windows',
-    'Ogrzewanie': 'heating',
-    'Rok budowy': 'building_year',
-    'Stan wykończenia': 'fit_out',
-    'Dostępne od': 'ready_from',
-    'Czynsz': 'additional_rent',
-    'Forma własności': 'type_of_ownership',
-    'Wynajmę również studentom': 'rental_for_students',
-    'Rynek': 'type_of_market',
-    'Wyposażenie': 'media',
-    'Zabezpieczenia': 'security_measures',
-    'Media': 'additonal_equipment',
-    'Informacje dodatkowe': 'additional_information',
-    'Powierzchnia': 'area',
-    'Liczba pokoi': 'amount_of_rooms',
-    'Piętro': 'apartment_level',
-    'Liczba pięter': 'apartment_level',
-}
 
 offer_features = {
     'internet': 'internet',

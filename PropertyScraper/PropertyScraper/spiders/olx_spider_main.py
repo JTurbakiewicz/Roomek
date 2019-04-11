@@ -5,10 +5,9 @@ from items import OfferItem
 from items import OfferFeaturesItem
 from scrapy.linkextractors import LinkExtractor
 import PropertyScraper_mysql_connection as db
-from util import offer_features, offer_data
+from util import offer_features
 
-
-already_scraped_urls_dicts = db.get_all('offer_url')
+already_scraped_urls_dicts = db.get_all(table_name = 'offers', fields_to_get = 'offer_url')
 already_scraped_urls = []
 for url in already_scraped_urls_dicts:
     already_scraped_urls.append(url['offer_url'])
@@ -23,7 +22,6 @@ OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=23|page=33'), un
 #                                                       '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a',
 #                                                       '//*[@id="body-container"]/div[3]/div/div[8]/span[5]/a',
 #                                                       '//*[@id="body-container"]/div[3]/div/div[8]/span[6]/a']))
-
 links_to_main_page = set()
 links_to_olx_offers = set()
 links_to_otodom_offers = set()
