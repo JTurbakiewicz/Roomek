@@ -1,11 +1,11 @@
 import Witai.witai_connection as wit
-import PropertyScraper.PropertyScraper.PropertyScraper_mysql_connection as sql
+import Databases.mysql_connection as sql
 import re
 import logging
 from time import sleep
 from math import ceil
-from PropertyScraper.PropertyScraper.items import OfferItem
-from PropertyScraper.PropertyScraper.util import offer_features
+from Scraper.PropertyScraper.items import OfferItem
+from Scraper.PropertyScraper.util import offer_features
 import inspect
 import clean_output as cn
 
@@ -132,13 +132,12 @@ class Parser():
                         print('Error is ', e)
 
     def parse_simple(self):
-
+        print(len(self.sql_parse_features_data))
         results = {
             'records_to_parse': len(self.sql_parse_features_data),
             'amount_of_updated_sentences' : 0,
             'amount_of_updated_values': 0,
         }
-
         sent_end_pattern = re.compile(r'\. ')
         for record in self.sql_parse_features_data:
             sentence_updated = False
@@ -215,9 +214,9 @@ class Parser():
 
 def batch_parse(min_accuracy):
 
-    # simple_parse = Parser()
-    # simple_parsing_results = simple_parse.parse_simple()
-    # logging.info(simple_parsing_results)
+    simple_parse = Parser()
+    simple_parsing_results = simple_parse.parse_simple()
+    logging.info(simple_parsing_results)
 
     fields_to_parse_wit = {
         'security_deposit' : {'relevant_word':['kaucj'], 'confidence_req' : 0.9, 'output_processing_funtion': cn.to_int},

@@ -44,5 +44,8 @@ class OfferItem(dict, BaseItem):
     additional_equipment = scrapy.Field()
     additional_information = scrapy.Field()
 
+    location_latitude = scrapy.Field()
+    location_longitude = scrapy.Field()
+
 class OfferFeaturesItem(dict, BaseItem):
     pass

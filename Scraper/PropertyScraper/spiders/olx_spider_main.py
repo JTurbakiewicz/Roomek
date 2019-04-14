@@ -4,7 +4,7 @@ from itemloaders import OlxOfferLoader, OtodomOfferLoader
 from items import OfferItem
 from items import OfferFeaturesItem
 from scrapy.linkextractors import LinkExtractor
-import PropertyScraper_mysql_connection as db
+import Databases.mysql_connection as db
 from util import offer_features
 
 already_scraped_urls_dicts = db.get_all(table_name = 'offers', fields_to_get = 'offer_url')
@@ -146,7 +146,9 @@ class OlxSpiderMain(scrapy.Spider):
         OfferItem_loader.add_xpath('offer_name', '//*[@id="root"]/div/article/header/div[1]/h1/text()')
         OfferItem_loader.add_xpath('offer_thumbnail_url', '//*[@id="root"]/div/article/section/div[1]/div/div[1]/div/div[2]/div/div[2]/div/picture/img')
         OfferItem_loader.add_xpath('price', '//*[@id="root"]/div/article/header/div[3]/div[1]/text()')
-        OfferItem_loader.add_xpath('date_of_the_offer', '//*[@id="root"]/div/article/div[2]/div[1]/div[2]/div/div[2]/text()[2]')
+        OfferItem_loader.add_value('date_of_the_offer', response.body)
+        OfferItem_loader.add_value('location_latitude', response.body)
+        OfferItem_loader.add_value('location_longitude', response.body)
         OfferItem_loader.add_xpath('offer_id', '//*[@id="root"]/div/article/div[2]/div[1]/div[2]/div/div[1]/text()[1]')
         OfferItem_loader.add_xpath('offer_text', '//*[@id="root"]/div/article/div[2]/div[1]/section[2]/div/div[1]')
         OfferItem_loader.add_xpath('price_per_m2', '//*[@id="root"]/div/article/header/div[3]/div[2]/text()')
