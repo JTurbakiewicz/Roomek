@@ -3,8 +3,7 @@
 """ Functions enabling the Bot to understand messages and intents. """
 from geopy.geocoders import Nominatim
 from geopy.point import Point
-from Bot.bot_responses_PL import *
-log = logging.getLogger(os.path.basename(__file__))
+# from Bot.bot_responses_PL import *
 
 # Set of intents and patterns to recognize them:
 pattern_dictionary = {
@@ -70,12 +69,8 @@ def recognize_sticker(sticker_id):
 def recognize_location(location):
     geolocator = Nominatim(user_agent="Roomek")
     loc = geolocator.geocode(location, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'], addressdetails = True)
-    # return(loc.address)
-    try:
-        print(loc.address)
-        print((loc.latitude, loc.longitude))
-        print(loc.raw)
-    except:
-        pass
+    return loc
+    # (loc.raw)
+    # TODO pass attributes like street, boundingbox etc.
 
 # recognize_location("twarda 18")

@@ -22,7 +22,7 @@ else:
     from Bot.tokens import tokens
 if use_database:
     from Databases import mysql_connection as db
-log = logging.getLogger(os.path.basename(__file__))
+
 
 # TODO add a 'tag' NON_PROMOTIONAL_SUBSCRIPTION
 # TODO add a 'messaging_type' TYPE_MESSAGE_TYPE
@@ -35,9 +35,9 @@ def verify_fb_token(request, token_sent):
     """Take token sent by facebook and verify if it matches"""
     if token_sent == tokens.fb_verification:
         return request.args.get("hub.challenge")
-        log.info("FB token verification succesfull.")
+        logging.info("FB token verification succesfull.")
     else:
-        log.warning("Failed to verify FB token.")
+        logging.warning("Failed to verify FB token.")
         return 'Invalid verification token'
 
 
@@ -151,7 +151,7 @@ class Bot:
         if type(message) == list:
             message = random.choice(message)
         if use_database: db.add_conversation(str(userid), 'User', message)
-        log.info("Bot's message ??? to {1}: {0}".format(message, str(userid)))
+        logging.info("BOT({0}): '{1}'".format(str(userid)[0:5], message))
         return self.fb_send_message(userid, {
             'text': message
         }, notification_type)
@@ -165,7 +165,7 @@ class Bot:
         Output:
             Response from API as <dict>
         """
-        log.debug("Trying to send generic message...")
+        logging.debug("Trying to send generic message...")
 
         elements = self.fb_define_elements(elements_titles, buttons_titles)
 
@@ -189,7 +189,7 @@ class Bot:
     #     Output:
     #         Response from API as <dict>
     #     """
-    #     log.debug("Trying to send list message.")
+    #     logging.debug("Trying to send list message.")
     #
     #     elements = self.fb_define_elements(element_titles, button_titles)
     #     buttons = self.fb_define_buttons(button_titles)
@@ -208,7 +208,7 @@ class Bot:
 
     def fb_send_list_message(self, userid, element_titles=['a', 'b'], button_titles=['a', 'b'], notification_type=NotificationType.regular):
         """TEST"""
-        log.debug("Trying to send TEST list message.")
+        logging.debug("Trying to send TEST list message.")
 
         elements = self.fb_define_elements(element_titles, button_titles)
         buttons = self.fb_define_buttons(button_titles)
@@ -269,7 +269,7 @@ class Bot:
         Output:
             Response from API as <dict>
         """
-        log.debug("Trying to send button message.")
+        logging.debug("Trying to send button message.")
         buttons = self.fb_define_buttons(button_names)
 
         return self.fb_send_message(userid, {
@@ -353,7 +353,7 @@ class Bot:
         """
         return self.fb_send_attachment_url(userid, "image", image_url, notification_type)
 
-    def fb_send_quick_replies(self, userid, reply_message = "", replies = ['a','b','c'], notification_type=NotificationType.regular):
+    def fb_send_quick_replies(self, userid, reply_message = "", replies = ['a','b','c'], location=False, notification_type=NotificationType.regular):
         """Send quick replies to the specified recipient.
         https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies
         Input:
@@ -365,32 +365,22 @@ class Bot:
         """
         # TODO add icon near quick replies: {...,"image_url":"http://example.com/img/red.png"}
         reply_options = []
+        if location:
+            reply_options.append({"content_type": "location", "title": "mapka"})
         for option in replies:
             content = {
-                "content_type" : "text",
-                "title" : str(option),
-                "payload" : "<POSTBACK_PAYLOAD>"
+                "content_type": "text",
+                "title": str(option),
+                "payload": "<POSTBACK_PAYLOAD>"
             }
             reply_options.append(content)
 
         if use_database: db.add_conversation(str(userid), 'User', message)
-        log.info("Bot sends quick replies to {1}: {0}".format(str(reply_message) + " : " + str(replies), str(userid)))
+        logging.info("BOT({0}): '{1}' Replies{2}".format(str(userid)[0:5], str(reply_message), str(replies)))
 
         return self.fb_send_message(userid, {
             "text": reply_message,
             "quick_replies": reply_options
-        }, notification_type)
-
-    def fb_send_quick_location(self, userid, reply_message = ""):
-        """Send quick replies with location button to the specified recipient.
-        Input:
-            userid: recipient id to send to
-        Output:
-            Response from API as <dict>
-        """
-        return self.fb_send_message(userid, {
-            "text": reply_message,
-            "quick_replies": [{"content_type":"location"}]
         }, notification_type)
 
     def fb_fake_typing(self, userid, duration=0.6):
