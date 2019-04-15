@@ -49,3 +49,7 @@ class OfferItem(dict, BaseItem):
 
 class OfferFeaturesItem(dict, BaseItem):
     pass
+
+class OfferRoomItem(dict, BaseItem):
+    type_of_room = scrapy.Field()
+    preferred_locator = scrapy.Field()

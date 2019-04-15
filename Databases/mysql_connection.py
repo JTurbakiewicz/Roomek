@@ -73,7 +73,7 @@ def create_offer(item):
     """
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         try:
-            if type(item).__name__ == 'OfferItem':
+            if type(item).__name__ == 'OfferItem' or type(item).__name__ == 'OfferRoomItem':
                 fields_to_insert_into_offers = str(list(item.keys()))
                 fields_to_insert_into_offers = re.sub("""[[']|]""", '', fields_to_insert_into_offers)
                 s_to_insert_into_offers = ('%s,' * len(item.keys()))[:-1]
@@ -263,12 +263,64 @@ def get_user(facebook_id):
         cursor.execute(query)
         return cursor.fetchone()
 
-def create_user(facebook_id):
+def create_user(facebook_id, first_name = None, last_name = None, gender = None, business_type = None,
+                price_limit = None, location_latidude = None, location_longitude = None, city = None,
+                country = None, housing_type = None, features = None, confirmed_data = None, add_more = None,
+                shown_input = None):
+    #TODO -> dodać tworzenie z parametrami
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-        add_query = ("INSERT INTO users "
-                    "(facebook_id) "
-                    "VALUES (%s)")
-        cursor.execute(add_query, (facebook_id,))
+        fields_to_add = 'facebook_id'
+        user_data = [facebook_id]
+        if first_name:
+            fields_to_add = fields_to_add + ',first_name'
+            user_data.append(first_name)
+        if last_name:
+            fields_to_add = fields_to_add + ',last_name'
+            user_data.append(last_name)
+        if gender:
+            fields_to_add = fields_to_add + ',gender'
+            user_data.append(gender)
+        if business_type:
+            fields_to_add = fields_to_add + ',business_type'
+            user_data.append(business_type)
+        if price_limit:
+            fields_to_add = fields_to_add + ',price_limit'
+            user_data.append(price_limit)
+        if location_latidude:
+            fields_to_add = fields_to_add + ',location_latidude'
+            user_data.append(location_latidude)
+        if location_longitude:
+            fields_to_add = fields_to_add + ',location_longitude'
+            user_data.append(location_longitude)
+        if city:
+            fields_to_add = fields_to_add + ',city'
+            user_data.append(city)
+        if country:
+            fields_to_add = fields_to_add + ',country'
+            user_data.append(country)
+        if housing_type:
+            fields_to_add = fields_to_add + ',housing_type'
+            user_data.append(housing_type)
+        if features:
+            fields_to_add = fields_to_add + ',features'
+            user_data.append(features)
+        if confirmed_data:
+            fields_to_add = fields_to_add + ',confirmed_data'
+            user_data.append(confirmed_data)
+        if add_more:
+            fields_to_add = fields_to_add + ',add_more'
+            user_data.append(add_more)
+        if shown_input:
+            fields_to_add = fields_to_add + ',shown_input'
+            user_data.append(shown_input)
+
+        placeholders = '%s,' * len(fields_to_add.split(','))
+        placeholders = placeholders[:-1]
+
+        query = """INSERT INTO users
+                ({})
+                VALUES ({})""".format(fields_to_add,placeholders)
+        cursor.execute(query, user_data)
         cnx.commit()
 
 def create_conversation(facebook_id, who_said_it, text = None, sticker_id = None, nlp_intent = None, nlp_entity = None, nlp_value = None, message_time = None):
@@ -342,6 +394,8 @@ db_tables['offers'] = (
     "  `rental_for_students` varchar(25),"
     "  `location_latitude` FLOAT,"
     "  `location_longitude` FLOAT,"
+    "  `type_of_room` varchar(50),"
+    "  `preferred_locator` varchar(50),"
     "  `creation_time` datetime default current_timestamp,"
     "  `modification_time` datetime on update current_timestamp,"
     "  PRIMARY KEY (`offer_url`)"

@@ -195,3 +195,7 @@ class OtodomOfferLoader(OlxOfferLoader):
     additional_information_in = MapCompose(delist_string)
     location_latitude_in = MapCompose(location_latitude_otodom)
     location_longitude_in = MapCompose(location_longitude_otodom)
+
+class OlxRoomLoader(OlxOfferLoader):
+    type_of_room_in = MapCompose(remove_html_tags)
+    preferred_locator_in = MapCompose(remove_html_tags)
