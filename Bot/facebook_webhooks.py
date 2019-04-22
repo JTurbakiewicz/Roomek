@@ -5,7 +5,6 @@ This code contains functions for sending FB messages and other actions.
 It mostly contains modified version of Davidchua's pymessenger(https://github.com/davidchua/pymessenger).
 """
 
-# import public modules:
 from enum import Enum
 import requests
 from requests_toolbelt import MultipartEncoder
@@ -16,34 +15,37 @@ import six
 import os
 import random
 import logging
-from flask import Flask, request
-# import from own modules:
-from Dispatcher_app import local_tokens, database, witai
-if local_tokens: from Bot.tokens import tokens_local as tokens
-else: from Bot.tokens import tokens
-if database: from Databases import mysql_connection as db
+from Dispatcher_app import use_local_tokens, use_database, use_witai
+if use_local_tokens:
+    from Bot.tokens import tokens_local as tokens
+else:
+    from Bot.tokens import tokens
+if use_database:
+    from Databases import mysql_connection as db
 
-log = logging.getLogger(os.path.basename(__file__))
 
-#TODO add a 'tag' NON_PROMOTIONAL_SUBSCRIPTION
-#TODO add a 'messaging_type' TYPE_MESSAGE_TYPE
+# TODO add a 'tag' NON_PROMOTIONAL_SUBSCRIPTION
+# TODO add a 'messaging_type' TYPE_MESSAGE_TYPE
 # https://developers.facebook.com/docs/messenger-platform/send-messages/message-tags
 
-DEFAULT_API_VERSION = 3.2   #2.6
+DEFAULT_API_VERSION = 3.2   # 2.6
+
 
 def verify_fb_token(request, token_sent):
     """Take token sent by facebook and verify if it matches"""
     if token_sent == tokens.fb_verification:
         return request.args.get("hub.challenge")
-        log.info("FB token verification succesfull.")
+        logging.info("FB token verification succesfull.")
     else:
-        log.warning("Failed to verify FB token.")
+        logging.warning("Failed to verify FB token.")
         return 'Invalid verification token'
+
 
 class NotificationType(Enum):
     regular = "REGULAR"
     silent_push = "SILENT_PUSH"
     no_push = "NO_PUSH"
+
 
 class Bot:
     def __init__(self, access_token, **kwargs):
@@ -146,8 +148,10 @@ class Bot:
         Output:
             Response from API as <dict>
         """
-        if type(message) == list: message = random.choice(message)
-        #log.info("Bot's message ??? to {1}: {0}".format(message, str(userid)))
+        if type(message) == list:
+            message = random.choice(message)
+        if use_database: db.add_conversation(str(userid), 'User', message)
+        logging.info("BOT({0}): '{1}'".format(str(userid)[0:5], message))
         return self.fb_send_message(userid, {
             'text': message
         }, notification_type)
@@ -161,7 +165,7 @@ class Bot:
         Output:
             Response from API as <dict>
         """
-        log.debug("Trying to send generic message...")
+        logging.debug("Trying to send generic message...")
 
         elements = self.fb_define_elements(elements_titles, buttons_titles)
 
@@ -175,7 +179,8 @@ class Bot:
             }
         }, notification_type)
 
-    # def fb_send_list_message(self, userid, element_titles=['a', 'b'], button_titles=['a', 'b'], notification_type=NotificationType.regular):
+    # def fb_send_list_message(self, userid, element_titles=['a', 'b'],
+    #   button_titles=['a', 'b'], notification_type=NotificationType.regular):
     #     """Send generic messages to the specified recipient.
     #     https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
     #     Input:
@@ -184,7 +189,7 @@ class Bot:
     #     Output:
     #         Response from API as <dict>
     #     """
-    #     log.debug("Trying to send list message.")
+    #     logging.debug("Trying to send list message.")
     #
     #     elements = self.fb_define_elements(element_titles, button_titles)
     #     buttons = self.fb_define_buttons(button_titles)
@@ -201,10 +206,9 @@ class Bot:
     #         }
     #     }, notification_type)
 
-
     def fb_send_list_message(self, userid, element_titles=['a', 'b'], button_titles=['a', 'b'], notification_type=NotificationType.regular):
         """TEST"""
-        log.debug("Trying to send TEST list message.")
+        logging.debug("Trying to send TEST list message.")
 
         elements = self.fb_define_elements(element_titles, button_titles)
         buttons = self.fb_define_buttons(button_titles)
@@ -265,7 +269,7 @@ class Bot:
         Output:
             Response from API as <dict>
         """
-        log.debug("Trying to send button message.")
+        logging.debug("Trying to send button message.")
         buttons = self.fb_define_buttons(button_names)
 
         return self.fb_send_message(userid, {
@@ -285,12 +289,12 @@ class Bot:
             buttons.append({
                 "title": str(b),
                 "type": "web_url",
-                #"type":"postback",
+                # "type":"postback",
                 "url": "http://www.olx.com"
-                #"messenger_extensions": "true",
-                #"webview_height_ratio": "tall",
-                #"payload":"DEVELOPER_DEFINED_PAYLOAD"
-                #"fallback_url": "http://www.olx.com"
+                # "messenger_extensions": "true",
+                # "webview_height_ratio": "tall",
+                # "payload":"DEVELOPER_DEFINED_PAYLOAD"
+                # "fallback_url": "http://www.olx.com"
             })
         return buttons
 
@@ -349,7 +353,7 @@ class Bot:
         """
         return self.fb_send_attachment_url(userid, "image", image_url, notification_type)
 
-    def fb_send_quick_replies(self, userid, reply_message = "", replies = ['a','b','c'], notification_type=NotificationType.regular):
+    def fb_send_quick_replies(self, userid, reply_message = "", replies = ['a','b','c'], location=False, notification_type=NotificationType.regular):
         """Send quick replies to the specified recipient.
         https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies
         Input:
@@ -359,36 +363,29 @@ class Bot:
         Output:
             Response from API as <dict>
         """
-        #TODO add icon near quick replies: {...,"image_url":"http://example.com/img/red.png"}
+        # TODO add icon near quick replies: {...,"image_url":"http://example.com/img/red.png"}
         reply_options = []
+        if location:
+            reply_options.append({"content_type": "location", "title": "mapka"})
         for option in replies:
             content = {
-                "content_type" : "text",
-                "title" : str(option),
-                "payload" : "<POSTBACK_PAYLOAD>"
+                "content_type": "text",
+                "title": str(option),
+                "payload": "<POSTBACK_PAYLOAD>"
             }
             reply_options.append(content)
+
+        if use_database: db.add_conversation(str(userid), 'User', message)
+        logging.info("BOT({0}): '{1}' Replies{2}".format(str(userid)[0:5], str(reply_message), str(replies)))
 
         return self.fb_send_message(userid, {
             "text": reply_message,
             "quick_replies": reply_options
         }, notification_type)
 
-    def fb_send_quick_location(self, userid, reply_message = ""):
-        """Send quick replies with location button to the specified recipient.
-        Input:
-            userid: recipient id to send to
-        Output:
-            Response from API as <dict>
-        """
-        return self.fb_send_message(userid, {
-            "text": reply_message,
-            "quick_replies": [{"content_type":"location"}]
-        }, notification_type)
-
     def fb_fake_typing(self, userid, duration=0.6):
         """ Pretend the bot is typing for n seconds. """
-        #TODO shouldn't it be waiting a but before typing? sleep(duration/2)
+        # TODO shouldn't it be waiting a but before typing? sleep(duration/2)
         self.fb_send_action(userid, 'typing_on')
         sleep(duration)
         self.fb_send_action(userid, 'typing_off')
@@ -541,6 +538,7 @@ class Bot:
     #       ]
     #     }
 
+
 def validate_hub_signature(app_secret, request_payload, hub_signature_header):
     """
         @inputs:
@@ -565,6 +563,7 @@ def validate_hub_signature(app_secret, request_payload, hub_signature_header):
         if hub_signature == generated_hash:
             return True
     return False
+
 
 def generate_appsecret_proof(access_token, app_secret):
     """

@@ -1,25 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """ Functions enabling the Bot to understand messages and intents. """
-
-# import public modules:
-import os
-import random
+from geopy.geocoders import Nominatim
+from geopy.point import Point
+# from Bot.bot_responses_PL import *
 import logging
-from flask import Flask, request
-# import from own modules:
-from Dispatcher_app import local_tokens, database, witai
-if local_tokens: from Bot.tokens import tokens_local as tokens
-else: from Bot.tokens import tokens
-if database: from Databases import mysql_connection as db
-from Bot.bot_responses import *
-from Bot.facebook_webhooks import Bot
 
-log = logging.getLogger(os.path.basename(__file__))
-
-#Set of intents and patterns to recognize them:
+# Set of intents and patterns to recognize them:
 pattern_dictionary = {
-        'greetings': [r'\b(hi|h[ea]+l+?o|h[ea]+[yj]+|yo+|welcome|(good)?\s?(morning?|evenin?)|hola|howdy|shalom|salam|czesc|cześć|hejka|witaj|siemk?a|marhaba|salut)\b', r'(\🖐|\🖖|\👋|\🤙)'],
+        'greeting': [r'\b(hi|h[ea]+l+?o|h[ea]+[yj]+|yo+|welcome|(good)?\s?(morning?|evenin?)|hola|howdy|shalom|salam|czesc|cześć|hejka|witaj|siemk?a|marhaba|salut)\b', r'(\🖐|\🖖|\👋|\🤙)'],
         'yes': [r'\b(yes|si|ok|kk|ok[ae]y|confirm)\b',r'\b(tak|oczywiście|dobra|dobrze)\b',r'(\✔️|\☑️|\👍|\👌)'],
         'no': [r'\b(n+o+|decline|negative|n+o+pe)\b', r'\b(nie+)\b', r'\👎'],
         'maybe' : r'\b(don\'?t\sknow?|maybe|perhaps?|not\ssure|może|moze|y+)\b',
@@ -32,6 +21,7 @@ pattern_dictionary = {
         'test_quick_replies': r'quick replies',
         'bye': r'(bye|exit|quit|end)'
     }
+
 
 def regex_pattern_matcher(str, pat_dic=pattern_dictionary):
     """Regular Expression pattern finder that searches for intents from patternDictionary."""
@@ -51,26 +41,9 @@ def regex_pattern_matcher(str, pat_dic=pattern_dictionary):
 
     return intent
 
-def best_entity(message, minimum=0.90):
-    """ Return best matching entity from NLP or None. """
-    try:
-        entities = list(message.get('nlp').get('entities').keys())
-        #entities.remove("sentiment")
-        confidence = []
-        for c in list(message.get('nlp').get('entities').values()):
-            confidence.append(c[0]['confidence'])
-        if max(confidence)>minimum:
-            # create dictionary entity:confidence:
-            iterable = zip(entities, confidence)
-            pairs = {key: value for (key, value) in iterable}
-            best_match = max(pairs, key=pairs.get)
-            return [best_match, str(max(confidence))]
-        else:
-            return None
-    except:
-        return None
 
 def recognize_sticker(sticker_id):
+    sticker_id = str(sticker_id)
     if sticker_id.startswith('369239263222822'):  sticker_name = 'thumb'
     elif sticker_id.startswith('369239343222814'):  sticker_name = 'thumb+'
     elif sticker_id.startswith('369239383222810'): sticker_name = 'thumb++'
@@ -92,3 +65,26 @@ def recognize_sticker(sticker_id):
     elif sticker_id.startswith('30261'):  sticker_name = 'sloth'
     else:  sticker_name = 'unknown'
     return sticker_name
+
+
+# TODO get subregions (dzielnice żeby zasugerować)
+def recognize_location(message="", location="", city="", lat=0, long=0):
+    try:
+        geolocator = Nominatim(user_agent="Roomek")
+        if lat != 0 or long != 0:
+            loc = geolocator.reverse(Point(lat, long), language="pl")
+        elif city == "":
+            loc = geolocator.geocode(location, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'], addressdetails = True, limit=3)
+        else:
+            loc1 = geolocator.geocode(city, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'], addressdetails=True)
+            if 'boundingbox' in loc1.raw:
+                box = [Point(loc1.raw['boundingbox'][0], loc1.raw['boundingbox'][2]), Point(loc1.raw['boundingbox'][1], loc1.raw['boundingbox'][3])]
+                loc = geolocator.geocode(location, viewbox=box, bounded=True, country_codes=['pl'], addressdetails=True, limit=3)
+            else:
+                loc = geolocator.geocode(message, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'], addressdetails=True, limit=3)
+        return loc
+    except:
+        logging.warning("Error while recognizing location. Probably GeoCoder Timed Out or URLerror.")
+
+# l=recognize_location(city="Sopot", location="centrum")
+# print(l.raw)
