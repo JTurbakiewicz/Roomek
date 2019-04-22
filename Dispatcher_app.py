@@ -16,7 +16,7 @@ logging_level = logging.INFO   # levels in order: DEBUG, INFO, WARNING, EXCEPTIO
 from flask import Flask, request
 # import from own modules:
 if use_database: from Databases import mysql_connection as db
-from Bot.bot_logic import *
+from Bot.logic import *
 from Bot.facebook_webhooks import verify_fb_token
 
 # disable Flask server logs unless errors and set our logging parameters:

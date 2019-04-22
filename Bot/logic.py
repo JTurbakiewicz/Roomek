@@ -6,10 +6,10 @@ from Dispatcher_app import use_local_tokens, use_database, use_witai, fake_typin
 if use_local_tokens: from Bot.tokens import tokens_local as tokens
 else: from Bot.tokens import tokens
 if use_database: from Databases import mysql_connection as db
-from Bot.bot_cognition import *
-from Bot.bot_responses_PL import *
-from Bot.bot_respond import *
-from Bot.bot_message_parser import Message
+from Bot.cognition import *
+from Bot.responses_PL import *
+from Bot.respond import *
+from Bot.message_parser import Message
 from Bot.facebook_webhooks import Bot
 
 # initiate the bot object:
@@ -50,11 +50,11 @@ def handle_message(user_message):
 def handle_text(message, bot):
     """ React when the user sends any text. """
     if message.NLP:
-        if message.NLP_intent is not None or message.NLP_entities is not None:
+        if hasattr(message, "NLP_intent") or message.NLP_entities is not None:
             concat = ""
             for m in range(len(message.NLP_entities)):
                 concat += str(message.NLP_entities[m][0])+" = "+str(message.NLP_entities[m][1])+' ('+str(float(message.NLP_entities[m][2])*100)[0:5]+'%);'
-            logging.info("NLP recognized: '{0}' as: intent={1}, entities={2}".format(message.text, message.NLP_intent, concat))
+            logging.info("NLP recognized: '{0}' as: intent=[{1}], entities=[{2}]".format(message.text, message.NLP_intent, concat))
         respond(message, bot)
     else:
         default_message(message, bot)

@@ -5,7 +5,7 @@
 import os
 import random
 import logging
-from Bot.bot_cognition import *
+from Bot.cognition import *
 from Dispatcher_app import fake_typing
 
 # TODO do the decorator and try to input (message, bot):
@@ -41,47 +41,63 @@ def greeting(message, bot):
         "{0}! Nazywam się Roomek i zajmuję się znajdywaniem najlepszych nieruchomości.".format(message.text.split(' ', 1)[0].capitalize())
         ])
     bot.fb_send_text_message(str(message.senderID), response)
-    bot.fb_send_quick_replies(message.senderID, "Jak mogę Ci dzisiaj pomóc?", ['Szukam pokoju', 'Sprzedaję mieszkanie'])
+    bot.fb_send_quick_replies(message.senderID, "Jak mogę Ci dzisiaj pomóc?", ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', 'Sprzedaję mieszkanie'])
 
 
 @response_decorator
 def ask_for_housing_type(message, bot):
-    bot.fb_send_quick_replies(message.senderID, "Jakiego typu lokal Cię interesuje?", ['pokój', 'mieszkanie', 'kawalerka', 'dom wolnostojący'])
+    bot.fb_send_quick_replies(message.senderID, "Jakiego typu lokal Cię interesuje?", ['🚪 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący'])
 
 
 @response_decorator
 def ask_for_city(message, bot):
-    bot.fb_send_quick_replies(message.senderID, "W jakim mieście ma być lokal?", ['Warszawa', 'Poznań', 'Kraków', 'Gdańsk'])
+    bot.fb_send_quick_replies(message.senderID, "Które miasto Cię interesuje?", ['Warszawa', 'Kraków', 'Łódź', 'Wrocław', 'Poznań', 'Gdańsk', 'Szczecin', 'Bydgoszcz', 'Białystok'])
 
 
 @response_decorator
 def ask_for_features(message, bot):
-    bot.fb_send_quick_replies(message.senderID, "Jakie masz preferencje?", ['ze zwierzętami', 'blisko do...', 'wyremontowane', 'umeblowane'])
+    bot.fb_send_quick_replies(message.senderID, "Czy masz jakieś szczególne preferencje?", ['Nie, pokaż oferty', 'od zaraz', 'przyjazne dla 🐶🐱', 'blisko do...', 'garaż', '🔨 wyremontowane', 'umeblowane', 'ma 🛀', 'dla 🚬', 'dla 🚭'])
 
 
 @response_decorator
-def ask_if_want_more(message, bot):
-    bot.fb_send_quick_replies(message.senderID, "Czy chciałbyś dodać jeszcze jakieś miejsce?", ['Tak', 'Nie'])
+def ask_for_more_features(message, bot):
+    question = random.choice(["Coś oprócz tego?", "Ok, jeszcze coś?", "Zanotowałem, chciałbyś coś dodać?"])
+    bot.fb_send_quick_replies(message.senderID, question, ['Nie, wystarczy', 'od zaraz', 'przyjazne dla 🐶🐱', 'blisko do...', 'garaż', '🔨 wyremontowane', 'umeblowane', 'ma 🛀', 'dla 🚬', 'dla 🚭'])
+    # TODO powinno wiedzieć jakie już padły
+
+
+@response_decorator
+def ask_for_location(message, bot):
+    bot.fb_send_quick_replies(message.senderID, reply_message="Gdzie chciałbyś mieszkać?", replies=['🎯 blisko centrum', 'Mokotów', 'Wola'], location=True)
+    # TODO powinno sugerować dzielnice na bazie miasta, a nie default (nominatim get lower level nodes like suburb)
+
+
+@response_decorator
+def ask_more_locations(message, bot):
+    question = random.choice(["Czy chciałbyś dodać jeszcze jakieś miejsce?","Zanotowałem, coś oprócz tego?"])
+    bot.fb_send_quick_replies(message.senderID, reply_message=question, replies=['Nie', '🎯 blisko centrum', 'Mokotów', 'Wola'], location=True)
+    # TODO tez powinno sugerować dzielnice i wiedzieć co już padło
+
+@response_decorator
+def ask_for_price_limit(message, bot):
+    bot.fb_send_quick_replies(message.senderID, "Ile jesteś w stanie płacić?", ['<800zł', '<1000zł', '<1500zł', '<2000zł','💸 dowolna kwota'])
 
 
 @response_decorator
 def show_input_data(message, bot):
     message.user.shown_input = True
-    # TODO ask if correct...
+    response1 = "Zanotowałem, że interesuje Cię {0} w {1} w okolicy {2}".format(message.housing_type, message.user.city, message.user.location)
+    bot.fb_send_text_message(str(message.senderID), response1)
+    response2 = "które ma {0} i kosztuje do {1}zł".format(str(message.features), message.user.price_limit)
+    bot.fb_send_text_message(str(message.senderID), response2)
+    # TODO add more params...
+    bot.fb_send_quick_replies(message.senderID, "Czy wszystko się zgadza?",
+                              ['Tak, pokaż oferty 🔮', 'Tak, chcę coś dodać', 'Nie'])
 
 
 @response_decorator
 def ask_what_wrong(message, bot):
-    bot.fb_send_quick_replies(message.senderID, "Coś pomyliłem?", ['zła okolica', 'złe parametry', 'zła cena'])
-
-
-@response_decorator
-def ask_for_location(message, bot):
-    bot.fb_send_quick_replies(message.senderID, reply_message="Gdzie chciałbyś mieszkać?", replies=['blisko centrum', 'Mokotów', 'Wola'], location=True)
-
-@response_decorator
-def ask_for_price_limit(message, bot):
-    bot.fb_send_quick_replies(message.senderID, "Ile jesteś w stanie płacić?", ['<800zł', '<1000zł', '<1500zł', '<2000zł','dowolna kwota'])
+    bot.fb_send_quick_replies(message.senderID, "Coś pomyliłem?", ['nie, jest ok', 'zła okolica', 'złe parametry', 'zła cena'])
 
 
 @response_decorator

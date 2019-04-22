@@ -4,6 +4,7 @@
 from geopy.geocoders import Nominatim
 from geopy.point import Point
 # from Bot.bot_responses_PL import *
+import logging
 
 # Set of intents and patterns to recognize them:
 pattern_dictionary = {
@@ -66,11 +67,24 @@ def recognize_sticker(sticker_id):
     return sticker_name
 
 
-def recognize_location(location):
-    geolocator = Nominatim(user_agent="Roomek")
-    loc = geolocator.geocode(location, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'], addressdetails = True)
-    return loc
-    # (loc.raw)
-    # TODO pass attributes like street, boundingbox etc.
+# TODO get subregions (dzielnice żeby zasugerować)
+def recognize_location(message="", location="", city="", lat=0, long=0):
+    try:
+        geolocator = Nominatim(user_agent="Roomek")
+        if lat != 0 or long != 0:
+            loc = geolocator.reverse(Point(lat, long), language="pl")
+        elif city == "":
+            loc = geolocator.geocode(location, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'], addressdetails = True, limit=3)
+        else:
+            loc1 = geolocator.geocode(city, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'], addressdetails=True)
+            if 'boundingbox' in loc1.raw:
+                box = [Point(loc1.raw['boundingbox'][0], loc1.raw['boundingbox'][2]), Point(loc1.raw['boundingbox'][1], loc1.raw['boundingbox'][3])]
+                loc = geolocator.geocode(location, viewbox=box, bounded=True, country_codes=['pl'], addressdetails=True, limit=3)
+            else:
+                loc = geolocator.geocode(message, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'], addressdetails=True, limit=3)
+        return loc
+    except:
+        logging.warning("Error while recognizing location. Probably GeoCoder Timed Out or URLerror.")
 
-# recognize_location("twarda 18")
+# l=recognize_location(city="Sopot", location="centrum")
+# print(l.raw)

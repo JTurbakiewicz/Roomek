@@ -6,8 +6,8 @@ import os
 import logging
 from datetime import date
 from Dispatcher_app import use_local_tokens, use_database
-from Bot.bot_cognition import recognize_sticker
-from Bot.bot_user import *
+from Bot.cognition import recognize_sticker
+from Bot.user import *
 if use_local_tokens: from Bot.tokens import tokens_local as tokens
 else: from Bot.tokens import tokens
 # TODO if use_database: from Databases.... import update_user
@@ -27,7 +27,7 @@ class Message:
     """
 
     def __init__(self, json_data):
-        MIN_CONFIDENCE = 0.90
+        minimum_confidence = 0.85
         self.__dict__ = json_data  # previously json.loads
         self.id = self.entry[0]['id']
         # TODO już teraz wiadomo czy od usera czy od bota!
@@ -74,7 +74,7 @@ class Message:
                             nlp = self.messaging['message']['nlp']['entities']
                             entities = list(nlp.keys())
                             if 'intent' in entities:
-                                if nlp['intent'][0]['confidence'] > MIN_CONFIDENCE:
+                                if nlp['intent'][0]['confidence'] > minimum_confidence:
                                     self.NLP_intent = nlp['intent'][0]['value']
                                 else:
                                     self.NLP_intent = None
@@ -82,13 +82,16 @@ class Message:
                             else:
                                 self.NLP_intent = None
                             for e in entities:
-                                if float(nlp[e][0]['confidence']) > 0.5: # MIN_CONFIDENCE:
-                                    self.NLP_entities.append([
-                                        nlp[e][0]['_entity'],
-                                        nlp[e][0]['value'],
-                                        nlp[e][0]['confidence'],
-                                        nlp[e][0]['_body']
-                                    ])
+                                if float(nlp[e][0]['confidence']) > 0.8:   # minimum_confidence:
+                                    try:
+                                        self.NLP_entities.append([
+                                            nlp[e][0]['_entity'],
+                                            nlp[e][0]['value'],
+                                            nlp[e][0]['confidence'],
+                                            nlp[e][0]['_body']
+                                        ])
+                                    except:
+                                        logging.warning(self.messaging)
                         else:
                             self.NLP = False
             else:
