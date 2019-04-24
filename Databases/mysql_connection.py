@@ -242,6 +242,20 @@ def update_field(table_name, field_name, field_value, where_field, where_value, 
         cursor.execute(query, (field_value,where_value))
         cnx.commit()
 
+def create_record(table_name, field_name, field_value, offer_url):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        query = """
+           INSERT INTO {0}
+           (offer_url, {1})
+           VALUES (%s, %s)
+           ON DUPLICATE KEY UPDATE {1}=%s
+        """.format(table_name, field_name)
+        # if if_null_required:
+        #     query = query + 'AND ' + field_name + ' IS NULL'
+        print(query)
+        cursor.execute(query, (offer_url,field_value,field_value))
+        cnx.commit()
+
 def update_user(facebook_id, field_to_update, field_value, if_null_required = False):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """
@@ -472,6 +486,73 @@ db_tables['conversations'] = (
     "  PRIMARY KEY (`facebook_id`,`conversation_no`), KEY `conversation_no` (`conversation_no`),"
     "  CONSTRAINT `conversation_ibfk_1` FOREIGN KEY (`facebook_id`) "
     "     REFERENCES `users` (`facebook_id`) ON DELETE CASCADE"
+    ") ENGINE=InnoDB")
+
+db_tables['ratings'] = (
+    "CREATE TABLE `ratings` ("
+    "  `offer_url` varchar(700) NOT NULL,"
+    "  `city` float(4,3),"
+    "  `offer_type` float(4,3),"
+    "  `offer_name` float(4,3),"
+    "  `offer_thumbnail_url` float(4,3),"    
+    "  `price` float(4,3),"
+    "  `street` float(4,3),"
+    "  `district` float(4,3),"
+    "  `date_of_the_offer` float(4,3),"
+    "  `offer_id` float(4,3),"
+    "  `offer_text` float(4,3),"
+    "  `offer_from` float(4,3),"
+    "  `apartment_level` float(4,3),"
+    "  `furniture` float(4,3),"
+    "  `type_of_building` float(4,3),"
+    "  `area` float(4,3),"
+    "  `amount_of_rooms` float(4,3),"
+    "  `additional_rent` float(4,3),"
+    "  `price_per_m2` float(4,3),"
+    "  `type_of_market` float(4,3),"
+    "  `security_deposit` float(4,3),"
+    "  `building_material` float(4,3),"
+    "  `windows` float(4,3),"
+    "  `heating` float(4,3),"
+    "  `building_year` float(4,3),"
+    "  `fit_out` float(4,3),"
+    "  `ready_from` float(4,3),"
+    "  `type_of_ownership` float(4,3),"
+    "  `rental_for_students` float(4,3),"
+    "  `location_latitude` float(4,3),"
+    "  `location_longitude` float(4,3),"
+    "  `type_of_room` float(4,3),"
+    "  `preferred_locator` float(4,3),"
+    "  `internet` BOOLEAN,"
+    "  `cable_tv` BOOLEAN,"
+    "  `closed_terrain` BOOLEAN,"
+    "  `monitoring_or_security` BOOLEAN,"
+    "  `entry_phone` BOOLEAN,"
+    "  `antibulglar_doors_windows` BOOLEAN,"
+    "  `alarm_system` BOOLEAN,"
+    "  `antibulglar_blinds` BOOLEAN,"
+    "  `dishwasher` BOOLEAN,"
+    "  `cooker` BOOLEAN,"
+    "  `fridge` BOOLEAN,"
+    "  `oven` BOOLEAN,"
+    "  `washing_machine` BOOLEAN,"
+    "  `tv` BOOLEAN,"
+    "  `elevator` BOOLEAN,"
+    "  `phone` BOOLEAN,"
+    "  `AC` BOOLEAN,"
+    "  `garden` BOOLEAN,"
+    "  `utility_room` BOOLEAN,"
+    "  `parking_space` BOOLEAN,"
+    "  `terrace` BOOLEAN,"
+    "  `balcony` BOOLEAN,"
+    "  `non_smokers_only` BOOLEAN,"
+    "  `separate_kitchen` BOOLEAN,"
+    "  `basement` BOOLEAN,"
+    "  `virtual_walk` BOOLEAN,"
+    "  `two_level_apartment` BOOLEAN,"
+    "  `creation_time` datetime default current_timestamp,"
+    "  `modification_time` datetime on update current_timestamp,"
+    "  PRIMARY KEY (`offer_url`)"
     ") ENGINE=InnoDB")
 
 """SETUP"""
