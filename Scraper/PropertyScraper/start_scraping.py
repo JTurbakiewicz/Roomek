@@ -25,8 +25,8 @@ runner = CrawlerRunner(s)
 
 @defer.inlineCallbacks
 def crawl():
-    yield runner.crawl(olx_room_spider.OlxRoomSpider, urls_to_scrape=urls_rooms_OLX)
-    #yield runner.crawl(olx_spider_main.OlxSpiderMain, urls_to_scrape = urls_flats_OLX)
+    #yield runner.crawl(olx_room_spider.OlxRoomSpider, urls_to_scrape=urls_rooms_OLX)
+    yield runner.crawl(olx_spider_main.OlxSpiderMain, urls_to_scrape = urls_flats_OLX)
     reactor.stop()
 
 crawl()

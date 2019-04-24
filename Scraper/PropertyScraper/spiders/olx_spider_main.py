@@ -12,7 +12,7 @@ already_scraped_urls = []
 for url in already_scraped_urls_dicts:
     already_scraped_urls.append(url['offer_url'])
 
-OLX_extractor_subpage = LinkExtractor(allow=('olx.pl/oferta/'), deny=(';promoted'), unique=True)
+OLX_extractor_subpage = LinkExtractor(allow=('olx.pl/oferta/DOUSUNIECIA'), deny=(';promoted'), unique=True)
 OLX_extractor_otodom = LinkExtractor(allow=('otodom'), deny=(';promoted'), unique=True)
 OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=23|page=33'), unique=True,
                                     restrict_xpaths=(['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
@@ -143,9 +143,9 @@ class OlxSpiderMain(scrapy.Spider):
         OfferItem_loader.add_value('city', response.meta['city'])
         OfferItem_loader.add_value('offer_type', response.meta['offer_type'])
         OfferItem_loader.add_value('offer_url', response)
-        OfferItem_loader.add_xpath('offer_name', '//*[@id="root"]/div/article/header/div[1]/h1/text()')
+        OfferItem_loader.add_xpath('offer_name', '//*[@id="root"]/div/article/header/div[1]/div/div/h1/text()')
         OfferItem_loader.add_xpath('offer_thumbnail_url', '//*[@id="root"]/div/article/section/div[1]/div/div[1]/div/div[2]/div/div[2]/div/picture/img')
-        OfferItem_loader.add_xpath('price', '//*[@id="root"]/div/article/header/div[3]/div[1]/text()')
+        OfferItem_loader.add_xpath('price', '//*[@id="root"]/div/article/header/div[2]/div[1]/div[2]/text()')
         OfferItem_loader.add_value('date_of_the_offer', response.body)
         OfferItem_loader.add_value('location_latitude', response.body)
         OfferItem_loader.add_value('location_longitude', response.body)
@@ -155,7 +155,7 @@ class OlxSpiderMain(scrapy.Spider):
         OfferItem_loader.add_xpath('area', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[2]/span/strong/text()')
         OfferItem_loader.add_xpath('amount_of_rooms', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[3]/span/strong/text()')
         OfferItem_loader.add_xpath('apartment_level', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[4]/span/strong/text()')
-        OfferItem_loader.add_xpath('district', '//*[@id="root"]/div/article/header/div[1]/div/a/text()')
+        OfferItem_loader.add_xpath('district', '//*[@id="root"]/div/article/header/div[1]/div/div/div/a/text()')
 
         ###Otodometable
 
