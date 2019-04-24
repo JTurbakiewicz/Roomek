@@ -1,3 +1,5 @@
+#TEST BRANCZA
+
 import Witai.witai_connection as wit
 import Databases.mysql_connection as sql
 import re
@@ -231,8 +233,13 @@ def batch_parse(min_accuracy):
             parser.train(80)
             logging.info('Verifing parser for: ' + str(sql_field) + '; keyword: ' + relevant_word)
             res = parser.verify(20)
-            entity_correct = res['correct_entity'] / (res['correct_entity']+res['wrong_entity'])
-            value_correct = res['correct_value'] / (res['correct_value'] + res['wrong_value'])
+            try:
+                entity_correct = res['correct_entity'] / (res['correct_entity']+res['wrong_entity'])
+                value_correct = res['correct_value'] / (res['correct_value'] + res['wrong_value'])
+            except ZeroDivisionError:
+                logging.info('Sample size is 0, check is stopped')
+                entity_correct = 0
+                value_correct = 0
             logging.info('Entity check is correct in: ' + str(entity_correct))
             logging.info('Value check is correct in: ' + str(value_correct))
             if entity_correct > min_accuracy and value_correct > min_accuracy:
