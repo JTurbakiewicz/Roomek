@@ -97,14 +97,13 @@ def datetime_it_Otodom(input):
 
 def ready_from_Otodom(input):
     """Returns in a datetime prepared format."""
-    if str(input) != '':
-        print('DODAĆ READY FROM OTODOM')
+    year, month, day = input.split('-')
+    yield datetime.datetime(int(year), int(month), int(day))
+
 
 def get_inside_tags(input):
     string_wo_br = re.sub(r'<br>', ' ', input)
     pattern = re.compile(r'(>.*<)')
-    inside_tags = pattern.findall(string_wo_br)
-    # yield ''.join(inside_tags)
     yield re.sub(r'<.*?>', '', string_wo_br)
 
 def district(input):
@@ -158,6 +157,7 @@ def location_longitude_otodom(input):
 class OlxOfferLoader(ItemLoader):
     city_in = MapCompose()
     offer_type = MapCompose()
+    offer_purpose_in = MapCompose()
     offer_url_in = MapCompose(response_to_string)
     offer_thumbnail_url_in = MapCompose(find_image_url)
     offer_name_in = MapCompose(remove_html_tags, remove_unnecessary_spaces)

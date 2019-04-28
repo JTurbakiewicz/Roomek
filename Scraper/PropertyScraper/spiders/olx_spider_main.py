@@ -12,7 +12,7 @@ already_scraped_urls = []
 for url in already_scraped_urls_dicts:
     already_scraped_urls.append(url['offer_url'])
 
-OLX_extractor_subpage = LinkExtractor(allow=('olx.pl/oferta/DOUSUNIECIA'), deny=(';promoted'), unique=True)
+OLX_extractor_subpage = LinkExtractor(allow=('olx.pl/oferta/'), deny=(';promoted'), unique=True)
 OLX_extractor_otodom = LinkExtractor(allow=('otodom'), deny=(';promoted'), unique=True)
 OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=23|page=33'), unique=True,
                                     restrict_xpaths=(['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
@@ -40,7 +40,8 @@ class OlxSpiderMain(scrapy.Spider):
     def start_requests(self):
         for url in self.urls:
             request = scrapy.Request(url=url, callback=self.parse_initial_page)
-            request.meta['offer_type'] = url.split('/')[-3]
+            request.meta['offer_type'] = url.split('/')[-4]
+            request.meta['offer_purpose'] = url.split('/')[-3]
             request.meta['city'] = url.split('/')[-2]
             yield request
 
@@ -52,6 +53,7 @@ class OlxSpiderMain(scrapy.Spider):
                 request = scrapy.Request(link.url, callback=self.parse_main_pages)
                 request.meta['offer_type'] = response.meta['offer_type']
                 request.meta['city'] = response.meta['city']
+                request.meta['offer_purpose'] = response.meta['offer_purpose']
                 yield request
 
         olx_offer_links = OLX_extractor_subpage.extract_links(response)
@@ -63,6 +65,7 @@ class OlxSpiderMain(scrapy.Spider):
                     request = scrapy.Request(link.url, callback=self.parse_olx_offer)
                     request.meta['offer_type'] = response.meta['offer_type']
                     request.meta['city'] = response.meta['city']
+                    request.meta['offer_purpose'] = response.meta['offer_purpose']
                     yield request
 
         otodom_offer_links = OLX_extractor_otodom.extract_links(response)
@@ -73,6 +76,7 @@ class OlxSpiderMain(scrapy.Spider):
                     request = scrapy.Request(link.url, callback=self.parse_otodom_offer)
                     request.meta['offer_type'] = response.meta['offer_type']
                     request.meta['city'] = response.meta['city']
+                    request.meta['offer_purpose'] = response.meta['offer_purpose']
                     yield request
 
     def parse_main_pages(self, response):
@@ -84,6 +88,7 @@ class OlxSpiderMain(scrapy.Spider):
                     request = scrapy.Request(link.url, callback=self.parse_olx_offer)
                     request.meta['offer_type'] = response.meta['offer_type']
                     request.meta['city'] = response.meta['city']
+                    request.meta['offer_purpose'] = response.meta['offer_purpose']
                     yield request
 
         otodom_offer_links = OLX_extractor_otodom.extract_links(response)
@@ -94,6 +99,7 @@ class OlxSpiderMain(scrapy.Spider):
                     request = scrapy.Request(link.url, callback=self.parse_otodom_offer)
                     request.meta['offer_type'] = response.meta['offer_type']
                     request.meta['city'] = response.meta['city']
+                    request.meta['offer_purpose'] = response.meta['offer_purpose']
                     yield request
 
     def parse_olx_offer(self, response):
@@ -101,6 +107,7 @@ class OlxSpiderMain(scrapy.Spider):
         OfferFeaturesItem_loader = OtodomOfferLoader(item=OfferFeaturesItem(), response=response)
         OfferFeaturesItem_loader.add_value('offer_url', response)
         OfferItem_loader.add_value('city', response.meta['city'])
+        OfferItem_loader.add_value('offer_purpose', response.meta['offer_purpose'])
         OfferItem_loader.add_value('offer_type', response.meta['offer_type'])
         OfferItem_loader.add_value('offer_url', response)
         OfferItem_loader.add_xpath('offer_thumbnail_url', '//*[@id="photo-gallery-opener"]/img')
@@ -142,6 +149,7 @@ class OlxSpiderMain(scrapy.Spider):
         OfferFeaturesItem_loader.add_value('offer_url', response)
         OfferItem_loader.add_value('city', response.meta['city'])
         OfferItem_loader.add_value('offer_type', response.meta['offer_type'])
+        OfferItem_loader.add_value('offer_purpose', response.meta['offer_purpose'])
         OfferItem_loader.add_value('offer_url', response)
         OfferItem_loader.add_xpath('offer_name', '//*[@id="root"]/div/article/header/div[1]/div/div/h1/text()')
         OfferItem_loader.add_xpath('offer_thumbnail_url', '//*[@id="root"]/div/article/section/div[1]/div/div[1]/div/div[2]/div/div[2]/div/picture/img')

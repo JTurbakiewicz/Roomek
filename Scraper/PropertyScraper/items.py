@@ -10,6 +10,7 @@ from scrapy.item import BaseItem
 class OfferItem(dict, BaseItem):
     city = scrapy.Field()
     offer_type = scrapy.Field()
+    offer_purpose = scrapy.Field()
     offer_url = scrapy.Field()
     offer_thumbnail_url = scrapy.Field()
     offer_name = scrapy.Field()

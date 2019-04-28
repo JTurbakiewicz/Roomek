@@ -64,6 +64,7 @@ class OlxRoomSpider(scrapy.Spider):
         OfferRI_loader.add_value('city', response.meta['city'])
         OfferRI_loader.add_value('offer_type', response.meta['offer_type'])
         OfferRI_loader.add_value('offer_url', response)
+        OfferRI_loader.add_value('offer_purpose', 'wynajem')
         OfferRI_loader.add_xpath('offer_thumbnail_url', '//*[@id="photo-gallery-opener"]/img')
         OfferRI_loader.add_xpath('offer_name', '//*[@id="offerdescription"]/div[2]/h1/text()')
         OfferRI_loader.add_xpath('price', '//*[@id="offeractions"]/div[1]/strong/text()')

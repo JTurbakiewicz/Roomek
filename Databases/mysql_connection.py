@@ -382,6 +382,7 @@ db_tables['offers'] = (
     "  `offer_url` varchar(700) NOT NULL,"
     "  `city` varchar(50) NOT NULL,"
     "  `offer_type` varchar(50) NOT NULL,"
+    "  `offer_purpose` varchar(50)," 
     "  `offer_name` varchar(200),"
     "  `offer_thumbnail_url` varchar(400),"    
     "  `price` int(1),"
