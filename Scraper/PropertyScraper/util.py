@@ -1,6 +1,7 @@
 
 offer_features = {
     'internet': 'internet',
+    'dostępne od': 'ready_from',
     'telewizja kablowa': 'cable_tv',
     'teren zamknięty': 'closed_terrain',
     'monitoring / ochrona': 'monitoring_or_security',

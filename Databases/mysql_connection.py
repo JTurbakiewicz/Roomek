@@ -4,6 +4,7 @@ from mysql.connector import errorcode
 import logging
 import os
 import tokens
+import sys
 log = logging.getLogger(os.path.basename(__file__))
 
 
@@ -42,6 +43,9 @@ def set_up_db(db_config):
         log.info("Database created")
     except mysql.connector.Error as err:
         log.info("Failed creating database: {}".format(err))
+    except UnboundLocalError:
+        log.info("No connection estabilished")
+        sys.exit()
     try:
         cursor.execute("USE {}".format(DB_NAME))
         log.info("Database chosen")
@@ -242,20 +246,6 @@ def update_field(table_name, field_name, field_value, where_field, where_value, 
         cursor.execute(query, (field_value,where_value))
         cnx.commit()
 
-def create_record(table_name, field_name, field_value, offer_url):
-    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-        query = """
-           INSERT INTO {0}
-           (offer_url, {1})
-           VALUES (%s, %s)
-           ON DUPLICATE KEY UPDATE {1}=%s
-        """.format(table_name, field_name)
-        # if if_null_required:
-        #     query = query + 'AND ' + field_name + ' IS NULL'
-        print(query)
-        cursor.execute(query, (offer_url,field_value,field_value))
-        cnx.commit()
-
 def update_user(facebook_id, field_to_update, field_value, if_null_required = False):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """
@@ -281,7 +271,6 @@ def create_user(facebook_id, first_name = None, last_name = None, gender = None,
                 price_limit = None, location_latidude = None, location_longitude = None, city = None,
                 country = None, housing_type = None, features = None, confirmed_data = None, add_more = None,
                 shown_input = None):
-    #TODO -> dodać tworzenie z parametrami
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         fields_to_add = 'facebook_id'
         user_data = [facebook_id]
@@ -371,6 +360,42 @@ def create_conversation(facebook_id, who_said_it, text = None, sticker_id = None
         cursor.execute(query, conversation_data)
         cnx.commit()
 
+
+def create_record(table_name, field_name, field_value, offer_url):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        query = """
+            INSERT INTO {0}
+            (offer_url, {1})
+            VALUES (%s, %s)
+            ON DUPLICATE KEY UPDATE {1}=%s
+         """.format(table_name, field_name)
+        # if if_null_required:
+        #     query = query + 'AND ' + field_name + ' IS NULL'
+        cursor.execute(query, (offer_url, field_value, field_value))
+        cnx.commit()
+
+def create_rating(rating):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        fields = list(rating.keys())
+        values = list(rating.values())
+
+        fields_to_insert = ','.join(fields)
+        placeholders = ','.join(['%s']*len(values))
+
+        duplicate_condition = ''
+        for field in fields:
+            duplicate_condition = duplicate_condition + field + '=%s,'
+        duplicate_condition = duplicate_condition[:-1]
+
+        query = f"""
+                    INSERT INTO ratings
+                    ({fields_to_insert})
+                    VALUES ({placeholders})
+                    ON DUPLICATE KEY UPDATE {duplicate_condition}
+                 """
+        cursor.execute(query, values*2)
+        cnx.commit()
+
 """DATA"""
 
 DB_NAME = 'offers'
@@ -380,6 +405,7 @@ db_tables['offers'] = (
     "  `offer_url` varchar(700) NOT NULL,"
     "  `city` varchar(50) NOT NULL,"
     "  `offer_type` varchar(50) NOT NULL,"
+    "  `offer_purpose` varchar(50)," 
     "  `offer_name` varchar(200),"
     "  `offer_thumbnail_url` varchar(400),"    
     "  `price` int(1),"
@@ -491,8 +517,7 @@ db_tables['conversations'] = (
 db_tables['ratings'] = (
     "CREATE TABLE `ratings` ("
     "  `offer_url` varchar(700) NOT NULL,"
-    "  `city` float(4,3),"
-    "  `offer_type` float(4,3),"
+    "  `static_rating` float(6,2),"
     "  `offer_name` float(4,3),"
     "  `offer_thumbnail_url` float(4,3),"    
     "  `price` float(4,3),"

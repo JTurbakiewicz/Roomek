@@ -1,3 +1,5 @@
+#TEST BRANCZA
+
 import Witai.witai_connection as wit
 import Databases.mysql_connection as sql
 import re
@@ -8,6 +10,7 @@ from Scraper.PropertyScraper.items import OfferItem
 from Scraper.PropertyScraper.util import offer_features
 import inspect
 import clean_output as cn
+
 
 logging.basicConfig(level='DEBUG')
 
@@ -128,7 +131,7 @@ class Parser():
                         logging.info('Updated offer: ' + offer_url + ' column: ' + self.sql_column_name + ' with: ' + str(value))
                         sql.update_field(table_name='offers', field_name=self.sql_column_name, field_value=value,
                                          where_field='offer_url', where_value=offer_url, if_null_required=True)
-                    except Exception  as e:
+                    except Exception as e:
                         print('Error is ', e)
 
     def parse_simple(self):
@@ -154,8 +157,12 @@ class Parser():
                         results['amount_of_updated_values'] = results['amount_of_updated_values'] + 1
                         logging.info('Parsed sentence: ' + sentence)
                         logging.info('Updated offer: ' + url + ' column: ' + offer_features[key] + ' with: ' + 'True')
-                        sql.update_field(table_name='offer_features', field_name=offer_features[key], field_value=1,
-                                         where_field='offer_url', where_value=url, if_null_required=True)
+                        try:
+                            sql.update_field(table_name='offer_features', field_name=offer_features[key], field_value=1,
+                                             where_field='offer_url', where_value=url, if_null_required=True)
+                        except Exception as e:
+                            logging.debug(e)
+
 
         return results
 
@@ -231,8 +238,13 @@ def batch_parse(min_accuracy):
             parser.train(80)
             logging.info('Verifing parser for: ' + str(sql_field) + '; keyword: ' + relevant_word)
             res = parser.verify(20)
-            entity_correct = res['correct_entity'] / (res['correct_entity']+res['wrong_entity'])
-            value_correct = res['correct_value'] / (res['correct_value'] + res['wrong_value'])
+            try:
+                entity_correct = res['correct_entity'] / (res['correct_entity']+res['wrong_entity'])
+                value_correct = res['correct_value'] / (res['correct_value'] + res['wrong_value'])
+            except ZeroDivisionError:
+                logging.info('Sample size is 0, check is stopped')
+                entity_correct = 0
+                value_correct = 0
             logging.info('Entity check is correct in: ' + str(entity_correct))
             logging.info('Value check is correct in: ' + str(value_correct))
             if entity_correct > min_accuracy and value_correct > min_accuracy:
