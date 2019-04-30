@@ -1,10 +1,10 @@
 from Databases import mysql_connection as db
 import rater as r
 import logging
-logging.basicConfig(level='INFO')
-import time
+from Key import rating_weights
 
-start = time.time()
+logging.basicConfig(level='INFO')
+
 fields_to_ignore = ['creation_time', 'modification_time', 'city', 'offer_type']
 offer_records = db.get_custom('select offers.*, offer_features.* from offers inner join offer_features on offers.offer_url=offer_features.offer_url;')
 
@@ -29,8 +29,11 @@ for offer_record in offer_records:
 
         if rating is not None and column_name not in fields_to_ignore:
             offer_rating[column_name] = rating
-
+    static_rating = 0
+    for rating_name, rating_value in offer_rating.items():
+        try:
+            static_rating = static_rating + rating_value * rating_weights[rating_name]
+        except KeyError:
+            pass
+    offer_rating['static_rating'] = static_rating
     db.create_rating(offer_rating)
-
-end = time.time()
-print(end - start)

@@ -517,6 +517,7 @@ db_tables['conversations'] = (
 db_tables['ratings'] = (
     "CREATE TABLE `ratings` ("
     "  `offer_url` varchar(700) NOT NULL,"
+    "  `static_rating` float(6,2),"
     "  `offer_name` float(4,3),"
     "  `offer_thumbnail_url` float(4,3),"    
     "  `price` float(4,3),"
