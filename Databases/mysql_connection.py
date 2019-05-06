@@ -5,6 +5,7 @@ import logging
 import os
 import tokens
 import sys
+from Bot.user import User
 log = logging.getLogger(os.path.basename(__file__))
 
 
@@ -267,63 +268,124 @@ def get_user(facebook_id):
         cursor.execute(query)
         return cursor.fetchone()
 
-def create_user(facebook_id, first_name = None, last_name = None, gender = None, business_type = None,
-                price_limit = None, location_latidude = None, location_longitude = None, city = None,
+
+def create_user(user_obj = None, facebook_id = None, first_name = None, last_name = None, gender = None, business_type = None,
+                price_limit = None, location_latitude = None, location_longitude = None, city = None,
                 country = None, housing_type = None, features = None, confirmed_data = None, add_more = None,
-                shown_input = None):
+                shown_input = None, update = False):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         fields_to_add = 'facebook_id'
-        user_data = [facebook_id]
-        if first_name:
+        if facebook_id:
+            user_data = [facebook_id]
+        else:
+            user_data = [user_obj.facebook_id]
+        if first_name or user_obj.first_name:
+            if first_name:
+                user_data.append(first_name)
+            else:
+                user_data.append(user_obj.first_name)
             fields_to_add = fields_to_add + ',first_name'
-            user_data.append(first_name)
-        if last_name:
+        if last_name or user_obj.last_name:
+            if last_name:
+                user_data.append(last_name)
+            else:
+                user_data.append(user_obj.last_name)
             fields_to_add = fields_to_add + ',last_name'
-            user_data.append(last_name)
-        if gender:
+        if gender or user_obj.gender:
+            if gender:
+                user_data.append(gender)
+            else:
+                user_data.append(user_obj.gender)
             fields_to_add = fields_to_add + ',gender'
-            user_data.append(gender)
-        if business_type:
+        if business_type or user_obj.business_type:
+            if business_type:
+                user_data.append(business_type)
+            else:
+                user_data.append(user_obj.business_type)
             fields_to_add = fields_to_add + ',business_type'
-            user_data.append(business_type)
-        if price_limit:
+        if price_limit or user_obj.price_limit:
+            if price_limit:
+                user_data.append(price_limit)
+            else:
+                user_data.append(user_obj.price_limit)
             fields_to_add = fields_to_add + ',price_limit'
-            user_data.append(price_limit)
-        if location_latidude:
-            fields_to_add = fields_to_add + ',location_latidude'
-            user_data.append(location_latidude)
-        if location_longitude:
+        if location_latitude or user_obj.location_latitude:
+            if location_latitude:
+                user_data.append(location_latitude)
+            else:
+                user_data.append(user_obj.location_latitude)
+            fields_to_add = fields_to_add + ',location_latitude'
+        if location_longitude or user_obj.location_longitude:
+            if location_longitude:
+                user_data.append(location_longitude)
+            else:
+                user_data.append(user_obj.location_longitude)
             fields_to_add = fields_to_add + ',location_longitude'
-            user_data.append(location_longitude)
-        if city:
+        if city or user_obj.city:
+            if city:
+                user_data.append(city)
+            else:
+                user_data.append(user_obj.city)
             fields_to_add = fields_to_add + ',city'
-            user_data.append(city)
-        if country:
+        if country or user_obj.country:
+            if country:
+                user_data.append(country)
+            else:
+                user_data.append(user_obj.country)
             fields_to_add = fields_to_add + ',country'
-            user_data.append(country)
-        if housing_type:
+        if housing_type or user_obj.housing_type:
+            if housing_type:
+                user_data.append(housing_type)
+            else:
+                user_data.append(user_obj.housing_type)
             fields_to_add = fields_to_add + ',housing_type'
-            user_data.append(housing_type)
-        if features:
+        if features or user_obj.features:
+            if features:
+                user_data.append(features)
+            else:
+                user_data.append(user_obj.features)
             fields_to_add = fields_to_add + ',features'
-            user_data.append(features)
-        if confirmed_data:
+        if confirmed_data or user_obj.confirmed_data:
+            if confirmed_data:
+                user_data.append(confirmed_data)
+            else:
+                user_data.append(user_obj.confirmed_data)
             fields_to_add = fields_to_add + ',confirmed_data'
-            user_data.append(confirmed_data)
-        if add_more:
+        if add_more or user_obj.add_more:
+            if add_more:
+                user_data.append(add_more)
+            else:
+                user_data.append(user_obj.add_more)
             fields_to_add = fields_to_add + ',add_more'
-            user_data.append(add_more)
-        if shown_input:
+        if shown_input or user_obj.shown_input:
+            if shown_input:
+                user_data.append(shown_input)
+            else:
+                user_data.append(user_obj.shown_input)
             fields_to_add = fields_to_add + ',shown_input'
-            user_data.append(shown_input)
 
         placeholders = '%s,' * len(fields_to_add.split(','))
         placeholders = placeholders[:-1]
 
-        query = """INSERT INTO users
-                ({})
-                VALUES ({})""".format(fields_to_add,placeholders)
-        cursor.execute(query, user_data)
+        if update:
+            duplicate_condition = ''
+            for field in fields_to_add.split(','):
+                duplicate_condition = duplicate_condition + field + '=%s,'
+            duplicate_condition = duplicate_condition[:-1]
+
+            query = f"""
+                        INSERT INTO users
+                        ({fields_to_add})
+                        VALUES ({placeholders})
+                        ON DUPLICATE KEY UPDATE {duplicate_condition}
+                     """
+            cursor.execute(query, user_data*2)
+        else:
+
+            query = """INSERT INTO users
+                    ({})
+                    VALUES ({})""".format(fields_to_add,placeholders)
+            cursor.execute(query, user_data)
         cnx.commit()
 
 def create_conversation(facebook_id, who_said_it, text = None, sticker_id = None, nlp_intent = None, nlp_entity = None, nlp_value = None, message_time = None):
@@ -591,3 +653,9 @@ else:
 
 
 set_up_db(local_config)
+# jt = User('126')
+# jt.set_first_name('Jakub')
+# jt.set_last_name('Turb')
+# jt.set_city('Poznan')
+# jt.set_country('ABC')
+# create_user(user_obj=jt, update = True)
