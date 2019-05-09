@@ -41,5 +41,8 @@ class OfferItem(dict, BaseItem):
 
     media = scrapy.Field()
     security_measures = scrapy.Field()
-    additonal_equipment = scrapy.Field()
+    additional_equipment = scrapy.Field()
     additional_information = scrapy.Field()
+
+class OfferFeaturesItem(dict, BaseItem):
+    pass

@@ -93,20 +93,35 @@ def create_offer(item):
         item: A scrapy.item object, that contains all of the scraped data.
     """
     try:
-        fields_to_insert = str(list(item.keys()))
-        fields_to_insert = re.sub("""[[']|]""", '', fields_to_insert)
-        s_to_insert = ('%s,' * len(item.keys()))[:-1]
-        add_player = ("INSERT INTO offers "
-                        "(%s) "
-                        "VALUES (%s)" % (fields_to_insert,s_to_insert))
-        values = []
-        for val in item.values():
-            values.append(val[0])
-        cursor.execute(add_player, values)
+        if type(item).__name__ == 'OfferItem':
+
+            fields_to_insert_into_offers = str(list(item.keys()))
+            fields_to_insert_into_offers = re.sub("""[[']|]""", '', fields_to_insert_into_offers)
+            s_to_insert_into_offers = ('%s,' * len(item.keys()))[:-1]
+            add_query = ("INSERT INTO offers "
+                            "(%s) "
+                            "VALUES (%s)" % (fields_to_insert_into_offers,s_to_insert_into_offers))
+            values = []
+            for val in item.values():
+                values.append(val[0])
+            cursor.execute(add_query, values)
+
+        elif type(item).__name__ == 'OfferFeaturesItem':
+            fields_to_insert_into_offer_features = str(list(item.keys()))
+            fields_to_insert_into_offer_features = re.sub("""[[']|]""", '', fields_to_insert_into_offer_features)
+            s_to_insert_into_offer_features = ('%s,' * len(item.keys()))[:-1]
+            add_query = ("INSERT INTO offer_features "
+                               "(%s) "
+                               "VALUES (%s)" % (fields_to_insert_into_offer_features, s_to_insert_into_offer_features))
+            values = []
+            for val in item.values():
+                values.append(val[0])
+            cursor.execute(add_query, values)
         cnx.commit()
-        #print ('[LOG-DBSQL-INFO] Added an offer with values: %s' % (values))
+        # print ('[LOG-DBSQL-INFO] Added an offer with values: %s' % (values))
+
     except mysql.connector.IntegrityError as err:
-        print("[LOG-DBSQL-ERROR] Error: {}".format(err))
+        print(" [LOG-DBSQL-ERROR] Error: {}".format(err))
 
 def get_all(fields_to_get = '*'):
     """ Gets all off rows from DB.
@@ -250,10 +265,41 @@ db_tables['offers'] = (
     "  `ready_from` DATETIME,"
     "  `type_of_ownership` varchar(50),"
     "  `rental_for_students` varchar(25),"
-    "  `media` varchar(200),"
-    "  `security_measures` varchar(200),"
-    "  `additonal_equipment` varchar(200),"
-    "  `additional_information` varchar(200),"
+    "  `creation_time` datetime default current_timestamp,"
+    "  `modification_time` datetime on update current_timestamp,"
+    "  PRIMARY KEY (`offer_url`)"
+    ") ENGINE=InnoDB")
+
+db_tables['offer_features'] = (
+    "CREATE TABLE `offer_features` ("
+    "  `offer_url` varchar(700) NOT NULL,"
+    "  `internet` BOOLEAN,"
+    "  `cable_tv` BOOLEAN,"
+    "  `closed_terrain` BOOLEAN,"
+    "  `monitoring_or_security` BOOLEAN,"
+    "  `entry_phone` BOOLEAN,"
+    "  `antibulglar_doors_windows` BOOLEAN,"
+    "  `alarm_system` BOOLEAN,"
+    "  `antibulglar_blinds` BOOLEAN,"
+    "  `dishwasher` BOOLEAN,"
+    "  `cooker` BOOLEAN,"
+    "  `fridge` BOOLEAN,"
+    "  `oven` BOOLEAN,"
+    "  `washing_machine` BOOLEAN,"
+    "  `tv` BOOLEAN,"
+    "  `elevator` BOOLEAN,"
+    "  `phone` BOOLEAN,"
+    "  `AC` BOOLEAN,"
+    "  `garden` BOOLEAN,"
+    "  `utility_room` BOOLEAN,"
+    "  `parking_space` BOOLEAN,"
+    "  `terrace` BOOLEAN,"
+    "  `balcony` BOOLEAN,"
+    "  `non_smokers_only` BOOLEAN,"
+    "  `separate_kitchen` BOOLEAN,"
+    "  `basement` BOOLEAN,"
+    "  `virtual_walk` BOOLEAN,"
+    "  `two_level_apartment` BOOLEAN,"
     "  `creation_time` datetime default current_timestamp,"
     "  `modification_time` datetime on update current_timestamp,"
     "  PRIMARY KEY (`offer_url`)"
