@@ -15,11 +15,8 @@ import six
 import os
 import random
 import logging
-from Dispatcher_app import use_local_tokens, use_database, use_witai
-if use_local_tokens:
-    from Bot.tokens import tokens_local as tokens
-else:
-    from Bot.tokens import tokens
+from Dispatcher_app import use_database
+import tokens
 if use_database:
     from Databases import mysql_connection as db
 

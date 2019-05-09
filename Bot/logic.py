@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 """ Functions for basic bot behaviours. """
 
-from Dispatcher_app import use_local_tokens, use_database, use_witai, fake_typing
-if use_local_tokens: from Bot.tokens import tokens_local as tokens
-else: from Bot.tokens import tokens
+from Dispatcher_app import use_database, fake_typing
+import tokens
 if use_database: from Databases import mysql_connection as db
 from Bot.cognition import *
 from Bot.responses_PL import *

@@ -5,9 +5,6 @@ import logging
 import os
 import tokens
 import sys
-# from Bot.user import User
-log = logging.getLogger(os.path.basename(__file__))
-
 
 """Funtion definition"""
 
@@ -30,41 +27,41 @@ def set_up_db(db_config):
     try:
         cnx = mysql.connector.connect(**db_config)
         cursor = cnx.cursor()
-        log.info("Connection succeeded")
+        logging.info("Connection succeeded")
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            log.error("Something is wrong with your user name or password")
+            logging.error("Something is wrong with your user name or password")
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            log.error("Database does not exist")
+            logging.error("Database does not exist")
         else:
-            log.error(str(err))
+            logging.error(str(err))
     try:
         cursor.execute("CREATE DATABASE {} "
                        "DEFAULT CHARACTER SET utf8mb4".format(DB_NAME))
-        log.info("Database created")
+        logging.info("Database created")
     except mysql.connector.Error as err:
-        log.info("Failed creating database: {}".format(err))
+        logging.info("Failed creating database: {}".format(err))
     except UnboundLocalError:
-        log.info("No connection estabilished")
+        logging.info("No connection estabilished")
         sys.exit()
     try:
         cursor.execute("USE {}".format(DB_NAME))
-        log.info("Database chosen")
+        logging.info("Database chosen")
     except mysql.connector.Error as err:
-        log.error("Failed choosing database: {}".format(err))
+        logging.error("Failed choosing database: {}".format(err))
 
     for table_name in db_tables:
         table_description = db_tables[table_name]
         try:
-            log.info("Creating table {0}".format(table_name))
+            logging.info("Creating table {0}".format(table_name))
             cursor.execute(table_description)
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-                log.info("Table already exists")
+                logging.info("Table already exists")
             else:
-                log.error(str(err.msg))
+                logging.error(str(err.msg))
         else:
-            log.info("OK")
+            logging.info("OK")
     cnx.close()
 
 def create_offer(item):
@@ -102,7 +99,7 @@ def create_offer(item):
                     values.append(val[0])
                 cursor.execute(add_query, values)
         except mysql.connector.IntegrityError as err:
-                log.error("Error: {}".format(err))
+                logging.error("Error: {}".format(err))
         cnx.commit()
 
 def get_all(table_name = 'offers', fields_to_get = '*'):
@@ -644,18 +641,6 @@ db_tables['ratings'] = (
 
 """SETUP"""
 
-local_config =  tokens.local_config
+db_config = tokens.sql_config
 
-if local_config:
-    db_config = tokens.local_config
-else:
-    db_config = tokens.pythonanywhere_config
-
-
-set_up_db(local_config)
-# jt = User('126')
-# jt.set_first_name('Jakub')
-# jt.set_last_name('Turb')
-# jt.set_city('Poznan')
-# jt.set_country('ABC')
-# create_user(user_obj=jt, update = True)
+set_up_db(db_config)

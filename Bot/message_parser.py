@@ -5,11 +5,10 @@
 import os
 import logging
 from datetime import date
-from Dispatcher_app import use_local_tokens, use_database
+from Dispatcher_app import use_database
 from Bot.cognition import recognize_sticker
 from Bot.user import *
-if use_local_tokens: from Bot.tokens import tokens_local as tokens
-else: from Bot.tokens import tokens
+import tokens
 # TODO if use_database: from Databases.... import update_user
 
 # # in the future fetch user ids from the DB:

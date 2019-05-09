@@ -6,9 +6,7 @@ import os
 import logging
 
 # ------------------app-configuration----------------------------------------------------------------
-use_local_tokens = True         # change to False if you want to use main tokens file
 use_database = False            # turns the database connection on and off
-use_witai = False               # turns the NLP connection on and off
 fake_typing = False
 logging_level = logging.DEBUG   # levels in order: DEBUG, INFO, WARNING, EXCEPTION, ERROR, CRITICAL
 # ---------------------------------------------------------------------------------------------------
@@ -26,11 +24,6 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.basicConfig(level=logging_level,
                     # filename='/folder/myapp.log',
                     # filemode='w',
-                    # %(pathname)s Full pathname of the source file where the logging call was issued(if available).
-                    # %(filename)s Filename portion of pathname.
-                    # %(module)s Module (name portion of filename).
-                    # %(funcName)s Name of function containing the logging call.
-                    # %(lineno)d Source line number where the logging call was issued (if available).
                     format='%(asctime)s %(levelname)-7s %(module)-19s L%(lineno)-3d: %(message)s',
                     # %()-5s adds space if less then 5 letters
                     datefmt='%m.%d %H:%M:%S')
@@ -56,5 +49,5 @@ def receive_message():
 
 # If the program is executed (double-clicked), it will set name to main, thus run app:
 if __name__ == "__main__":
-    logging.info("Main app has been restarted. New Flask app initialized (tokens_local: "+str(use_local_tokens)+", database: "+str(use_database)+", witai: "+str(use_witai)+").")
+    logging.info("Main app has been restarted. New Flask app initialized (database: "+str(use_database)+").")
     app.run()
