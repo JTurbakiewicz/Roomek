@@ -10,6 +10,7 @@ from scrapy.item import BaseItem
 class OfferItem(dict, BaseItem):
     city = scrapy.Field()
     offer_type = scrapy.Field()
+    offer_purpose = scrapy.Field()
     offer_url = scrapy.Field()
     offer_thumbnail_url = scrapy.Field()
     offer_name = scrapy.Field()
@@ -44,5 +45,12 @@ class OfferItem(dict, BaseItem):
     additional_equipment = scrapy.Field()
     additional_information = scrapy.Field()
 
+    location_latitude = scrapy.Field()
+    location_longitude = scrapy.Field()
+
 class OfferFeaturesItem(dict, BaseItem):
     pass
+
+class OfferRoomItem(dict, BaseItem):
+    type_of_room = scrapy.Field()
+    preferred_locator = scrapy.Field()

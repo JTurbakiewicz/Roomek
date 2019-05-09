@@ -5,7 +5,7 @@ import logging
 
 WIT_API_HOST = os.getenv('WIT_URL', 'https://api.wit.ai')
 WIT_API_VERSION = os.getenv('WIT_API_VERSION', '20160516')
-access_token = 'KSDIFR7JNR5BA2YVBX7QHO4IDIKIJS3Y'  #TESTING APP TOKEN -> TO CHANGE
+access_token = 'MCHBF5WE3RCWWW2BEZCXRGVPXFKY43EE'  #TESTING APP TOKEN -> TO CHANGE
 headers = {
     'Authorization': 'Bearer ' + access_token,
     'Accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
@@ -17,6 +17,8 @@ logging.basicConfig(level='DEBUG')
 def response_status(rsp):
     if rsp.status_code == 409:
         logging.debug('Entity already exists')
+    elif rsp.status_code == 429:
+        logging.debug('Too many requests created at the same time')
     elif rsp.status_code > 200:
         logging.debug('Wit responded with status: ' + str(rsp.status_code) +
                        ' (' + rsp.reason + ')')
@@ -269,7 +271,6 @@ def train(messages, entities, entity_values, start_chars = None, end_chars = Non
     if len (entities) < len (messages):
         missing_entities = []
         for entity in range(len(entities), len(messages)):
-            print(entity)
             missing_entities.append(entities[-1])
         entities = entities + missing_entities
 
@@ -280,11 +281,13 @@ def train(messages, entities, entity_values, start_chars = None, end_chars = Non
         if start_chars:
             if not isinstance(start_chars, (list,)):
                 start_chars = [start_chars]
-            entity["start"] = int(start_chars[message])
+            if start_chars[message] is not None:
+                entity["start"] = int(start_chars[message])
         if end_chars:
             if not isinstance(end_chars, (list,)):
                 end_chars = [end_chars]
-            entity["end"] = int(end_chars[message])
+            if end_chars[message] is not None:
+                entity["end"] = int(end_chars[message])
         if subentities:
             if not isinstance(subentities, (list,)):
                 subentities = [subentities]

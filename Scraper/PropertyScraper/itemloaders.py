@@ -83,28 +83,27 @@ def datetime_it_OLX(input):
 
 def datetime_it_Otodom(input):
     """Returns in a datetime prepared format."""
-    now = datetime.datetime.now()
-    just_date = re.sub(r'Data aktualizacji: ', '', input)
-    just_date_split = just_date.split(' ')
-    if just_date_split[0] == 'in':
-        if just_date_split[2] =='minutes':
-            yield now + datetime.timedelta(minutes=int(just_date_split[1])) - datetime.timedelta(minutes=60)
-        elif just_date_split[2] =='hour':
-            yield now + datetime.timedelta(hours=1)
-    elif just_date_split[1] == 'minutes' and just_date_split[2] == 'ago':
-        yield now - datetime.timedelta(minutes=int(just_date_split[0])) - datetime.timedelta(minutes=60)
-    elif just_date_split[3] == 'seconds':
-        yield now
-    else:
-        print ('FIX IT ', just_date_split)
+    pattern = re.compile(r'"dateModified":".*?"')
+    try:
+        date_unprocessed = pattern.findall(str(input))[0]
+        only_date_string = re.sub(r'dateModified":', '', date_unprocessed)
+        only_date_string = re.sub(r'"', '', only_date_string)
+        date, hour = only_date_string.split(' ')
+        year, month, day = date.split('-')
+        hour, minute, second = hour.split(':')
+        yield datetime.datetime(int(year), int(month), int(day), int(hour), int(minute), int(second))
+    except:
+        print('failed' + str(input))
 
+def ready_from_Otodom(input):
+    """Returns in a datetime prepared format."""
+    year, month, day = input.split('-')
+    yield datetime.datetime(int(year), int(month), int(day))
 
 
 def get_inside_tags(input):
     string_wo_br = re.sub(r'<br>', ' ', input)
     pattern = re.compile(r'(>.*<)')
-    inside_tags = pattern.findall(string_wo_br)
-    # yield ''.join(inside_tags)
     yield re.sub(r'<.*?>', '', string_wo_br)
 
 def district(input):
@@ -119,10 +118,46 @@ def district_otodom(input):
     if len(split_input) == 2:
         yield split_input[1].strip()
 
+def location_latitude_otodom(input):
+    print(input)
+    pattern = re.compile(r'"geo":{"@type":"GeoCoordinates","latitude":.*?,"')
+    try:
+        latidude_unprocessed = pattern.findall(str(input))
+        unprocessed_latitude = max(latidude_unprocessed,key=len)
+        print(unprocessed_latitude)
+        yield float(re.sub(r'[^0123456789.]', '', unprocessed_latitude))
+
+    except:
+        print('failed' + str(input))
+
+def location_latitude_otodom(input):
+    pattern = re.compile(r'"geo":{"@type":"GeoCoordinates","latitude":.*?,"')
+    try:
+        latidude_unprocessed = pattern.findall(str(input))
+        unprocessed_latitude = max(latidude_unprocessed,key=len)
+        yield float(re.sub(r'[^0123456789.]', '', unprocessed_latitude))
+
+    except Exception as e:
+        print(e)
+        print('failed' + str(input))
+
+def location_longitude_otodom(input):
+    pattern = re.compile(r'"longitude":.*?},')
+    try:
+        longitude_unprocessed = pattern.findall(str(input))
+        unprocessed_longitude = max(longitude_unprocessed,key=len)
+        unprocessed_longitude = unprocessed_longitude.split(',')[0]
+        yield float(re.sub(r'[^0123456789.]', '', unprocessed_longitude))
+
+    except Exception as e:
+        print('failed' + str(input))
+        print (e)
+
 
 class OlxOfferLoader(ItemLoader):
     city_in = MapCompose()
     offer_type = MapCompose()
+    offer_purpose_in = MapCompose()
     offer_url_in = MapCompose(response_to_string)
     offer_thumbnail_url_in = MapCompose(find_image_url)
     offer_name_in = MapCompose(remove_html_tags, remove_unnecessary_spaces)
@@ -151,10 +186,16 @@ class OtodomOfferLoader(OlxOfferLoader):
     heating_in = MapCompose()
     building_year_in = MapCompose(just_numbers,integer_the_price)
     fit_out_in = MapCompose()
-    ready_from_in = MapCompose(datetime_it_Otodom)
+    ready_from_in = MapCompose(ready_from_Otodom)
     type_of_ownership_in = MapCompose()
     rental_for_students_in = MapCompose()
     media_in = MapCompose(delist_string)
     security_measures_in = MapCompose(delist_string)
     additional_equipment_in = MapCompose(delist_string)
     additional_information_in = MapCompose(delist_string)
+    location_latitude_in = MapCompose(location_latitude_otodom)
+    location_longitude_in = MapCompose(location_longitude_otodom)
+
+class OlxRoomLoader(OlxOfferLoader):
+    type_of_room_in = MapCompose(remove_html_tags)
+    preferred_locator_in = MapCompose(remove_html_tags)

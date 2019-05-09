@@ -4,10 +4,10 @@ from itemloaders import OlxOfferLoader, OtodomOfferLoader
 from items import OfferItem
 from items import OfferFeaturesItem
 from scrapy.linkextractors import LinkExtractor
-import PropertyScraper_mysql_connection as db
+import Databases.mysql_connection as db
+from util import offer_features
 
-
-already_scraped_urls_dicts = db.get_all('offer_url')
+already_scraped_urls_dicts = db.get_all(table_name = 'offers', fields_to_get = 'offer_url')
 already_scraped_urls = []
 for url in already_scraped_urls_dicts:
     already_scraped_urls.append(url['offer_url'])
@@ -22,7 +22,6 @@ OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=23|page=33'), un
 #                                                       '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a',
 #                                                       '//*[@id="body-container"]/div[3]/div/div[8]/span[5]/a',
 #                                                       '//*[@id="body-container"]/div[3]/div/div[8]/span[6]/a']))
-
 links_to_main_page = set()
 links_to_olx_offers = set()
 links_to_otodom_offers = set()
@@ -41,7 +40,8 @@ class OlxSpiderMain(scrapy.Spider):
     def start_requests(self):
         for url in self.urls:
             request = scrapy.Request(url=url, callback=self.parse_initial_page)
-            request.meta['offer_type'] = url.split('/')[-3]
+            request.meta['offer_type'] = url.split('/')[-4]
+            request.meta['offer_purpose'] = url.split('/')[-3]
             request.meta['city'] = url.split('/')[-2]
             yield request
 
@@ -53,6 +53,7 @@ class OlxSpiderMain(scrapy.Spider):
                 request = scrapy.Request(link.url, callback=self.parse_main_pages)
                 request.meta['offer_type'] = response.meta['offer_type']
                 request.meta['city'] = response.meta['city']
+                request.meta['offer_purpose'] = response.meta['offer_purpose']
                 yield request
 
         olx_offer_links = OLX_extractor_subpage.extract_links(response)
@@ -64,6 +65,7 @@ class OlxSpiderMain(scrapy.Spider):
                     request = scrapy.Request(link.url, callback=self.parse_olx_offer)
                     request.meta['offer_type'] = response.meta['offer_type']
                     request.meta['city'] = response.meta['city']
+                    request.meta['offer_purpose'] = response.meta['offer_purpose']
                     yield request
 
         otodom_offer_links = OLX_extractor_otodom.extract_links(response)
@@ -74,6 +76,7 @@ class OlxSpiderMain(scrapy.Spider):
                     request = scrapy.Request(link.url, callback=self.parse_otodom_offer)
                     request.meta['offer_type'] = response.meta['offer_type']
                     request.meta['city'] = response.meta['city']
+                    request.meta['offer_purpose'] = response.meta['offer_purpose']
                     yield request
 
     def parse_main_pages(self, response):
@@ -85,6 +88,7 @@ class OlxSpiderMain(scrapy.Spider):
                     request = scrapy.Request(link.url, callback=self.parse_olx_offer)
                     request.meta['offer_type'] = response.meta['offer_type']
                     request.meta['city'] = response.meta['city']
+                    request.meta['offer_purpose'] = response.meta['offer_purpose']
                     yield request
 
         otodom_offer_links = OLX_extractor_otodom.extract_links(response)
@@ -95,11 +99,15 @@ class OlxSpiderMain(scrapy.Spider):
                     request = scrapy.Request(link.url, callback=self.parse_otodom_offer)
                     request.meta['offer_type'] = response.meta['offer_type']
                     request.meta['city'] = response.meta['city']
+                    request.meta['offer_purpose'] = response.meta['offer_purpose']
                     yield request
 
     def parse_olx_offer(self, response):
         OfferItem_loader = OlxOfferLoader(item=OfferItem(), response=response)
+        OfferFeaturesItem_loader = OtodomOfferLoader(item=OfferFeaturesItem(), response=response)
+        OfferFeaturesItem_loader.add_value('offer_url', response)
         OfferItem_loader.add_value('city', response.meta['city'])
+        OfferItem_loader.add_value('offer_purpose', response.meta['offer_purpose'])
         OfferItem_loader.add_value('offer_type', response.meta['offer_type'])
         OfferItem_loader.add_value('offer_url', response)
         OfferItem_loader.add_xpath('offer_thumbnail_url', '//*[@id="photo-gallery-opener"]/img')
@@ -131,7 +139,9 @@ class OlxSpiderMain(scrapy.Spider):
         ###/OLXtable
 
         OfferItem_item = OfferItem_loader.load_item()
+        OfferFeaturesItem_item = OfferFeaturesItem_loader.load_item()
         yield OfferItem_item
+        yield OfferFeaturesItem_item
 
     def parse_otodom_offer(self, response):
         OfferItem_loader = OtodomOfferLoader(item=OfferItem(), response=response)
@@ -139,18 +149,21 @@ class OlxSpiderMain(scrapy.Spider):
         OfferFeaturesItem_loader.add_value('offer_url', response)
         OfferItem_loader.add_value('city', response.meta['city'])
         OfferItem_loader.add_value('offer_type', response.meta['offer_type'])
+        OfferItem_loader.add_value('offer_purpose', response.meta['offer_purpose'])
         OfferItem_loader.add_value('offer_url', response)
-        OfferItem_loader.add_xpath('offer_name', '//*[@id="root"]/div/article/header/div[1]/h1/text()')
+        OfferItem_loader.add_xpath('offer_name', '//*[@id="root"]/div/article/header/div[1]/div/div/h1/text()')
         OfferItem_loader.add_xpath('offer_thumbnail_url', '//*[@id="root"]/div/article/section/div[1]/div/div[1]/div/div[2]/div/div[2]/div/picture/img')
-        OfferItem_loader.add_xpath('price', '//*[@id="root"]/div/article/header/div[3]/div[1]/text()')
-        OfferItem_loader.add_xpath('date_of_the_offer', '//*[@id="root"]/div/article/div[2]/div[1]/div[2]/div/div[2]/text()[2]')
+        OfferItem_loader.add_xpath('price', '//*[@id="root"]/div/article/header/div[2]/div[1]/div[2]/text()')
+        OfferItem_loader.add_value('date_of_the_offer', response.body)
+        OfferItem_loader.add_value('location_latitude', response.body)
+        OfferItem_loader.add_value('location_longitude', response.body)
         OfferItem_loader.add_xpath('offer_id', '//*[@id="root"]/div/article/div[2]/div[1]/div[2]/div/div[1]/text()[1]')
         OfferItem_loader.add_xpath('offer_text', '//*[@id="root"]/div/article/div[2]/div[1]/section[2]/div/div[1]')
         OfferItem_loader.add_xpath('price_per_m2', '//*[@id="root"]/div/article/header/div[3]/div[2]/text()')
         OfferItem_loader.add_xpath('area', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[2]/span/strong/text()')
         OfferItem_loader.add_xpath('amount_of_rooms', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[3]/span/strong/text()')
         OfferItem_loader.add_xpath('apartment_level', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[4]/span/strong/text()')
-        OfferItem_loader.add_xpath('district', '//*[@id="root"]/div/article/header/div[1]/div/a/text()')
+        OfferItem_loader.add_xpath('district', '//*[@id="root"]/div/article/header/div[1]/div/div/div/a/text()')
 
         ###Otodometable
 
@@ -183,36 +196,6 @@ class OlxSpiderMain(scrapy.Spider):
             line = re.sub(r'<.*?>', '', line).split(':')
             OfferItem_loader.add_value(Otodom_table_fields[line[0]], line[1][1:])
 
-        Otodom_table_fields_2 = {
-            'internet': 'internet',
-            'telewizja kablowa': 'cable_tv',
-            'teren zamknięty': 'closed_terrain',
-            'monitoring / ochrona': 'monitoring_or_security',
-            'domofon / wideofon': 'entry_phone',
-            'drzwi / okna antywłamaniowe': 'antibulglar_doors_windows',
-            'system alarmowy': 'alarm_system',
-            'rolety antywłamaniowe': 'antibulglar_blinds',
-            'zmywarka': 'dishwasher',
-            'kuchenka': 'cooker',
-            'lodówka': 'fridge',
-            'piekarnik': 'oven',
-            'pralka': 'washing_machine',
-            'telewizor': 'tv',
-            'winda': 'elevator',
-            'telefon': 'phone',
-            'klimatyzacja': 'AC',
-            'ogródek': 'garden',
-            'pom. użytkowe': 'utility_room',
-            'garaż/miejsce parkingowe': 'parking_space',
-            'taras': 'terrace',
-            'balkon': 'balcony',
-            'tylko dla niepalących': 'non_smokers_only',
-            'oddzielna kuchnia': 'separate_kitchen',
-            'piwnica': 'basement',
-            'wirtualny spacer': 'virtual_walk',
-            'dwupoziomowe': 'two_level_apartment'
-        }
-
         Otodom_table2 = response.xpath(r'//*[@id="root"]/div/article/div[2]/div[1]/section[3]/div/ul/li').getall()
 
         for line in Otodom_table2:
@@ -221,8 +204,8 @@ class OlxSpiderMain(scrapy.Spider):
                 OfferItem_loader.add_value('furniture', 'Tak')
             elif line == 'wynajmę również studentom':
                 OfferItem_loader.add_value('rental_for_students', 'Tak')
-            elif line in Otodom_table_fields_2:
-                OfferFeaturesItem_loader.add_value(Otodom_table_fields_2[line], True)
+            elif line in offer_features:
+                OfferFeaturesItem_loader.add_value(offer_features[line], True)
             else:
                 print ('DODAC ' + line)
 
