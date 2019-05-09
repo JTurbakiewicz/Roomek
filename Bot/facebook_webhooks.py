@@ -179,33 +179,6 @@ class Bot:
             }
         }, notification_type)
 
-    # def fb_send_list_message(self, userid, element_titles=['a', 'b'],
-    #   button_titles=['a', 'b'], notification_type=NotificationType.regular):
-    #     """Send generic messages to the specified recipient.
-    #     https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
-    #     Input:
-    #         userid: recipient id to send to
-    #         element_titles: generic message elements to send
-    #     Output:
-    #         Response from API as <dict>
-    #     """
-    #     logging.debug("Trying to send list message.")
-    #
-    #     elements = self.fb_define_elements(element_titles, button_titles)
-    #     buttons = self.fb_define_buttons(button_titles)
-    #
-    #     return self.fb_send_message(userid, {
-    #         "attachment": {
-    #             "type": "template",
-    #             "payload": {
-    #                 "template_type": "list",
-    #                 "top_element_style": "large",
-    #                     "elements": elements,
-    #                     "buttons": buttons
-    #             }
-    #         }
-    #     }, notification_type)
-
     def fb_send_list_message(self, userid, element_titles=['a', 'b'], button_titles=['a', 'b'], notification_type=NotificationType.regular):
         """TEST"""
         logging.debug("Trying to send TEST list message.")
@@ -221,40 +194,29 @@ class Bot:
                     "top_element_style": "compact",
                     "elements": [
                         {
-                            "title": "Classic White T-Shirt",
+                            "title": "Proba",
                             "subtitle": "See all our colors",
                             "default_action": {
                                 "type": "web_url",
                                 "url": "https://peterssendreceiveapp.ngrok.io/view?item=100",
-                                # "messenger_extensions": "false",
-                                "messenger_extensions": False,
+                                "messenger_extensions": "false",
+                                # "messenger_extensions": False,
                                 "webview_height_ratio": "tall"
                             }
                         },
                         {
-                            "title": "Classic White T-Shirt 2",
+                            "title": "Gruba",
                             "subtitle": "See all our colors 2",
                             "default_action": {
                                 "type": "web_url",
                                 "url": "https://peterssendreceiveapp.ngrok.io/view?item=100",
-                                # "messenger_extensions": "false",
-                                "messenger_extensions": False,
+                                "messenger_extensions": "false",
+                                # "messenger_extensions": False,
                                 "webview_height_ratio": "tall"
                             }
                         }
                     ],
-                     "buttons": [
-                        {
-                            "title": "post back!",
-                            "type": "postback",
-                            "payload": "payload"
-                        },
-                        {
-                            "title": "Button 2",
-                            "type": "postback",
-                            "payload": "payload"
-                        }
-                    ]
+                     "buttons": buttons
                 }
             }
         }, notification_type)
@@ -385,7 +347,7 @@ class Bot:
 
     def fb_fake_typing(self, userid, duration=0.6):
         """ Pretend the bot is typing for n seconds. """
-        # TODO shouldn't it be waiting a but before typing? sleep(duration/2)
+        # TODO shouldn't it be waiting a bit before typing? sleep(duration/2)
         self.fb_send_action(userid, 'typing_on')
         sleep(duration)
         self.fb_send_action(userid, 'typing_off')
@@ -481,14 +443,6 @@ class Bot:
         """
         return self.fb_send_attachment_url(userid, "file", file_url, notification_type)
 
-    def fb_send_airline_itinerary(self, userid, payload, notification_type=NotificationType.regular):
-        return self.fb_send_message(userid, {
-            "attachment": {
-                "type": "template",
-                "payload": payload
-            }
-        }, notification_type)
-
     def fb_send_raw(self, payload):
         request_endpoint = '{0}/me/messages'.format(self.graph_url)
         response = requests.post(
@@ -497,47 +451,44 @@ class Bot:
             json=payload
         )
         result = response.json()
+        logging.debug(payload)
         return result
 
-    # def fb_create_menu(self):
-    #     request_endpoint = '{0}/me/messenger_profile?access_token='.format(self.graph_url)
-    #     response = requests.post(
-    #         request_endpoint,
-    #         params=self.auth_args,
-    #         json=payload
-    #     )
-    #     result = response.json()
-    #     return result
-    #
-    #
-    #          {
-    #       "persistent_menu":[
-    #         {
-    #           "locale":"default",
-    #           "composer_input_disabled": true,
-    #           "call_to_actions":[
-    #             {
-    #               "title":"My Account",
-    #               "type":"nested",
-    #               "call_to_actions":[
-    #                 {
-    #                   "title":"Pay Bill",
-    #                   "type":"postback",
-    #                   "payload":"PAYBILL_PAYLOAD"
-    #                 },
-    #                 {
-    #                   "type":"web_url",
-    #                   "title":"Latest News",
-    #                   "url":"https://www.messenger.com/",
-    #                   "webview_height_ratio":"full"
-    #                 }
-    #               ]
-    #             }
-    #           ]
-    #         }
-    #       ]
-    #     }
+    # TODO hamburger menu
+    def fb_create_menu(self):
+        request_endpoint = '{0}/me/messenger_profile?access_token='.format(self.graph_url)
 
+        logging.debug("EVEN GOT INSIDE THIS ONE")
+
+        payload = {
+            "persistent_menu": [
+                {
+                    "locale": "default",
+                    "composer_input_disabled": "true",
+                    "call_to_actions": [
+                        {
+                            "title": "My Account",
+                            "type": "nested",
+                            "call_to_actions": [
+                                {
+                                    "title": "Pay Bill",
+                                    "type": "postback",
+                                    "payload": "PAYBILL_PAYLOAD"
+                                },
+                                {
+                                    "type": "web_url",
+                                    "title": "Latest News",
+                                    "url": "https://www.messenger.com/",
+                                    "webview_height_ratio": "full"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+
+        return self.fb_send_raw(payload=payload)
 
 def validate_hub_signature(app_secret, request_payload, hub_signature_header):
     """

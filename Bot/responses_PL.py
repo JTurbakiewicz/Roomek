@@ -80,15 +80,15 @@ def ask_more_locations(message, bot):
 
 @response_decorator
 def ask_for_price_limit(message, bot):
-    bot.fb_send_quick_replies(message.senderID, "Ile jesteś w stanie płacić?", ['<800zł', '<1000zł', '<1500zł', '<2000zł','💸 dowolna kwota'])
+    bot.fb_send_quick_replies(message.senderID, "Ile jesteś w stanie płacić? (wraz z ew. czynszem i opłatami)", ['<800zł', '<1000zł', '<1500zł', '<2000zł','💸 dowolna kwota'])
 
 
 @response_decorator
 def show_input_data(message, bot):
     message.user.shown_input = True
-    response1 = "Zanotowałem, że interesuje Cię {0} w {1} w okolicy {2}".format(message.housing_type, message.user.city, message.user.location)
+    response1 = "Zanotowałem, że interesuje Cię {0} w {1} w okolicy {2}".format(message.user.housing_type, message.user.city, message.user.location)
     bot.fb_send_text_message(str(message.senderID), response1)
-    response2 = "które ma {0} i kosztuje do {1}zł".format(str(message.features), message.user.price_limit)
+    response2 = "które ma {0} i kosztuje do {1}zł".format(str(message.user.features), message.user.price_limit)
     bot.fb_send_text_message(str(message.senderID), response2)
     # TODO add more params...
     bot.fb_send_quick_replies(message.senderID, "Czy wszystko się zgadza?",

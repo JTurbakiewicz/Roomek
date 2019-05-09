@@ -59,8 +59,23 @@ class Message:
                         self.latitude = self.messaging['message']['attachments'][0]['payload']['coordinates']['lat']
                         self.longitude = self.messaging['message']['attachments'][0]['payload']['coordinates']['long']
                     else:
-                        self.type = "MessageWithAttachment"
-                        self.url = str(self.messaging['message']['attachments'][0]['payload']['url'])
+                        if self.messaging['message']['attachments'][0]['type'] == 'image':
+                            # gif etc.
+                            self.type = "GifMessage"
+                            self.url = str(self.messaging['message']['attachments'][0]['payload']['url'])
+                        elif self.messaging['message']['attachments'][0]['type'] == 'template':
+                            self.type = "MessageWithAttachment"
+                            if self.messaging['message']['attachments'][0]['payload']['template_type'] == 'button':
+                                    # button message
+                                self.url = str(self.messaging['message']['attachments'][0]['payload']['buttons'])
+                            elif self.messaging['message']['attachments'][0]['payload']['template_type'] == 'list':
+                                # list message
+                                self.url = str(self.messaging['message']['attachments'][0]['payload']['buttons'])
+                            else:
+                                print("Unknown Template message with attachment: " + str(self.messaging['message']))
+                        else:
+                            self.type = "MessageWithAttachment"
+                            print("Unknown message with attachment: " + str(self.messaging['message']))
                 else:
                     self.text = self.messaging['message']['text']
                     if self.text.startswith('bottest'):
@@ -117,8 +132,10 @@ class Message:
                     logging.debug("USER({0}) message read by bot.".format(short_id))
                 elif self.type == "StickerMessage":
                     logging.info("USER({0}): <sticker id={1}>".format(short_id, self.stickerID))
-                elif self.type == "MessageWithAttachment":
+                elif self.type == "GifMessage":
                     logging.info("USER({0}): <GIF link={1}>".format(short_id, self.url))
+                elif self.type == "MessageWithAttachment":
+                    logging.info("USER({0}): <MessageWithAttachment>".format(short_id))
                 elif self.type == "LocationAnswer":
                     logging.info("USER({0}): <Location: lat={1}, long={2}>".format(short_id, self.latitude, self.longitude))
                 elif self.type == "TextMessage":
