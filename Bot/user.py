@@ -8,6 +8,7 @@ from datetime import date
 import re
 from Dispatcher_app import use_local_tokens, use_database
 from Bot.cognition import recognize_sticker, recognize_location
+from OfferParser.translator import translate
 if use_local_tokens: from Bot.tokens import tokens_local as tokens
 else: from Bot.tokens import tokens
 # TODO if use_database: from Databases.... import update_user
@@ -71,11 +72,15 @@ class User:
         # update_user(self.facebook_id, "gender", gender)
 
     def set_business_type(self, business_type):
+        print(business_type) # TODO Skasuj mnie później.
+        business_type = translate(business_type, "Q") # TODO Skasuj mnie później.
+        print(business_type) # TODO Skasuj mnie później.
         self.business_type = str(business_type)
         logging.info("[User info] business_type set to {0}".format(business_type))
         # update_user(self.facebook_id, "business_type", business_type)
 
     def set_housing_type(self, housing_type):
+        housing_type = translate(housing_type, "Q")  # TODO Skasuj mnie później.
         self.housing_type = str(housing_type)
         logging.info("[User info] housing_type set to {0}".format(housing_type))
         # update_user(self.facebook_id, "housing_type", housing_type)

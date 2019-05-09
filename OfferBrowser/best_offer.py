@@ -1,9 +1,11 @@
 import Databases.mysql_connection as sql
-from Bot.user import User
+# from Bot.user import User
 
 def best_offer(user_obj = None, nr = 3):
 
     query = 'select * from offers where True'
+
+    print(user_obj.business_type)   # TODO
 
     if user_obj.price_limit:
         if type(user_obj.price_limit) is list:
@@ -49,7 +51,9 @@ def best_offer(user_obj = None, nr = 3):
 
     relatable_urls = [x['offer_url'] for x in offers]
     # print(offers)
-    return relatable_urls[0]
+    print(query)
+    return relatable_urls
+    # return relatable_urls[0]
 
 # uzy = User('1')
 # uzy.price_limit = [5100]

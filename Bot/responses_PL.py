@@ -7,6 +7,9 @@ import random
 import logging
 from Bot.cognition import *
 from Dispatcher_app import fake_typing
+from OfferBrowser.best_offer import best_offer
+from Databases import mysql_connection as db
+
 
 # TODO do the decorator and try to input (message, bot):
 def response_decorator(original_function):
@@ -104,7 +107,11 @@ def ask_what_wrong(message, bot):
 def show_offers(message, bot):
     bot.fb_send_text_message(str(message.senderID), "Znalazłem dla Ciebie takie oferty:")
     if fake_typing: bot.fb_fake_typing(message.senderID, 0.4)
-    bot.fb_send_generic_message(userid, ['Oferta 1', 'Oferta 2', 'Oferta 3'])
+    best = best_offer(user_obj=message.user)
+    bot.fb_send_text_message(str(message.senderID), best[0])
+    bot.fb_send_text_message(str(message.senderID), best[1])
+    bot.fb_send_text_message(str(message.senderID), best[2])
+    # bot.fb_send_generic_message(userid, ['Oferta 1', 'Oferta 2', 'Oferta 3'])
 
 
 @response_decorator

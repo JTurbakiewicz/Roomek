@@ -20,11 +20,12 @@ def respond(message, bot):
         if message.NLP_intent == "greeting":
             response.greeting(message, bot)
         elif message.NLP_intent == "looking for":
-            message.user.business_type = "rent"
+            message.user.set_business_type("rent")
             ask_for_information(message, bot)
         elif message.NLP_intent == "offering":
-            message.user.business_type = "offer"
+            message.user.set_business_type("offer")
             response.unable_to_answer(message, bot)
+        # TODO inne opcje jak kupno itd
         else:
             ask_for_information(message, bot)
     else:
@@ -130,9 +131,13 @@ def ask_for_information(message, bot):
 
     elif message.user.wants_more_features is False:
         response.show_input_data(message, bot)
+        # TODO TEMP
+        response.show_offers(message, bot)
 
-    elif not message.user.confirmed_data:
-        response.ask_what_wrong(message, bot)
+    # elif not message.user.confirmed_data:
+        # TODO TEMP response.ask_what_wrong(message, bot)
+        # best = best_offer(user_obj=message.user)
+        # response.show_offers(message, bot, best)
 
     elif message.user.confirmed_data is None:
         response.show_offers(message, bot)

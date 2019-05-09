@@ -148,6 +148,7 @@ class Bot:
         Output:
             Response from API as <dict>
         """
+        # TODO character limit error
         if type(message) == list:
             message = random.choice(message)
         if use_database: db.add_conversation(str(userid), 'User', message)
@@ -451,7 +452,7 @@ class Bot:
             json=payload
         )
         result = response.json()
-        logging.debug(payload)
+
         return result
 
     # TODO hamburger menu
@@ -489,6 +490,7 @@ class Bot:
         }
 
         return self.fb_send_raw(payload=payload)
+
 
 def validate_hub_signature(app_secret, request_payload, hub_signature_header):
     """

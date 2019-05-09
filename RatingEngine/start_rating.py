@@ -3,7 +3,7 @@ import rater as r
 import logging
 from Key import rating_weights
 
-logging.basicConfig(level='INFO')
+logging.basicConfig(level='DEBUG')
 
 fields_to_ignore = ['creation_time', 'modification_time', 'city', 'offer_type']
 offer_records = db.get_custom('select offers.*, offer_features.* from offers inner join offer_features on offers.offer_url=offer_features.offer_url;')

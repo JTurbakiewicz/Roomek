@@ -5,7 +5,7 @@ import logging
 import os
 import tokens
 import sys
-from Bot.user import User
+# from Bot.user import User
 log = logging.getLogger(os.path.basename(__file__))
 
 
