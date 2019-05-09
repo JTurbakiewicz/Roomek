@@ -10,7 +10,7 @@ use_local_tokens = True         # change to False if you want to use main tokens
 use_database = False            # turns the database connection on and off
 use_witai = False               # turns the NLP connection on and off
 fake_typing = False
-logging_level = logging.INFO   # levels in order: DEBUG, INFO, WARNING, EXCEPTION, ERROR, CRITICAL
+logging_level = logging.DEBUG   # levels in order: DEBUG, INFO, WARNING, EXCEPTION, ERROR, CRITICAL
 # ---------------------------------------------------------------------------------------------------
 
 from flask import Flask, request

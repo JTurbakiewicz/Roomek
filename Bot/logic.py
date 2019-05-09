@@ -85,13 +85,17 @@ def handle_location(message, bot):
 
 def handle_test(message, bot):
     if 'quick' in message.text:
-        bot.fb_send_quick_replies(userid, "This is a test of quick replies", ['test_value_1', 'test_value_2', 'test_value_3'])  # TODO test if working
+        bot.fb_send_quick_replies(message.senderID, "This is a test of quick replies", ['test_value_1', 'test_value_2', 'test_value_3'])
     elif 'list' in message.text:
-        bot.fb_send_list_message(message.senderID, ['test_value_1', 'test_value_2'], ['test_value_3', 'test_value_4'])  # TODO not working
+        print("TEMP GOT HERE")
+        bot.fb_send_list_message(message.senderID, element_titles=['test_value_1', 'test_value_2'], button_titles=['test_value_3', 'test_value_4'])  # TODO not working
+    elif 'menu' in message.text:
+        print("TEMP GOT HERE TO MENY TRY")
+        bot.fb_create_menu()
     elif 'button' in message.text:
-        bot.fb_send_button_message(userid, "test", ['test_value_1', 'test_value_2'])  # TODO not working
+        bot.fb_send_button_message(message.senderID, "test", ['test_value_1', 'test_value_2'])  # TODO not working
     elif 'generic' in message.text:
-        bot.fb_send_generic_message(userid, ['Test_value_1', 'Test_value_2'])
+        bot.fb_send_generic_message(message.senderID, ['Test_value_1', 'Test_value_2'])
         # temp: bot.fb_send_test_message(userid, ['test_value_1', 'test_value_2'])
         # bot.fb_send_generic_message(
         # userid, [['Title1','Subtitle1','image_url1',
