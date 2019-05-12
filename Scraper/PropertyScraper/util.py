@@ -51,7 +51,7 @@ offer_features = {
     'taras': 'terrace',
     'balkon': 'balcony',
     'tylko dla niepalących': 'non_smokers_only',
-    'Tylko osoby niepalące': 'non_smokers_only',
+    'tylko osoby niepalące': 'non_smokers_only',
     'dla osób niepalących': 'non_smokers_only',
     'oddzielna kuchnia': 'separate_kitchen',
     'piwnica': 'basement',

@@ -9,7 +9,7 @@ base_string = 'https://www.olx.pl/nieruchomosci'
 offer_types = ['mieszkania', 'stancje-pokoje']
 offer_purposes = ['sprzedaz', 'wynajem']
 cities = ['warszawa', 'krakow', 'lodz', 'wroclaw', 'poznan', 'gdansk', 'szczecin', 'bydgoszcz', 'lublin', 'bialystok']
-cities = ['warszawa']
+#cities = ['warszawa']
 urls_flats_OLX = []
 urls_rooms_OLX = []
 

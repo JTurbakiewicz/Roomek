@@ -475,7 +475,7 @@ db_tables['offers'] = (
     "  `offer_text` LONGTEXT,"
     "  `offer_from` varchar(25),"
     "  `apartment_level` smallint(1),"
-    "  `furniture` varchar(25),"
+    "  `furniture` BOOLEAN,"
     "  `type_of_building` varchar(25),"
     "  `area` smallint(1),"
     "  `amount_of_rooms` int(1),"

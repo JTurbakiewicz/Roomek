@@ -2,6 +2,7 @@ from scrapy.loader import ItemLoader
 from scrapy.loader.processors import MapCompose, Join
 import re
 import datetime
+from OfferParser.translator import translate
 
 def remove_html_tags(input):
     string_wo_br = re.sub(r'<br>', ' ', input)
@@ -118,6 +119,14 @@ def district_otodom(input):
     if len(split_input) == 2:
         yield split_input[1].strip()
 
+def furniture(input):
+    if input == 'Tak':
+        return True
+    elif input == 'Nie':
+        return False
+    else:
+        return None
+
 def location_latitude_otodom(input):
     print(input)
     pattern = re.compile(r'"geo":{"@type":"GeoCoordinates","latitude":.*?,"')
@@ -156,8 +165,8 @@ def location_longitude_otodom(input):
 
 class OlxOfferLoader(ItemLoader):
     city_in = MapCompose()
-    offer_type = MapCompose()
-    offer_purpose_in = MapCompose()
+    offer_type_in = MapCompose(translate)
+    offer_purpose_in = MapCompose(translate)
     offer_url_in = MapCompose(response_to_string)
     offer_thumbnail_url_in = MapCompose(find_image_url)
     offer_name_in = MapCompose(remove_html_tags, remove_unnecessary_spaces)
@@ -167,35 +176,31 @@ class OlxOfferLoader(ItemLoader):
     date_of_the_offer_in = MapCompose(remove_html_tags,remove_unnecessary_spaces, datetime_it_OLX)
     offer_id_in = MapCompose(just_numbers)
     offer_text_in = MapCompose(remove_unnecessary_spaces, remove_html_tags, swap_unnecessary_spaces)
-    offer_from_in = MapCompose(remove_html_tags)
+    offer_from_in = MapCompose(remove_html_tags,translate)
     apartment_level_in = MapCompose(remove_html_tags,word_to_numbers,just_numbers,integer_the_price)
-    furniture_in = MapCompose(remove_html_tags)
-    type_of_building_in = MapCompose(remove_html_tags)
+    furniture_in = MapCompose(remove_html_tags, furniture)
+    type_of_building_in = MapCompose(remove_html_tags,translate)
     area_in = MapCompose(remove_html_tags,just_numbers,integer_the_price)
     amount_of_rooms_in = MapCompose(remove_html_tags,word_to_numbers,just_numbers,integer_the_price)
     additional_rent_in = MapCompose(remove_html_tags,just_numbers,integer_the_price)
     price_per_m2_in = MapCompose(remove_html_tags,just_numbers,integer_the_price)
-    type_of_market_in = MapCompose(remove_html_tags)
+    type_of_market_in = MapCompose(remove_html_tags, translate)
 
 class OtodomOfferLoader(OlxOfferLoader):
     district_in = MapCompose(district_otodom)
     date_of_the_offer_in = MapCompose(datetime_it_Otodom)
     security_deposit_in = MapCompose(just_numbers,integer_the_price)
-    building_material_in = MapCompose()
-    windows_in = MapCompose()
-    heating_in = MapCompose()
+    building_material_in = MapCompose(translate)
+    windows_in = MapCompose(translate)
+    heating_in = MapCompose(translate)
     building_year_in = MapCompose(just_numbers,integer_the_price)
-    fit_out_in = MapCompose()
+    fit_out_in = MapCompose(translate)
     ready_from_in = MapCompose(ready_from_Otodom)
-    type_of_ownership_in = MapCompose()
-    rental_for_students_in = MapCompose()
-    media_in = MapCompose(delist_string)
-    security_measures_in = MapCompose(delist_string)
-    additional_equipment_in = MapCompose(delist_string)
-    additional_information_in = MapCompose(delist_string)
+    type_of_ownership_in = MapCompose(translate)
+    rental_for_students_in = MapCompose(translate)
     location_latitude_in = MapCompose(location_latitude_otodom)
     location_longitude_in = MapCompose(location_longitude_otodom)
 
 class OlxRoomLoader(OlxOfferLoader):
-    type_of_room_in = MapCompose(remove_html_tags)
-    preferred_locator_in = MapCompose(remove_html_tags)
+    type_of_room_in = MapCompose(remove_html_tags, translate)
+    preferred_locator_in = MapCompose(remove_html_tags, translate)

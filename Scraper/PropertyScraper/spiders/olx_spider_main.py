@@ -157,12 +157,12 @@ class OlxSpiderMain(scrapy.Spider):
         OfferItem_loader.add_value('date_of_the_offer', response.body)
         OfferItem_loader.add_value('location_latitude', response.body)
         OfferItem_loader.add_value('location_longitude', response.body)
-        OfferItem_loader.add_xpath('offer_id', '//*[@id="root"]/div/article/div[2]/div[1]/div[2]/div/div[1]/text()[1]')
-        OfferItem_loader.add_xpath('offer_text', '//*[@id="root"]/div/article/div[2]/div[1]/section[2]/div/div[1]')
-        OfferItem_loader.add_xpath('price_per_m2', '//*[@id="root"]/div/article/header/div[3]/div[2]/text()')
-        OfferItem_loader.add_xpath('area', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[2]/span/strong/text()')
-        OfferItem_loader.add_xpath('amount_of_rooms', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[3]/span/strong/text()')
-        OfferItem_loader.add_xpath('apartment_level', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[4]/span/strong/text()')
+        OfferItem_loader.add_xpath('offer_id', '//*[@id="root"]/div/article/div[3]/div[1]/div[2]/div/div[1]/text()[1]')
+        OfferItem_loader.add_xpath('offer_text', '//*[@id="root"]/div/article/div[3]/div[1]/section[2]/div/div[1]')
+        OfferItem_loader.add_xpath('price_per_m2', '//*[@id="root"]/div/article/header/div[2]/div[2]/div/text()')
+        # OfferItem_loader.add_xpath('area', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[2]/span/strong/text()')
+        # OfferItem_loader.add_xpath('amount_of_rooms', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[3]/span/strong/text()')
+        # OfferItem_loader.add_xpath('apartment_level', '/html/body/div[1]/section[6]/div/div/div/ul/li[1]/ul[1]/li[4]/span/strong/text()')
         OfferItem_loader.add_xpath('district', '//*[@id="root"]/div/article/header/div[1]/div/div/div/a/text()')
 
         ###Otodometable
@@ -189,15 +189,18 @@ class OlxSpiderMain(scrapy.Spider):
             'Liczba pokoi': 'amount_of_rooms',
             'Piętro': 'apartment_level',
             'Liczba pięter': 'apartment_level',
+            'Powierzchnia': 'area',
         }
 
-        Otodom_table1 = response.xpath(r'//*[@id="root"]/div/article/div[2]/div[1]/section[1]/div/ul/li').getall()
+        Otodom_table1 = response.xpath(r'//*[@id="root"]/div/article/div[3]/div[1]/section[1]/div/ul/li').getall()
         for line in Otodom_table1:
             line = re.sub(r'<.*?>', '', line).split(':')
             OfferItem_loader.add_value(Otodom_table_fields[line[0]], line[1][1:])
 
-        Otodom_table2 = response.xpath(r'//*[@id="root"]/div/article/div[2]/div[1]/section[3]/div/ul/li').getall()
-
+        if response.xpath(r'//*[@id="root"]/div/article/div[3]/div[1]/section[4]/div/ul/li').getall():
+            Otodom_table2 = response.xpath(r'//*[@id="root"]/div/article/div[3]/div[1]/section[4]/div/ul/li').getall()
+        else:
+            Otodom_table2 = response.xpath(r'//*[@id="root"]/div/article/div[3]/div[1]/section[3]/div/ul/li').getall()
         for line in Otodom_table2:
             line = re.sub(r'<.*?>', '', line).split(':')[0].lower()
             if line == 'meble':
