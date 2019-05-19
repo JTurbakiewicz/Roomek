@@ -6,6 +6,7 @@ import os
 import tokens
 import sys
 
+logging.basicConfig(level='DEBUG')
 """Funtion definition"""
 
 class DB_Connection():
@@ -457,14 +458,14 @@ def create_rating(rating):
 
 """DATA"""
 
-DB_NAME = 'offers'
+DB_NAME = 'RoomekBot$offers'
 db_tables = {}
 db_tables['offers'] = (
     "CREATE TABLE `offers` ("
     "  `offer_url` varchar(700) NOT NULL,"
     "  `city` varchar(50) NOT NULL,"
-    "  `offer_type` varchar(50) NOT NULL,"
-    "  `offer_purpose` varchar(50)," 
+    "  `housing_type` varchar(50) NOT NULL,"
+    "  `business_type` varchar(50)," 
     "  `offer_name` varchar(200),"
     "  `offer_thumbnail_url` varchar(400),"    
     "  `price` int(1),"

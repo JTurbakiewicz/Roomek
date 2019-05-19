@@ -5,7 +5,7 @@ from Key import rating_weights
 
 logging.basicConfig(level='DEBUG')
 
-fields_to_ignore = ['creation_time', 'modification_time', 'city', 'offer_type']
+fields_to_ignore = ['creation_time', 'modification_time', 'city', 'housing_type']
 offer_records = db.get_custom('select offers.*, offer_features.* from offers inner join offer_features on offers.offer_url=offer_features.offer_url;')
 
 for offer_record in offer_records:
@@ -35,5 +35,6 @@ for offer_record in offer_records:
             static_rating = static_rating + rating_value * rating_weights[rating_name]
         except KeyError:
             pass
+
     offer_rating['static_rating'] = static_rating
     db.create_rating(offer_rating)

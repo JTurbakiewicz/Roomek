@@ -32,7 +32,7 @@ class OlxRoomSpider(scrapy.Spider):
     def start_requests(self):
         for url in self.urls:
             request = scrapy.Request(url=url, callback=self.parse_initial_page)
-            request.meta['offer_type'] = url.split('/')[-3]
+            request.meta['housing_type'] = url.split('/')[-3]
             request.meta['city'] = url.split('/')[-2]
             yield request
 
@@ -42,7 +42,7 @@ class OlxRoomSpider(scrapy.Spider):
             links_to_main_page.add(link.url)
             if link is not None and link.url:
                 request = scrapy.Request(link.url, callback=self.parse_main_pages)
-                request.meta['offer_type'] = response.meta['offer_type']
+                request.meta['housing_type'] = response.meta['housing_type']
                 request.meta['city'] = response.meta['city']
                 yield request
 
@@ -53,7 +53,7 @@ class OlxRoomSpider(scrapy.Spider):
                 links_to_olx_offers.add(link.url)
                 if link is not None:
                     request = scrapy.Request(link.url, callback=self.parse_olx_offer)
-                    request.meta['offer_type'] = response.meta['offer_type']
+                    request.meta['housing_type'] = response.meta['housing_type']
                     request.meta['city'] = response.meta['city']
                     yield request
 
@@ -62,9 +62,9 @@ class OlxRoomSpider(scrapy.Spider):
         OfferFeaturesItem_loader = OtodomOfferLoader(item=OfferFeaturesItem(), response=response)
         OfferFeaturesItem_loader.add_value('offer_url', response)
         OfferRI_loader.add_value('city', response.meta['city'])
-        OfferRI_loader.add_value('offer_type', response.meta['offer_type'])
+        OfferRI_loader.add_value('housing_type', response.meta['housing_type'])
         OfferRI_loader.add_value('offer_url', response)
-        OfferRI_loader.add_value('offer_purpose', 'wynajem')
+        OfferRI_loader.add_value('business_type', 'wynajem')
         OfferRI_loader.add_xpath('offer_thumbnail_url', '//*[@id="photo-gallery-opener"]/img')
         OfferRI_loader.add_xpath('offer_name', '//*[@id="offerdescription"]/div[2]/h1/text()')
         OfferRI_loader.add_xpath('price', '//*[@id="offeractions"]/div[1]/strong/text()')
