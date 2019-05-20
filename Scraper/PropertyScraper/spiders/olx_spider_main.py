@@ -1,11 +1,17 @@
 import scrapy
 import re
-from itemloaders import OlxOfferLoader, OtodomOfferLoader
-from items import OfferItem
-from items import OfferFeaturesItem
+import os
+if '/home/RoomekBot' in os.path.abspath(''):
+    from Scraper.PropertyScraper.itemloaders import OlxOfferLoader, OtodomOfferLoader
+    from Scraper.PropertyScraper.items import OfferItem, OfferFeaturesItem
+    from Scraper.PropertyScraper.util import offer_features
+else:
+    from itemloaders import OlxOfferLoader, OtodomOfferLoader
+    from items import OfferItem, OfferFeaturesItem
+    from util import offer_features
 from scrapy.linkextractors import LinkExtractor
 import Databases.mysql_connection as db
-from util import offer_features
+
 
 already_scraped_urls_dicts = db.get_all(table_name = 'offers', fields_to_get = 'offer_url')
 already_scraped_urls = []

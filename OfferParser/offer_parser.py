@@ -221,12 +221,12 @@ class Parser():
 
 def batch_parse(min_accuracy):
 
-    simple_parse = Parser()
-    simple_parsing_results = simple_parse.parse_simple()
-    logging.info(simple_parsing_results)
+    # simple_parse = Parser()
+    # simple_parsing_results = simple_parse.parse_simple()
+    # logging.info(simple_parsing_results)
 
     fields_to_parse_wit = {
-        'security_deposit' : {'relevant_word':['kaucj'], 'confidence_req' : 0.9, 'output_processing_funtion': cn.to_int},
+        # 'security_deposit' : {'relevant_word':['kaucj'], 'confidence_req' : 0.9, 'output_processing_funtion': cn.to_int},
         'street': {'relevant_word': ['ul'], 'confidence_req': 0.9, 'output_processing_funtion': cn.to_nominative}
     }
 

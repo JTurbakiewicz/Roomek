@@ -5,8 +5,6 @@ def best_offer(user_obj = None, nr = 3):
 
     query = 'select * from offers where True'
 
-    print(user_obj.business_type)   # TODO
-
     if user_obj.price_limit:
         if type(user_obj.price_limit) is list:
             query = query + ' and ( '
@@ -46,14 +44,11 @@ def best_offer(user_obj = None, nr = 3):
     if user_obj.gender:
         query = query + f" and (preferred_locator like '{user_obj.gender[0]}%' or preferred_locator is Null)"
 
-    # print(query)
     offers = sql.get_custom(query)
 
     relatable_urls = [x['offer_url'] for x in offers]
-    # print(offers)
-    print(query)
+
     return relatable_urls
-    # return relatable_urls[0]
 
 # uzy = User('1')
 # uzy.price_limit = [5100]
