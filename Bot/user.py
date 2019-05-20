@@ -160,5 +160,3 @@ class User:
         self.confirmed_data = confirmed_data
         logging.info("[User info] confirmed_data set to: {0}".format(confirmed_data))
         # update_user(self.facebook_id, "confirmed_data", confirmed_data)
-
-
