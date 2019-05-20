@@ -35,7 +35,7 @@ def verify_fb_token(request, token_sent):
         logging.info("FB token verification succesfull.")
     else:
         logging.warning("Failed to verify FB token.")
-        return 'Invalid verification token'
+        return 'You are seeing this text, because you have probably entered the website and it is only supposed to exchange posts with facebook bot. You return invalid verification token. Just close this. For more info contact: artomczak@gmail.com'
 
 
 class NotificationType(Enum):

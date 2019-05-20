@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """ Functions enabling the Bot to understand messages and intents. """
-from geopy.geocoders import Nominatim
-from geopy.point import Point
+
 # from Bot.bot_responses_PL import *
 import logging
 
@@ -23,6 +22,83 @@ pattern_dictionary = {
     }
 
 
+def collect_information(message, bot):
+    """
+    Function that parses message to find as many information as possible and add as parameters to the user object.
+    """
+
+    if not message.user.location and message.type == "LocationAnswer":
+        message.user.add_location(message.latitude, message.longitude)
+
+    elif message.NLP:
+        if message.NLP_intent is not None:
+            if message.NLP_intent == "boolean":
+                print("TEMP 0001 Trochę DEAD END... " + message.NLP_intent)
+
+        if message.NLP_entities:  # posiada entities
+
+            for entity in message.NLP_entities:     # [entity, value, confidence, body]
+
+                if message.user.city is None and entity[0] == "location":
+                    message.user.set_city(entity[1])
+
+                elif message.user.wants_more_locations:
+                    if entity[0] == "boolean" and entity[1] == "no":
+                        message.user.wants_more_locations = False
+                    elif message.type == "LocationAnswer":
+                        message.user.add_location(lat=message.latitude, long=message.longitude)
+                    elif entity[0] == "location":
+                        message.user.add_location(entity[1])
+
+                elif message.user.wants_more_features and entity[0] == "boolean" and entity[1] == "no":
+                    message.user.wants_more_features = False
+
+                elif message.user.housing_type is None and entity[0] == "housing_type":
+                    message.user.set_housing_type(entity[1])
+
+                elif message.user.price_limit is None:
+                    message.user.set_price_limit(entity[3])
+
+                elif not message.user.wants_more_features and not message.user.confirmed_data:
+                    if entity[0] == "boolean" and entity[1] == "yes":
+                        message.user.confirmed_data = True
+                    elif entity[0] == "boolean" and entity[1] == "no":
+                        message.user.confirmed_data = False
+
+        else:   # ma nlp, ale intent=none i brak mu entities, więc freetext do wyłapania
+
+            if message.user.city is None:
+                try: message.user.set_city(recognize_location(message.text).city)
+                except: pass
+
+            elif not message.user.location and message.type == "LocationAnswer":
+                message.user.add_location(message.latitude, message.longitude)
+
+            elif not message.user.location:
+                try: message.user.add_location(recognize_location(message.text).city)
+                except: pass
+
+            elif message.user.housing_type is None:
+                message.user.set_housing_type(message.text)
+
+            elif message.user.price_limit is None:
+                print("tutaj 001")
+                message.user.set_price_limit(message.text)
+
+            elif message.user.wants_more_features:
+                message.user.add_feature(message.text)
+
+            elif message.user.wants_more_features and entity[0] == "boolean" and entity[1] == "no":
+                message.user.wants_more_features = False
+
+            else:
+                response.default_message(message, bot)
+    else:
+        if message.user.price_limit is None and message.type == "TextMessage":
+            print("tutaj 004")
+            message.user.set_price_limit(99999999)
+
+
 def regex_pattern_matcher(str, pat_dic=pattern_dictionary):
     """Regular Expression pattern finder that searches for intents from patternDictionary."""
     intent = False
@@ -40,6 +116,38 @@ def regex_pattern_matcher(str, pat_dic=pattern_dictionary):
             intent = key   #cause found searchObj.group()
 
     return intent
+
+
+def replace_emojis(to_replace):
+    to_replace = replace_if_contains(to_replace, "🐶", "zwierz")
+    to_replace = replace_if_contains(to_replace, "🐱", "zwierz")
+    to_replace = replace_if_contains(to_replace, "🔨", "remont")
+    to_replace = replace_if_contains(to_replace, "🛀", "wanna")
+    to_replace = replace_if_contains(to_replace, "🚬", "palący")
+    to_replace = replace_if_contains(to_replace, "🚭", "niepalący")
+    to_replace = replace_if_contains(to_replace, "💩", "słaba")
+    to_replace = replace_if_contains(to_replace, "🐭", "zwierz")
+    to_replace = replace_if_contains(to_replace, "🐹", "zwierz")
+    to_replace = replace_if_contains(to_replace, "🐰", "zwierz")
+    to_replace = replace_if_contains(to_replace, "🐍", "zwierz")
+    to_replace = replace_if_contains(to_replace, "🐢", "zwierz")
+    to_replace = replace_if_contains(to_replace, "🐠", "zwierz")
+    to_replace = replace_if_contains(to_replace, "🐟", "zwierz")
+    to_replace = replace_if_contains(to_replace, "👏", "brawo")
+    to_replace = replace_if_contains(to_replace, "👍", "tak")
+    to_replace = replace_if_contains(to_replace, "👎", "nie")
+    to_replace = replace_if_contains(to_replace, "🚲", "rower")
+    to_replace = replace_if_contains(to_replace, "🎊", "imprez")
+    to_replace = replace_if_contains(to_replace, "🎉", "imprez")
+    return to_replace
+
+
+def replace_if_contains(to_replace, if_contains, replace_with):
+    if str(if_contains) in str(to_replace):
+        return to_replace.replace(str(if_contains), str(replace_with))
+        logging.debug("replaced {0} with {1}").format(str(if_contains), str(replace_with))
+    else:
+        return str(to_replace)
 
 
 def recognize_sticker(sticker_id):
@@ -65,26 +173,3 @@ def recognize_sticker(sticker_id):
     elif sticker_id.startswith('30261'):  sticker_name = 'sloth'
     else:  sticker_name = 'unknown'
     return sticker_name
-
-
-# TODO get subregions (dzielnice żeby zasugerować)
-def recognize_location(message="", location="", city="", lat=0, long=0):
-    try:
-        geolocator = Nominatim(user_agent="Roomek")
-        if lat != 0 or long != 0:
-            loc = geolocator.reverse(Point(lat, long), language="pl")
-        elif city == "":
-            loc = geolocator.geocode(location, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'], addressdetails = True, limit=3)
-        else:
-            loc1 = geolocator.geocode(city, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'], addressdetails=True)
-            if 'boundingbox' in loc1.raw:
-                box = [Point(loc1.raw['boundingbox'][0], loc1.raw['boundingbox'][2]), Point(loc1.raw['boundingbox'][1], loc1.raw['boundingbox'][3])]
-                loc = geolocator.geocode(location, viewbox=box, bounded=True, country_codes=['pl'], addressdetails=True, limit=3)
-            else:
-                loc = geolocator.geocode(message, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'], addressdetails=True, limit=3)
-        return loc
-    except:
-        logging.warning("Error while recognizing location. Probably GeoCoder Timed Out or URLerror.")
-
-# l=recognize_location(city="Sopot", location="centrum")
-# print(l.raw)

@@ -7,8 +7,10 @@ import logging
 from datetime import date
 import re
 from Dispatcher_app import use_database
-from Bot.cognition import recognize_sticker, recognize_location
+from Bot.cognition import recognize_sticker, replace_emojis
+from Bot.geoinfo import recognize_location
 from OfferParser.translator import translate
+
 import tokens
 # TODO if use_database: from Databases.... import update_user
 
@@ -32,8 +34,11 @@ class User:
         self.housing_type = None
         self.price_limit = None
         self.city = None
+        self.street = None
         self.country = None
-        self.location = None
+        self.location = []
+        self.latitude = []
+        self.longitude = []
         self.features = []  # ["dla studenta", "nieprzechodni", "niepalacy"]
         self.shown_input = False
         self.asked_for_features = False
@@ -71,15 +76,13 @@ class User:
         # update_user(self.facebook_id, "gender", gender)
 
     def set_business_type(self, business_type):
-        print(business_type) # TODO Skasuj mnie później.
-        business_type = translate(business_type, "Q") # TODO Skasuj mnie później.
-        print(business_type) # TODO Skasuj mnie później.
+        business_type = translate(business_type, "Q") # TODO Skasuj mnie jak Kuba poprawi w bazie.
         self.business_type = str(business_type)
         logging.info("[User info] business_type set to {0}".format(business_type))
         # update_user(self.facebook_id, "business_type", business_type)
 
     def set_housing_type(self, housing_type):
-        housing_type = translate(housing_type, "Q")  # TODO Skasuj mnie później.
+        housing_type = translate(housing_type, "Q")  # TODO Skasuj mnie jak Kuba poprawi w bazie.
         self.housing_type = str(housing_type)
         logging.info("[User info] housing_type set to {0}".format(housing_type))
         # update_user(self.facebook_id, "housing_type", housing_type)
@@ -107,10 +110,15 @@ class User:
         # update_user(self.facebook_id, "country", country)
 
     # TODO powinno być "add" bo przecież może chcieć Mokotów Wolę i Pragę
-    def set_location(self, location="", lat=0, long=0):
+    def add_location(self, location="", lat=0, long=0):
         if lat != 0 and long != 0:
-            self.location = [float(lat), float(long)]
+            self.latitude.append(float(lat))
+            self.longitude.append(float(long))
             loc = recognize_location(lat=lat, long=long)
+            if hasattr(loc, 'display_name'):
+                self.location.append(loc.display_name)
+            else:
+                logging.warning('location missing!')
         elif "entrum" in str(location):
             if hasattr(self, 'city'):
                 loc = recognize_location(location="centrum", city=self.city)
@@ -119,21 +127,23 @@ class User:
         else:
             loc = recognize_location(location=str(location))
 
-        if hasattr(loc, 'latitude'):
-            self.location = [float(loc.latitude), float(loc.longitude)]
-            logging.info("[User info] Location changed: latitude={0}, longitude={1}".format(loc.latitude, loc.longitude))
-        if hasattr(loc, 'city'):
+        if not self.latitude and hasattr(loc, 'latitude'):
+            self.latitude.append(float(loc.latitude))
+            self.longitude.append(float(loc.longitude))
+        if not self.city and hasattr(loc, 'city'):
             self.city = loc.city
-            logging.info("[User info] Location changed: city={0}".format(loc.city))
-        if hasattr(loc, 'road'):
-            self.street = loc.road
-            logging.info("[User info] Location changed: street={0}".format(loc.road))
-
+        if not self.street and hasattr(loc, 'road'):
+            self.street = loc.address.road
+        if not self.location:
+            self.location.append(loc)
+            # TODO teraz daje pelny adres a moze samą dzielnicę
+        else:
+            logging.warning('location missing!')
         if not (hasattr(loc, 'latitude') or hasattr(loc, 'city') or hasattr(loc, 'road')):
             logging.warning("Unable to discover location!")
 
-        # update_user(self.facebook_id, "location_latitude", float(x))
-        # update_user(self.facebook_id, "location_longitude", float(y)
+        logging.info("User({0})'s location changed to: latitude={1}, longitude={2}, city={3}, street={4}, location={5}".format(
+            self.facebook_id[0:5], self.latitude, self.longitude, self.city, self.street, self.location))
 
     def add_feature(self, feature):
         feature = replace_emojis(feature)
@@ -152,33 +162,3 @@ class User:
         # update_user(self.facebook_id, "confirmed_data", confirmed_data)
 
 
-def replace_emojis(to_replace):
-    to_replace = replace_if_contains(to_replace, "🐶", "zwierz")
-    to_replace = replace_if_contains(to_replace, "🐱", "zwierz")
-    to_replace = replace_if_contains(to_replace, "🔨", "remont")
-    to_replace = replace_if_contains(to_replace, "🛀", "wanna")
-    to_replace = replace_if_contains(to_replace, "🚬", "palący")
-    to_replace = replace_if_contains(to_replace, "🚭", "niepalący")
-    to_replace = replace_if_contains(to_replace, "💩", "słaba")
-    to_replace = replace_if_contains(to_replace, "🐭", "zwierz")
-    to_replace = replace_if_contains(to_replace, "🐹", "zwierz")
-    to_replace = replace_if_contains(to_replace, "🐰", "zwierz")
-    to_replace = replace_if_contains(to_replace, "🐍", "zwierz")
-    to_replace = replace_if_contains(to_replace, "🐢", "zwierz")
-    to_replace = replace_if_contains(to_replace, "🐠", "zwierz")
-    to_replace = replace_if_contains(to_replace, "🐟", "zwierz")
-    to_replace = replace_if_contains(to_replace, "👏", "brawo")
-    to_replace = replace_if_contains(to_replace, "👍", "tak")
-    to_replace = replace_if_contains(to_replace, "👎", "nie")
-    to_replace = replace_if_contains(to_replace, "🚲", "rower")
-    to_replace = replace_if_contains(to_replace, "🎊", "imprez")
-    to_replace = replace_if_contains(to_replace, "🎉", "imprez")
-    return to_replace
-
-
-def replace_if_contains(to_replace, if_contains, replace_with):
-    if str(if_contains) in str(to_replace):
-        return to_replace.replace(str(if_contains), str(replace_with))
-        logging.debug("replaced {0} with {1}").format(str(if_contains), str(replace_with))
-    else:
-        return str(to_replace)
