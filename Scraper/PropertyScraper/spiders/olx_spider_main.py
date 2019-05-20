@@ -40,8 +40,8 @@ class OlxSpiderMain(scrapy.Spider):
     def start_requests(self):
         for url in self.urls:
             request = scrapy.Request(url=url, callback=self.parse_initial_page)
-            request.meta['offer_type'] = url.split('/')[-4]
-            request.meta['offer_purpose'] = url.split('/')[-3]
+            request.meta['housing_type'] = url.split('/')[-4]
+            request.meta['business_type'] = url.split('/')[-3]
             request.meta['city'] = url.split('/')[-2]
             yield request
 
@@ -51,9 +51,9 @@ class OlxSpiderMain(scrapy.Spider):
             links_to_main_page.add(link.url)
             if link is not None and link.url:
                 request = scrapy.Request(link.url, callback=self.parse_main_pages)
-                request.meta['offer_type'] = response.meta['offer_type']
+                request.meta['housing_type'] = response.meta['housing_type']
                 request.meta['city'] = response.meta['city']
-                request.meta['offer_purpose'] = response.meta['offer_purpose']
+                request.meta['business_type'] = response.meta['business_type']
                 yield request
 
         olx_offer_links = OLX_extractor_subpage.extract_links(response)
@@ -63,9 +63,9 @@ class OlxSpiderMain(scrapy.Spider):
                 links_to_olx_offers.add(link.url)
                 if link is not None:
                     request = scrapy.Request(link.url, callback=self.parse_olx_offer)
-                    request.meta['offer_type'] = response.meta['offer_type']
+                    request.meta['housing_type'] = response.meta['housing_type']
                     request.meta['city'] = response.meta['city']
-                    request.meta['offer_purpose'] = response.meta['offer_purpose']
+                    request.meta['business_type'] = response.meta['business_type']
                     yield request
 
         otodom_offer_links = OLX_extractor_otodom.extract_links(response)
@@ -74,9 +74,9 @@ class OlxSpiderMain(scrapy.Spider):
                 links_to_otodom_offers.add(link.url)
                 if link is not None:
                     request = scrapy.Request(link.url, callback=self.parse_otodom_offer)
-                    request.meta['offer_type'] = response.meta['offer_type']
+                    request.meta['housing_type'] = response.meta['housing_type']
                     request.meta['city'] = response.meta['city']
-                    request.meta['offer_purpose'] = response.meta['offer_purpose']
+                    request.meta['business_type'] = response.meta['business_type']
                     yield request
 
     def parse_main_pages(self, response):
@@ -86,9 +86,9 @@ class OlxSpiderMain(scrapy.Spider):
                 links_to_olx_offers.add(link.url)
                 if link is not None:
                     request = scrapy.Request(link.url, callback=self.parse_olx_offer)
-                    request.meta['offer_type'] = response.meta['offer_type']
+                    request.meta['housing_type'] = response.meta['housing_type']
                     request.meta['city'] = response.meta['city']
-                    request.meta['offer_purpose'] = response.meta['offer_purpose']
+                    request.meta['business_type'] = response.meta['business_type']
                     yield request
 
         otodom_offer_links = OLX_extractor_otodom.extract_links(response)
@@ -97,9 +97,9 @@ class OlxSpiderMain(scrapy.Spider):
                 links_to_otodom_offers.add(link.url)
                 if link is not None:
                     request = scrapy.Request(link.url, callback=self.parse_otodom_offer)
-                    request.meta['offer_type'] = response.meta['offer_type']
+                    request.meta['housing_type'] = response.meta['housing_type']
                     request.meta['city'] = response.meta['city']
-                    request.meta['offer_purpose'] = response.meta['offer_purpose']
+                    request.meta['business_type'] = response.meta['business_type']
                     yield request
 
     def parse_olx_offer(self, response):
@@ -107,8 +107,8 @@ class OlxSpiderMain(scrapy.Spider):
         OfferFeaturesItem_loader = OtodomOfferLoader(item=OfferFeaturesItem(), response=response)
         OfferFeaturesItem_loader.add_value('offer_url', response)
         OfferItem_loader.add_value('city', response.meta['city'])
-        OfferItem_loader.add_value('offer_purpose', response.meta['offer_purpose'])
-        OfferItem_loader.add_value('offer_type', response.meta['offer_type'])
+        OfferItem_loader.add_value('business_type', response.meta['business_type'])
+        OfferItem_loader.add_value('housing_type', response.meta['housing_type'])
         OfferItem_loader.add_value('offer_url', response)
         OfferItem_loader.add_xpath('offer_thumbnail_url', '//*[@id="photo-gallery-opener"]/img')
         OfferItem_loader.add_xpath('offer_name', '//*[@id="offerdescription"]/div[2]/h1/text()')
@@ -148,8 +148,8 @@ class OlxSpiderMain(scrapy.Spider):
         OfferFeaturesItem_loader = OtodomOfferLoader(item=OfferFeaturesItem(), response=response)
         OfferFeaturesItem_loader.add_value('offer_url', response)
         OfferItem_loader.add_value('city', response.meta['city'])
-        OfferItem_loader.add_value('offer_type', response.meta['offer_type'])
-        OfferItem_loader.add_value('offer_purpose', response.meta['offer_purpose'])
+        OfferItem_loader.add_value('housing_type', response.meta['housing_type'])
+        OfferItem_loader.add_value('business_type', response.meta['business_type'])
         OfferItem_loader.add_value('offer_url', response)
         OfferItem_loader.add_xpath('offer_name', '//*[@id="root"]/div/article/header/div[1]/div/div/h1/text()')
         OfferItem_loader.add_xpath('offer_thumbnail_url', '//*[@id="root"]/div/article/section/div[1]/div/div[1]/div/div[2]/div/div[2]/div/picture/img')

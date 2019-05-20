@@ -12,13 +12,13 @@ def price(column_name, value, *args, **kwargs):
     offer_record = kwargs['offer_record']
     city = offer_record['city']
     district = offer_record['district']
-    offer_type = offer_record['offer_type']
-    offer_purpose = offer_record['offer_purpose']
+    housing_type = offer_record['housing_type']
+    business_type = offer_record['business_type']
 
     if district is None:
-        prices_dict = db.get_custom(f"select price from offers where city = '{city}' and offer_type = '{offer_type}' and offer_purpose = '{offer_purpose}';")
+        prices_dict = db.get_custom(f"select price from offers where city = '{city}' and housing_type = '{housing_type}' and business_type = '{business_type}';")
     else:
-        prices_dict = db.get_custom(f"select price from offers where city = '{city}' and district = '{district}' and offer_type = '{offer_type}' and offer_purpose = '{offer_purpose}';")
+        prices_dict = db.get_custom(f"select price from offers where city = '{city}' and district = '{district}' and housing_type = '{housing_type}' and business_type = '{business_type}';")
 
     prices = [dictionary['price'] for dictionary in prices_dict]
     mean_of_prices = mean(prices)
@@ -52,13 +52,13 @@ def area(column_name, value, *args, **kwargs):
     offer_record = kwargs['offer_record']
     city = offer_record['city']
     district = offer_record['district']
-    offer_type = offer_record['offer_type']
-    offer_purpose = offer_record['offer_purpose']
+    housing_type = offer_record['housing_type']
+    business_type = offer_record['business_type']
 
     if district is None:
-        db_dict = db.get_custom(f"select price, area from offers where city = '{city}' and offer_type = '{offer_type}' and offer_purpose = '{offer_purpose}';")
+        db_dict = db.get_custom(f"select price, area from offers where city = '{city}' and housing_type = '{housing_type}' and business_type = '{business_type}';")
     else:
-        db_dict = db.get_custom(f"select price, area from offers where city = '{city}' and district = '{district}' and offer_type = '{offer_type}' and offer_purpose = '{offer_purpose}';")
+        db_dict = db.get_custom(f"select price, area from offers where city = '{city}' and district = '{district}' and housing_type = '{housing_type}' and business_type = '{business_type}';")
 
     prices = [dictionary['price'] for dictionary in db_dict]
     areas = [dictionary['area'] for dictionary in db_dict]
@@ -89,13 +89,13 @@ def price_per_m2(column_name, value, *args, **kwargs):
     offer_record = kwargs['offer_record']
     city = offer_record['city']
     district = offer_record['district']
-    offer_type = offer_record['offer_type']
-    offer_purpose = offer_record['offer_purpose']
+    housing_type = offer_record['housing_type']
+    business_type = offer_record['business_type']
 
     if district is None:
-        db_dict = db.get_custom(f"select price_per_m2 from offers where city = '{city}' and offer_type = '{offer_type}' and offer_purpose = '{offer_purpose}';")
+        db_dict = db.get_custom(f"select price_per_m2 from offers where city = '{city}' and housing_type = '{housing_type}' and business_type = '{business_type}';")
     else:
-        db_dict = db.get_custom(f"select price_per_m2 from offers where city = '{city}' and district = '{district}' and offer_type = '{offer_type}' and offer_purpose = '{offer_purpose}';")
+        db_dict = db.get_custom(f"select price_per_m2 from offers where city = '{city}' and district = '{district}' and housing_type = '{housing_type}' and business_type = '{business_type}';")
 
     prices = [dictionary['price_per_m2'] for dictionary in db_dict]
 

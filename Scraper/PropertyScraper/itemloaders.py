@@ -165,8 +165,8 @@ def location_longitude_otodom(input):
 
 class OlxOfferLoader(ItemLoader):
     city_in = MapCompose()
-    offer_type_in = MapCompose(translate)
-    offer_purpose_in = MapCompose(translate)
+    housing_type_in = MapCompose(translate)
+    business_type_in = MapCompose(translate)
     offer_url_in = MapCompose(response_to_string)
     offer_thumbnail_url_in = MapCompose(find_image_url)
     offer_name_in = MapCompose(remove_html_tags, remove_unnecessary_spaces)
