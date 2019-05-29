@@ -39,6 +39,10 @@ def collect_information(message, bot):
 
             for entity in message.NLP_entities:     # [entity, value, confidence, body]
 
+                # TODO if confidence > minimum...
+
+                # TODO zamiana logów na observer pattern - loguj jak zmiana usera
+
                 if message.user.city is None and entity[0] == "location":
                     message.user.set_city(entity[1])
 
@@ -52,6 +56,7 @@ def collect_information(message, bot):
 
                 elif message.user.wants_more_features and entity[0] == "boolean" and entity[1] == "no":
                     message.user.wants_more_features = False
+                    logging.info("[User {0} Update] wants_more_features = False".format(message.user.facebook_id))
 
                 elif message.user.housing_type is None and entity[0] == "housing_type":
                     message.user.set_housing_type(entity[1])
@@ -62,8 +67,12 @@ def collect_information(message, bot):
                 elif not message.user.wants_more_features and not message.user.confirmed_data:
                     if entity[0] == "boolean" and entity[1] == "yes":
                         message.user.confirmed_data = True
+                        logging.info("[User {0} Update] confirmed_data = True".format(message.user.facebook_id))
+
                     elif entity[0] == "boolean" and entity[1] == "no":
                         message.user.confirmed_data = False
+                        logging.info("[User {0} Update] confirmed_data = False".format(message.user.facebook_id))
+                        # TODO dead end.
 
         else:   # ma nlp, ale intent=none i brak mu entities, więc freetext do wyłapania
 
@@ -90,7 +99,7 @@ def collect_information(message, bot):
 
             elif message.user.wants_more_features and entity[0] == "boolean" and entity[1] == "no":
                 message.user.wants_more_features = False
-
+                logging.info("[User {0} Update] wants_more_features = False".format(message.user.facebook_id))
             else:
                 response.default_message(message, bot)
     else:

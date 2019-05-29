@@ -109,14 +109,13 @@ def ask_what_wrong(message, bot):
 
 @response_decorator
 def show_offers(message, bot):
-    bot.fb_send_text_message(str(message.senderID), "Znalazłem dla Ciebie takie oferty:")
+    # bot.fb_send_text_message(str(message.senderID), "Znalazłem dla Ciebie takie oferty:")
     if fake_typing: bot.fb_fake_typing(message.senderID, 0.4)
-    # best = best_offer(user_obj=message.user)
-    # bot.fb_send_text_message(str(message.senderID), best[0])
-    # bot.fb_send_text_message(str(message.senderID), best[1])
-    # bot.fb_send_text_message(str(message.senderID), best[2])
-    bot.fb_send_text_message(str(message.senderID), "POKAZALBYM OFERTY")
-    # # bot.fb_send_generic_message(userid, ['Oferta 1', 'Oferta 2', 'Oferta 3'])
+    best = best_offer(user_obj=message.user)
+    bot.fb_send_text_message(str(message.senderID), best[0])
+    bot.fb_send_text_message(str(message.senderID), best[1])
+    bot.fb_send_text_message(str(message.senderID), best[2])
+    bot.fb_send_generic_message(message.senderID, ['Oferta 1', 'Oferta 2', 'Oferta 3'])
 
 
 @response_decorator
