@@ -53,11 +53,10 @@ def ask_for_information(message, bot):
     elif message.user.wants_more_features is True:
         response.ask_for_more_features(message, bot)
 
-    elif message.user.wants_more_features is False:
+    elif not message.user.wants_more_features and not message.user.confirmed_data:
         response.show_input_data(message, bot)
 
-    # elif message.user.wants_more_features is False:
-    # TODO TEMP response.ask_what_wrong(message, bot)
+    # TODO response.ask_what_wrong(message, bot)
 
     elif message.user.confirmed_data:
         response.show_offers(message, bot)

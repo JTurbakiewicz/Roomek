@@ -1,4 +1,5 @@
-Bot module receives user message, parse it to collect information and prepares an answer to send back to the user.
+
+The Bot module receives user message, parses it to collect information and prepares an answer to send back to the user.
 
 How it works:
 1. Dispatcher_app receives the Rest message and pass it to 'logic'.
@@ -9,3 +10,17 @@ How it works:
 6. Questions and all the answers are in 'responses_PL' file.
 7. 'Cognition' contains functions to parse user message like 'recognize_location'.
 8. Message is being send using send functions from 'facebook_webhooks'.
+
+TODO Milestones:
+- dojść do zwracania 3 ofert (obecnie problem z user.confirmeddata)
+- 3 oferty jako linki
+- 3 oferty jako generic message
+- ma umieć zbierać kilka informacji na raz ("szukam mieszkania na wynajem w Warszawie" -> apartment, rent, Warszawa)
+- poprawić zbieranie np. lokalizacji.
+- ułatwić przyszłe zmiany struktury.
+- Postawić to na pyany
+- Sprawdzić jak sobie radzi z wieloma użytkownikami
+- Przejrzeć bazę danych o użytkownikach i rozmowach.
+- rozdzielić na osobne obiekty: User i Query (jeden user może mieć kilka "zapytań")
+- po udanym szukaniu dopytuj dalej lub nowe wyszukiwanie
+- wizualizacja grafu odpowiedzi (jak graf na szkoleniu z ML)

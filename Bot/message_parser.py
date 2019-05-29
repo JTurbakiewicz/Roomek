@@ -97,8 +97,8 @@ class Message:
                                 self.NLP_intent = None
                             for e in entities:
                                 if float(nlp[e][0]['confidence']) > 0.8:   # minimum_confidence:
-                                    logging.INFO(self.NLP_entities)
-                                    logging.INFO(nlp[e][0])
+                                    logging.info(self.NLP_entities)
+                                    logging.info(nlp[e][0])
 
                                     try:
                                         self.NLP_entities.append([
