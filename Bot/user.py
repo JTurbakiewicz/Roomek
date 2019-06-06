@@ -10,9 +10,8 @@ from Dispatcher_app import use_database
 from Bot.cognition import recognize_sticker, replace_emojis
 from Bot.geoinfo import recognize_location
 from OfferParser.translator import translate
-
-import tokens
-# TODO if use_database: from Databases.... import update_user
+if use_database: from Databases import mysql_connection as db
+import inspect
 
 # in the future fetch user ids from the DB:
 users = {}  # { userID : User() }
@@ -39,51 +38,71 @@ class User:
         self.street = None
         self.country = None
         self.location = []
-        self.latitude = []
-        self.longitude = []
+        self.location_latitude = []
+        self.location_longitude = []
         self.features = []  # ["dla studenta", "nieprzechodni", "niepalacy"]
         self.shown_input = False
         self.asked_for_features = False
         self.wants_more_features = True
         self.wants_more_locations = True
         self.confirmed_data = False
-        if facebook_id not in users:
-            users[facebook_id] = self
+        db.create_user(user_obj=self)
 
+    def update_user_decorator(original_function):
+        def wrapper(self, *args, **kwargs):
 
-        # if facebook_id not in BAZA:
-        #     create_user(facebook_id)
+            # Do something BEFORE the original function:
+
+            # The original function:
+            original_function(self, args[0])
+
+            # Do something AFTER the original function:
+            print("ALE JEBAĆ TO O O")
+            print(str(args[0]))
+            print(str(inspect.getfullargspec(original_function)))
+            # update_user(self.facebook_id, field_to_update="", field_value=args[0])
+
+        return wrapper
 
     # TODO universal setter?
     # def set_field(self, field_name, filed_value):
     # self.FIELD_NAME = FIELD.VALUE
 
+
+
+    @update_user_decorator
     def set_facebook_id(self, facebook_id):
         self.facebook_id = str(facebook_id)
         logging.info("[User info] facebook_id set to {0}".format(facebook_id))
 
+    @update_user_decorator
     def set_first_name(self, first_name):
         self.first_name = str(first_name)
         logging.info("[User info] first_name set to {0}".format(first_name))
 
+    @update_user_decorator
     def set_last_name(self, last_name):
         self.last_name = str(last_name)
         logging.info("[User info] last_name set to {0}".format(last_name))
 
+    @update_user_decorator
     def set_gender(self, gender):
         self.gender = str(gender)
         logging.info("[User info] gender set to {0}".format(gender))
 
+    @update_user_decorator
     def set_business_type(self, business_type):
         business_type = translate(business_type, "Q") # TODO Skasuj mnie jak Kuba poprawi w bazie.
         self.business_type = str(business_type)
         logging.info("[User info] business_type set to {0}".format(business_type))
 
+    @update_user_decorator
     def set_housing_type(self, housing_type):
         housing_type = translate(housing_type, "Q")  # TODO Skasuj mnie jak Kuba poprawi w bazie.
         self.housing_type = str(housing_type)
         logging.info("[User info] housing_type set to {0}".format(housing_type))
 
+    @update_user_decorator
     def set_price_limit(self, price_limit):
         try:
             # workaround for witai returning date instead of price:
@@ -95,15 +114,18 @@ class User:
         except:
             logging.warning("Couldn't set the price limit using: '{0}', so it remains at {1}.".format(price_limit, self.price_limit))
 
+    @update_user_decorator
     def set_city(self, city):
         self.city = str(city)
         logging.info("[User info] city set to {0}".format(city))
 
+    @update_user_decorator
     def set_country(self, country):
         self.country = str(country)
         logging.info("[User info] country set to {0}".format(country))
 
     # TODO powinno być "add" bo przecież może chcieć Mokotów Wolę i Pragę
+    @update_user_decorator
     def add_location(self, location="", lat=0, long=0):
         if lat != 0 and long != 0:
             self.latitude.append(float(lat))
@@ -139,6 +161,7 @@ class User:
         logging.info("User({0})'s location changed to: latitude={1}, longitude={2}, city={3}, street={4}, location={5}".format(
             self.facebook_id[0:5], self.latitude, self.longitude, self.city, self.street, self.location))
 
+    @update_user_decorator
     def add_feature(self, feature):
         feature = replace_emojis(feature)
         print("TEMP trying to add feature '{0}'".format(feature))
@@ -149,6 +172,7 @@ class User:
         # current = get_user(self.facebook_id)[0]["features"]
         # appended = str(current)+"&"+str(feature)
 
+    @update_user_decorator
     def set_confirmed_data(self, confirmed_data):
         self.confirmed_data = confirmed_data
         logging.info("[User info] confirmed_data set to: {0}".format(confirmed_data))

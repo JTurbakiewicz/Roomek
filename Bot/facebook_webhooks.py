@@ -148,7 +148,7 @@ class Bot:
         # TODO character limit error
         if type(message) == list:
             message = random.choice(message)
-        if use_database: db.add_conversation(str(userid), 'User', message)
+        # if use_database: db.add_conversation(str(userid), 'User', message)
         logging.info("BOT({0}): '{1}'".format(str(userid)[0:5], message))
         return self.fb_send_message(userid, {
             'text': message
@@ -340,7 +340,7 @@ class Bot:
             }
             reply_options.append(content)
 
-        if use_database: db.add_conversation(str(userid), 'User', message)
+        # if use_database: db.add_conversation(str(userid), 'User', message)
         logging.info("BOT({0}): '{1}' Replies{2}".format(str(userid)[0:5], str(reply_message), str(replies)))
 
         return self.fb_send_message(userid, {

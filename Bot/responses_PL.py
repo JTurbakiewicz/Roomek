@@ -12,7 +12,6 @@ from OfferParser.translator import translate
 from Databases import mysql_connection as db
 
 
-# TODO do the decorator and try to input (message, bot):
 def response_decorator(original_function):
     def wrapper(message, bot, *args, **kwargs):
 
@@ -94,7 +93,7 @@ def show_input_data(message, bot):
     message.user.shown_input = True
     housing_type = translate(message.user.housing_type, "D")
     print(housing_type)
-    response1 = "Zanotowałem, że szukasz {0} w mieście {1} w okolicy {2} ({3},{4})".format(housing_type, message.user.city, message.user.location, message.user.latitude, message.user.longitude)
+    response1 = "Zanotowałem, że szukasz {0} w mieście {1} w okolicy {2} ({3},{4})".format(housing_type, message.user.city, message.user.location, message.user.location_latitude, message.user.location_longitude)
     bot.fb_send_text_message(str(message.senderID), response1)
     response2 = "które ma {0} i kosztuje do {1}zł.".format(str(message.user.features), message.user.price_limit)
     bot.fb_send_text_message(str(message.senderID), response2)
