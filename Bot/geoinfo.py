@@ -4,10 +4,9 @@ from pprint import pprint
 import numpy as np
 import matplotlib.pyplot as plt
 # from mpl_toolkits.basemap import Basemap
-from geopy.geocoders import Nominatim
+from geopy.geocoders import Nominatim, GoogleV3, OpenCage, GeoNames
 from geopy.point import Point
-
-logging.basicConfig(level='DEBUG')
+from geopy.exc import GeocoderTimedOut, GeocoderUnavailable, GeocoderQuotaExceeded, GeocoderAuthenticationFailure
 
 APP_ID = "1e14e921"
 API_key = "b609a1ae5aec948dacb0dc8da2c8ee43"
@@ -131,6 +130,7 @@ payload_for_time_filter = """{
 }
 """
 
+
 def create_map(headers=r_headers, payload=payload_for_map):
     rsp = requests.request(
         'POST',
@@ -139,6 +139,7 @@ def create_map(headers=r_headers, payload=payload_for_map):
         data=payload
     )
     # pprint(rsp.json())
+
 
 def create_time_filter(headers=r_headers, payload=payload_for_time_filter):
     """ Given origin and destination points filter out points that cannot be reached within specified time limit.
@@ -152,32 +153,48 @@ def create_time_filter(headers=r_headers, payload=payload_for_time_filter):
     )
     # pprint(rsp.json())
 
+
 create_map(r_headers, payload_for_map)
 create_time_filter(r_headers, payload_for_time_filter)
 
 fig = plt.figure(figsize=(8, 8))
 
 
-# TODO get subregions (dzielnice żeby zasugerować)
-def recognize_location(message="", location="", city="", lat=0, long=0):
-    try:
-        geolocator = Nominatim(user_agent="Roomek")
-        if lat != 0 or long != 0:
-            loc = geolocator.reverse(Point(lat, long), language="pl")
-        elif city == "":
-            loc = geolocator.geocode(location, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'], addressdetails = True, limit=3)
-        else:
-            loc1 = geolocator.geocode(city, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'], addressdetails=True)
-            if 'boundingbox' in loc1.raw:
-                box = [Point(loc1.raw['boundingbox'][0], loc1.raw['boundingbox'][2]), Point(loc1.raw['boundingbox'][1], loc1.raw['boundingbox'][3])]
-                loc = geolocator.geocode(location, viewbox=box, bounded=True, country_codes=['pl'], addressdetails=True, limit=3)
-            else:
-                loc = geolocator.geocode(message, viewbox=[Point(40, 10), Point(60, 30)], bounded=True, country_codes=['pl'], addressdetails=True, limit=3)
-        return loc
-    except:
-        logging.warning("Error while recognizing location. Probably GeoCoder Timed Out or URLerror.")
-        loc = "Sample loc object"
-        return loc
 
-# l=recognize_location(city="Sopot", location="centrum")
-# print(l.raw)
+def recognize_location(location="", lat=0, long=0):
+    try:
+        geolocator = GeoNames(country_bias=None, username='ar3i', timeout=3, proxies=None, user_agent='geopy/1.20.0',
+                              format_string=None, ssl_context=None, scheme='http')
+        # geolocator = Nominatim(user_agent="Roomek")
+        # geolocator = OpenCage(api_key='9426f4964f6c416e924e3486879c1e49', domain='api.opencagedata.com', scheme='https', timeout=1, proxies=None)
+
+        # TODO get subregions (dzielnice żeby zasugerować) http://www.geonames.org/export/place-hierarchy.html#children
+
+        if lat != 0 or long != 0:
+            # reverse geocoding - mając lat i long zwróć adres:
+            loc = geolocator.reverse(Point(51.000, 20.000), exactly_one=True, timeout=3, feature_code=None, lang=None, find_nearby_type='findNearbyPlaceName')
+
+        # Narrow search when city is known:
+        # elif city != "":
+            # known city so narrow search area (box = "40, 10, 60, 30"):
+            # loc = geolocator.geocode(location, exactly_one=True, timeout=3, country=None, country_bias=None)
+
+        else:
+            # recognize the place:
+            loc = geolocator.geocode(location, exactly_one=True, timeout=3, country=None, country_bias=None)
+
+        if loc:
+            return loc
+        else:
+            print("error! " + str(loc))
+
+    except GeocoderTimedOut as e:
+        print("Error: geocode failed on input %s with message %s" % ("XYZ", e.message))
+    except GeocoderUnavailable as e:
+        print("Error: geocode failed on input %s with message %s" % ("XYZ", e.message))
+    except GeocoderQuotaExceeded as e:
+        print("Error: geocode failed on input %s with message %s" % ("XYZ", e.message))
+    except GeocoderAuthenticationFailure as e:
+        print("Error: geocode failed on input %s with message %s" % ("XYZ", e.message))
+    except:
+        print("GeoCoder unknown error.")

@@ -1,7 +1,8 @@
 import Databases.mysql_connection as sql
 # from Bot.user import User
 
-def best_offer(user_obj = None, nr = 3):
+
+def best_offer(user_obj = None, count = 3):
 
     query = 'select * from offers where True'
 
