@@ -313,7 +313,11 @@ class Bot:
         """
         return self.fb_send_attachment_url(userid, "image", image_url, notification_type)
 
-    def fb_send_quick_replies(self, userid, reply_message = "", replies = ['a','b','c'], location=False, notification_type=NotificationType.regular):
+
+    # def fb_send_quick_replies(self, userid, reply_message = "", replies = ['a','b','c'], location=False, notification_type=NotificationType.regular):
+    # TODO Temp:
+    def fb_send_quick_replies(self, userid, reply_message="", replies=['a', 'b', 'c'], location=False, notification_type=NotificationType.regular):
+
         """Send quick replies to the specified recipient.
         https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies
         Input:
@@ -323,6 +327,7 @@ class Bot:
         Output:
             Response from API as <dict>
         """
+
         # TODO add icon near quick replies: {...,"image_url":"http://example.com/img/red.png"}
         reply_options = []
         if location:

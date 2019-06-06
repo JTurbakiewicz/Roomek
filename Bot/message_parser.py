@@ -46,6 +46,7 @@ class Message:
             elif 'read' in self.messaging: self.type = "ReadConfirmation"
             elif 'message' in self.messaging:
                 self.mid = 1234567890
+                self.NLP = False
                 # self.mid = self.messaging['message']['mid']
                 # TODO: delivery has mids not mid
                 if 'attachments' in self.messaging['message']:
@@ -108,9 +109,7 @@ class Message:
                                             nlp[e][0]['_body']
                                         ])
                                     except:
-                                        logging.warning(self.messaging)
-                        else:
-                            self.NLP = False
+                                        logging.warning("NIE UDAŁO SIĘ ZNALEŹĆ JAKIEGOŚ PARAMETRU NLP! "+self.messaging)
             else:
                 self.type = "UnknownType"
         else:

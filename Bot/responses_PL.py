@@ -18,8 +18,11 @@ def response_decorator(original_function):
 
         # Do something BEFORE the original function:
         if fake_typing: bot.fb_fake_typing(message.senderID, 0.4)
+        show_user_object(message, bot)
+        show_message_object(message, bot)
 
         # The original function:
+
         original_function(message, bot)
 
         # Do something AFTER the original function:
@@ -56,7 +59,6 @@ def ask_for_housing_type(message, bot):
 @response_decorator
 def ask_for_city(message, bot):
     bot.fb_send_quick_replies(message.senderID, "Które miasto Cię interesuje?", ['Warszawa', 'Kraków', 'Łódź', 'Wrocław', 'Poznań', 'Gdańsk', 'Szczecin', 'Bydgoszcz', 'Białystok'])
-
 
 @response_decorator
 def ask_for_features(message, bot):
@@ -111,7 +113,7 @@ def ask_what_wrong(message, bot):
 def show_offers(message, bot):
     # bot.fb_send_text_message(str(message.senderID), "Znalazłem dla Ciebie takie oferty:")
     if fake_typing: bot.fb_fake_typing(message.senderID, 0.4)
-    best = best_offer(user_obj=message.user)
+    best = best_offer(user_obj=message.user, count=3)
     bot.fb_send_text_message(str(message.senderID), best[0])
     bot.fb_send_text_message(str(message.senderID), best[1])
     bot.fb_send_text_message(str(message.senderID), best[2])
@@ -213,3 +215,17 @@ def sticker_response(message, bot):
             'sloth': "moooogggęęę woooollllniiiieeeejjj"
          }.get(sticker_name, ["Fajna naklejka :)", "Czy to jest opowiedź na moje pytanie?"])
         bot.fb_send_text_message(str(message.senderID), response)
+
+
+def show_user_object(message, bot):
+    reply = ""
+    for key, val in vars(message.user).items():
+        reply += str(key) + "=" + str(val) + "\n"
+    bot.fb_send_text_message(str(message.senderID), reply)
+
+
+def show_message_object(message, bot):
+    reply = ""
+    for key, val in vars(message).items():
+        reply += str(key) + "=" + str(val) + "\n"
+    bot.fb_send_text_message(str(message.senderID), reply)

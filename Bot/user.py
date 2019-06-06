@@ -50,6 +50,7 @@ class User:
         if facebook_id not in users:
             users[facebook_id] = self
 
+
         # if facebook_id not in BAZA:
         #     create_user(facebook_id)
 
