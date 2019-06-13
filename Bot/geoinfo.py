@@ -154,11 +154,10 @@ def create_time_filter(headers=r_headers, payload=payload_for_time_filter):
     # pprint(rsp.json())
 
 
-create_map(r_headers, payload_for_map)
-create_time_filter(r_headers, payload_for_time_filter)
-
-fig = plt.figure(figsize=(8, 8))
-
+# create_map(r_headers, payload_for_map)
+# create_time_filter(r_headers, payload_for_time_filter)
+#
+# fig = plt.figure(figsize=(8, 8))
 
 
 def recognize_location(location="", lat=0, long=0):
@@ -168,16 +167,13 @@ def recognize_location(location="", lat=0, long=0):
         # geolocator = Nominatim(user_agent="Roomek")
         # geolocator = OpenCage(api_key='9426f4964f6c416e924e3486879c1e49', domain='api.opencagedata.com', scheme='https', timeout=1, proxies=None)
 
-        # TODO get subregions (dzielnice żeby zasugerować) http://www.geonames.org/export/place-hierarchy.html#children
-
         if lat != 0 or long != 0:
             # reverse geocoding - mając lat i long zwróć adres:
-            loc = geolocator.reverse(Point(51.000, 20.000), exactly_one=True, timeout=3, feature_code=None, lang=None, find_nearby_type='findNearbyPlaceName')
-
+            loc = geolocator.reverse(Point(lat, long), exactly_one=True, timeout=1, feature_code=None, lang=None, find_nearby_type='findNearbyPlaceName')
         # Narrow search when city is known:
         # elif city != "":
-            # known city so narrow search area (box = "40, 10, 60, 30"):
-            # loc = geolocator.geocode(location, exactly_one=True, timeout=3, country=None, country_bias=None)
+        # known city so narrow search area (box = "40, 10, 60, 30"):
+        # loc = geolocator.geocode(location, exactly_one=True, timeout=3, country=None, country_bias=None)
 
         else:
             # recognize the place:
@@ -187,6 +183,8 @@ def recognize_location(location="", lat=0, long=0):
             return loc
         else:
             print("error! " + str(loc))
+
+        # TODO get subregions (dzielnice żeby zasugerować) http://www.geonames.org/export/place-hierarchy.html#children
 
     except GeocoderTimedOut as e:
         print("Error: geocode failed on input %s with message %s" % ("XYZ", e.message))
@@ -198,3 +196,7 @@ def recognize_location(location="", lat=0, long=0):
         print("Error: geocode failed on input %s with message %s" % ("XYZ", e.message))
     except:
         print("GeoCoder unknown error.")
+
+print(recognize_location(lat=51, long=19))
+
+print(recognize_location(location="Mokotów"))

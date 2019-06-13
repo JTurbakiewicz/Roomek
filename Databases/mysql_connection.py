@@ -6,7 +6,7 @@ import os
 import tokens
 import sys
 
-logging.basicConfig(level='DEBUG')
+# logging.basicConfig(level='DEBUG')
 """Funtion definition"""
 
 class DB_Connection():

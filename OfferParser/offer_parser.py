@@ -12,7 +12,7 @@ import inspect
 import clean_output as cn
 
 
-logging.basicConfig(level='DEBUG')
+# logging.basicConfig(level='DEBUG')
 
 class Parser():
 

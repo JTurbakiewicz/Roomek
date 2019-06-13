@@ -10,6 +10,7 @@ from Dispatcher_app import fake_typing
 from OfferBrowser.best_offer import best_offer
 from OfferParser.translator import translate
 from Databases import mysql_connection as db
+from pprint import pprint, pformat
 
 
 def response_decorator(original_function):
@@ -18,7 +19,9 @@ def response_decorator(original_function):
         # Do something BEFORE the original function:
         if fake_typing: bot.fb_fake_typing(message.senderID, 0.4)
         show_user_object(message, bot)
-        show_message_object(message, bot)
+        # show_message_object(message, bot)
+        message.user.set_context(original_function.__name__)
+        message.user.increment()
 
         # The original function:
 
@@ -217,14 +220,23 @@ def sticker_response(message, bot):
 
 
 def show_user_object(message, bot):
-    reply = ""
+
+    reply = "*MESSAGE*\n"
+    reply += "_recipientID =_ " + str(message.recipientID) + "\n"
+    try:
+        reply += "_NLP intents =_ " + str(message.NLP_intent) + "\n"
+        reply += "_NLP entities =_ " + str(message.NLP_entities) + "\n"
+        reply += "_NLP language =_ " + str(message.NLP_language) + "\n"
+    except:
+        logging.warning("NLP not found")
+    reply += "\n*USER*\n"
     for key, val in vars(message.user).items():
-        reply += str(key) + "=" + str(val) + "\n"
+        reply += "_" + str(key) + "_ = " + str(val) + "\n"
     bot.fb_send_text_message(str(message.senderID), reply)
 
 
 def show_message_object(message, bot):
     reply = ""
     for key, val in vars(message).items():
-        reply += str(key) + "=" + str(val) + "\n"
+        reply += str(key) + " = " + str(val) + "\n"
     bot.fb_send_text_message(str(message.senderID), reply)

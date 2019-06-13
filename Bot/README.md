@@ -11,7 +11,13 @@ How it works:
 7. 'Cognition' contains functions to parse user message like 'recognize_location'.
 8. Message is being send using send functions from 'facebook_webhooks'.
 
-TODO Milestones:
+TODO - ZACZNIJ OD TEGO:
+1.  Spraw aby dodawał usera do bazy.
+2.  Cognition: wydobadz wiecej info z jednej wypowiedzi.
+
+
+
+Milestones:
 - dojść do zwracania 3 ofert (obecnie problem z user.confirmeddata)
 - 3 oferty jako linki
 - 3 oferty jako generic message
