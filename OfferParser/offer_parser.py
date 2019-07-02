@@ -16,18 +16,23 @@ logging.basicConfig(level='DEBUG')
 
 class Parser():
 
-    def __init__(self, relevant_word = 'def', sql_column_name = 'offer_text'):
+    def __init__(self, relevant_word = 'def', sql_column_name = 'offer_text', use_util = False):
+        self.use_util = use_util
         self.relevant_word = relevant_word
         self.sql_column_name = sql_column_name
-        self.sql_train_data = sql.get_custom(
-            """select offer_url, offer_text, {0} from offers where {0} is not Null and offer_text like '%{1}%'""".format(sql_column_name,relevant_word))
+        if self.use_util:
+            self.sql_train_data = sql.get_custom(
+                """select offer_url, offer_text, {0} from utility where {0} is not Null and offer_text like '%{1}%'""".format(sql_column_name, relevant_word))
+        else:
+            self.sql_train_data = sql.get_custom(
+                """select offer_url, offer_text, {0} from offers where {0} is not Null and offer_text like '%{1}%'""".format(sql_column_name,relevant_word))
         self.train_batch_size = len(self.sql_train_data)
         self.sql_parse_data = sql.get_custom(
             """select offer_url, offer_text from offers where {0} is Null and offer_text like '%{1}%'""".format(sql_column_name,relevant_word))
         self.parse_batch_size = len(self.sql_parse_data)
         self.sql_parse_features_data = sql.get_custom("""select offer_url, offer_text from offers""")
-        wit.create_new_entity(sql_column_name, entity_description = 'Created via OfferParser')
-        wit.update_entity(sql_column_name, lookups = ["free-text", 'keywords'])
+        # wit.create_new_entity(sql_column_name, entity_description = 'Created via OfferParser')
+        # wit.update_entity(sql_column_name, lookups = ["free-text", 'keywords'])
 
     def divide_chunks(self, list, size):
         for i in range(0, len(list), size):
@@ -169,6 +174,7 @@ class Parser():
     def train(self, train_percent):
         self.train_percent = train_percent
         self.train_sentences, self.train_values, self.start_chars, self.end_chars, *rest = self.prepare_input(self.sql_train_data, values_present=True)
+        logging.info('Train sample size is: ' + str(self.train_batch_size))
         sentences_to_train= list(self.divide_chunks(self.train_sentences[:int(self.train_batch_size*self.train_percent/100)], 200))
         values_to_train = list(self.divide_chunks(self.train_values[:int(self.train_batch_size*self.train_percent/100)], 200))
         start_chars_to_train = list(
@@ -227,13 +233,16 @@ def batch_parse(min_accuracy):
 
     fields_to_parse_wit = {
         # 'security_deposit' : {'relevant_word':['kaucj'], 'confidence_req' : 0.9, 'output_processing_funtion': cn.to_int},
-        'street': {'relevant_word': ['ul'], 'confidence_req': 0.9, 'output_processing_funtion': cn.to_nominative}
+        'street': {'relevant_word': ['ul'], 'confidence_req': 0.9, 'output_processing_funtion': cn.to_nominative, 'use_util_db': True}
     }
 
     for sql_field, parse_data in fields_to_parse_wit.items():
         for relevant_word in parse_data['relevant_word']:
             logging.info('Creating parser for: ' + str(sql_field) + '; keyword: ' + relevant_word)
-            parser = Parser(relevant_word, sql_field)
+            if parse_data['use_util_db']:
+                parser = Parser(relevant_word, sql_field, use_util = True)
+            else:
+                parser = Parser(relevant_word, sql_field)
             logging.info('Training parser for: ' + str(sql_field) + ' keyword: ' + relevant_word)
             parser.train(80)
             logging.info('Verifing parser for: ' + str(sql_field) + '; keyword: ' + relevant_word)
