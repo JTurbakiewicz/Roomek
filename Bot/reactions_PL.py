@@ -10,16 +10,21 @@ from Dispatcher_app import fake_typing
 from OfferBrowser.best_offer import best_offer
 from OfferParser.translator import translate
 from Databases import mysql_connection as db
+from pprint import pprint, pformat
 
 
-# TODO do the decorator and try to input (message, bot):
 def response_decorator(original_function):
     def wrapper(message, bot, *args, **kwargs):
 
         # Do something BEFORE the original function:
         if fake_typing: bot.fb_fake_typing(message.senderID, 0.4)
+        show_user_object(message, bot)
+        # show_message_object(message, bot)
+        message.user.set_context(original_function.__name__)
+        message.user.increment()
 
         # The original function:
+
         original_function(message, bot)
 
         # Do something AFTER the original function:
@@ -57,7 +62,6 @@ def ask_for_housing_type(message, bot):
 def ask_for_city(message, bot):
     bot.fb_send_quick_replies(message.senderID, "Które miasto Cię interesuje?", ['Warszawa', 'Kraków', 'Łódź', 'Wrocław', 'Poznań', 'Gdańsk', 'Szczecin', 'Bydgoszcz', 'Białystok'])
 
-
 @response_decorator
 def ask_for_features(message, bot):
     bot.fb_send_quick_replies(message.senderID, "Czy masz jakieś szczególne preferencje?", ['Nie, pokaż oferty', 'od zaraz', 'przyjazne dla 🐶🐱', 'blisko do...', 'garaż', '🔨 wyremontowane', 'umeblowane', 'ma 🛀', 'dla 🚬', 'dla 🚭'])
@@ -92,7 +96,7 @@ def show_input_data(message, bot):
     message.user.shown_input = True
     housing_type = translate(message.user.housing_type, "D")
     print(housing_type)
-    response1 = "Zanotowałem, że szukasz {0} w mieście {1} w okolicy {2} ({3},{4})".format(housing_type, message.user.city, message.user.location, message.user.latitude, message.user.longitude)
+    response1 = "Zanotowałem, że szukasz {0} w mieście {1} w okolicy {2} ({3},{4})".format(housing_type, message.user.city, message.user.location, message.user.location_latitude, message.user.location_longitude)
     bot.fb_send_text_message(str(message.senderID), response1)
     response2 = "które ma {0} i kosztuje do {1}zł.".format(str(message.user.features), message.user.price_limit)
     bot.fb_send_text_message(str(message.senderID), response2)
@@ -111,7 +115,7 @@ def ask_what_wrong(message, bot):
 def show_offers(message, bot):
     # bot.fb_send_text_message(str(message.senderID), "Znalazłem dla Ciebie takie oferty:")
     if fake_typing: bot.fb_fake_typing(message.senderID, 0.4)
-    best = best_offer(user_obj=message.user)
+    best = best_offer(user_obj=message.user, count=3)
     bot.fb_send_text_message(str(message.senderID), best[0])
     bot.fb_send_text_message(str(message.senderID), best[1])
     bot.fb_send_text_message(str(message.senderID), best[2])
@@ -213,3 +217,26 @@ def sticker_response(message, bot):
             'sloth': "moooogggęęę woooollllniiiieeeejjj"
          }.get(sticker_name, ["Fajna naklejka :)", "Czy to jest opowiedź na moje pytanie?"])
         bot.fb_send_text_message(str(message.senderID), response)
+
+
+def show_user_object(message, bot):
+
+    reply = "*MESSAGE*\n"
+    reply += "_recipientID =_ " + str(message.recipientID) + "\n"
+    try:
+        reply += "_NLP intents =_ " + str(message.NLP_intent) + "\n"
+        reply += "_NLP entities =_ " + str(message.NLP_entities) + "\n"
+        reply += "_NLP language =_ " + str(message.NLP_language) + "\n"
+    except:
+        logging.warning("NLP not found")
+    reply += "\n*USER*\n"
+    for key, val in vars(message.user).items():
+        reply += "_" + str(key) + "_ = " + str(val) + "\n"
+    bot.fb_send_text_message(str(message.senderID), reply)
+
+
+def show_message_object(message, bot):
+    reply = ""
+    for key, val in vars(message).items():
+        reply += str(key) + " = " + str(val) + "\n"
+    bot.fb_send_text_message(str(message.senderID), reply)

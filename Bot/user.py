@@ -10,56 +10,55 @@ from Dispatcher_app import use_database
 from Bot.cognition import recognize_sticker, replace_emojis
 from Bot.geoinfo import recognize_location
 from OfferParser.translator import translate
-
-import tokens
-# TODO if use_database: from Databases.... import update_user
-
-# in the future fetch user ids from the DB:
-users = {}  # { userID : User() }
-if use_database:
-    users_in_db = db.get_all(table_name='users', fields_to_get='facebook_id')
-    for user_in_db in users_in_db:
-        users[user['facebook_id']] = user_in_db
+if use_database: from Databases import mysql_connection as db
 
 
 class User:
     """ All user info that we also store in db """
 
-    # TODO zamiana logów na observer pattern - loguj jak zmiana usera
-
     def __init__(self, facebook_id):
+        # permanent:
         self.facebook_id = facebook_id
         self.first_name = None
         self.last_name = None
         self.gender = None
+        self.language = None
+        # query parameters:
         self.business_type = None
         self.housing_type = None
         self.price_limit = None
+        self.features = []  # ["dla studenta", "nieprzechodni", "niepalacy"]
+        # address:
+        self.country = None
         self.city = None
         self.street = None
-        self.country = None
-        self.location = []
-        self.latitude = []
-        self.longitude = []
-        self.features = []  # ["dla studenta", "nieprzechodni", "niepalacy"]
+        self.latitude = 0
+        self.longitude = 0
+        # dialogue parameters:
+        self.context = "initialization"
+        self.interactions = 0
         self.shown_input = False
         self.asked_for_features = False
         self.wants_more_features = True
         self.wants_more_locations = True
         self.confirmed_data = False
-        if facebook_id not in users:
-            users[facebook_id] = self
+        self.add_more = True    # TEMP
 
-        # if facebook_id not in BAZA:
-        #     create_user(facebook_id)
+        db.create_user(user_obj=self, update=True)
+
+        print(db.get_user(self.facebook_id))
 
     # TODO universal setter?
     # def set_field(self, field_name, filed_value):
     # self.FIELD_NAME = FIELD.VALUE
 
+    def increment(self):
+        self.interactions += 1
+
     def set_facebook_id(self, facebook_id):
         self.facebook_id = str(facebook_id)
         logging.info("[User info] facebook_id set to {0}".format(facebook_id))
+        update_user(self.facebook_id, field_to_update="", field_value=args[0])
 
     def set_first_name(self, first_name):
         self.first_name = str(first_name)
@@ -72,6 +71,10 @@ class User:
     def set_gender(self, gender):
         self.gender = str(gender)
         logging.info("[User info] gender set to {0}".format(gender))
+
+    def set_context(self, context):
+        self.context = str(context)
+        logging.info("[User info] context set to {0}".format(context))
 
     def set_business_type(self, business_type):
         business_type = translate(business_type, "Q") # TODO Skasuj mnie jak Kuba poprawi w bazie.
@@ -103,20 +106,21 @@ class User:
         logging.info("[User info] country set to {0}".format(country))
 
     # TODO powinno być "add" bo przecież może chcieć Mokotów Wolę i Pragę
-    def add_location(self, location="", lat=0, long=0):
+    def set_location(self, location="", lat=0, long=0):
         if lat != 0 and long != 0:
-            self.latitude.append(float(lat))
-            self.longitude.append(float(long))
+            self.latitude = float(lat)
+            self.longitude = float(long)
             loc = recognize_location(lat=lat, long=long)
             if hasattr(loc, 'display_name'):
-                self.location.append(loc.display_name)
+                logging.info("LOCATION OBJECT: " + loc.display_name)
             else:
-                logging.warning('location missing!')
-        elif "entrum" in str(location):
-            if hasattr(self, 'city'):
-                loc = recognize_location(location="centrum", city=self.city)
-            else:
-                loc = recognize_location(location=str(location))
+                logging.warning('Location missing!')
+
+        # elif "entrum" in str(location):
+        #     if hasattr(self, 'city'):
+        #         loc = recognize_location(location="centrum", city=self.city)
+        #     else:
+        #         loc = recognize_location(location=str(location))
         else:
             loc = recognize_location(location=str(location))
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """ How the Bot reacts to certain messages, depending on the context. """
 
-import Bot.responses_PL as response
+import Bot.reactions_PL as response
 from Bot.cognition import collect_information
 
 
@@ -34,7 +34,7 @@ def ask_for_information(message, bot):
     if message.user.city is None:
         response.ask_for_city(message, bot)
 
-    elif not message.user.location:
+    elif not message.user.latitude:
         response.ask_for_location(message, bot)
 
     elif message.user.wants_more_locations:

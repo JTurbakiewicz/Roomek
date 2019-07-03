@@ -6,9 +6,9 @@ from Dispatcher_app import use_database, fake_typing
 import tokens
 if use_database: from Databases import mysql_connection as db
 from Bot.cognition import *
-from Bot.responses_PL import *
+from Bot.reactions_PL import *
 from Bot.respond import *
-from Bot.message_parser import Message
+from Bot.message import Message
 from Bot.facebook_webhooks import Bot
 
 # initiate the bot object:

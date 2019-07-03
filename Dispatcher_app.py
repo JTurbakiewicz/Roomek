@@ -6,27 +6,28 @@ import os
 import logging
 
 # ------------------app-configuration----------------------------------------------------------------
-use_database = False            # turns the database connection on and off
+use_database = True            # turns the database connection on and off
 fake_typing = False
 logging_level = logging.INFO   # levels in order: DEBUG, INFO, WARNING, EXCEPTION, ERROR, CRITICAL
 # ---------------------------------------------------------------------------------------------------
 
-from flask import Flask, request
-# import from own modules:
-if use_database: from Databases import mysql_connection as db
-from Bot.logic import *
-from Bot.facebook_webhooks import verify_fb_token
-
-# disable Flask server logs unless errors and set our logging parameters:
-logging.getLogger('werkzeug').setLevel(logging.ERROR)
-logging.getLogger("requests").setLevel(logging.WARNING)
-logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.basicConfig(level=logging_level,
                     # filename='/folder/myapp.log',
                     # filemode='w',
                     format='%(asctime)s %(levelname)-7s %(module)-19s L%(lineno)-3d: %(message)s',
                     # %()-5s adds space if less then 5 letters
                     datefmt='%m.%d %H:%M:%S')
+
+# disable Flask server logs unless errors and set our logging parameters:
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
+from flask import Flask, request
+# import from own modules:
+if use_database: from Databases import mysql_connection as db
+from Bot.logic import *
+from Bot.facebook_webhooks import verify_fb_token
 
 # initiate the web app
 app = Flask(__name__)
@@ -41,7 +42,6 @@ def receive_message():
         token_sent = request.args.get("hub.verify_token")
         return verify_fb_token(request, token_sent)
     else:                                  # if type is not 'GET' it must be 'POST' - we have a message
-        # print("______________________________________________________________________________________________")
         json_message = request.get_json()  # read message as json
         handle_message(json_message)       # process the message and respond
     return "Message Processed"

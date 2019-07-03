@@ -27,10 +27,14 @@ def collect_information(message, bot):
     Function that parses message to find as many information as possible and add as parameters to the user object.
     """
 
-    if not message.user.location and message.type == "LocationAnswer":
-        message.user.add_location(message.latitude, message.longitude)
+    if message.type == "LocationAnswer":
+        if message.user.context == "ask_for_location":
+            message.user.add_location(message.latitude, message.longitude)
+        elif message.user.context == "ask_for_city":
+            message.user.add_city(message.latitude, message.longitude)
 
     elif message.NLP:
+
         if message.NLP_intent is not None:
             if message.NLP_intent == "boolean":
                 print("TEMP 0001 Trochę DEAD END... " + message.NLP_intent)

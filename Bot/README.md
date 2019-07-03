@@ -1,7 +1,7 @@
 
 The Bot module receives user message, parses it to collect information and prepares an answer to send back to the user.
 
-How it works:
+How it works:   ________________________________________________________________________________________
 1. Dispatcher_app receives the Rest message and pass it to 'logic'.
 2. 'logic' handles different types of messages and in case of text message it passes it to 'message_parser'.
 3. 'message_parser' creates message object and collects direct information from it.
@@ -11,7 +11,7 @@ How it works:
 7. 'Cognition' contains functions to parse user message like 'recognize_location'.
 8. Message is being send using send functions from 'facebook_webhooks'.
 
-TODO Milestones:
+Milestones:   __________________________________________________________________________________________
 - dojść do zwracania 3 ofert (obecnie problem z user.confirmeddata)
 - 3 oferty jako linki
 - 3 oferty jako generic message
@@ -24,3 +24,12 @@ TODO Milestones:
 - rozdzielić na osobne obiekty: User i Query (jeden user może mieć kilka "zapytań")
 - po udanym szukaniu dopytuj dalej lub nowe wyszukiwanie
 - wizualizacja grafu odpowiedzi (jak graf na szkoleniu z ML)
+- rozdzielić user i query (user może mieć kilka query)
+
+TODO - Dziennik zadań (od najnowszych):   _____________________________________________________________
+- [wymaga Kuby] Spraw aby dodawał usera do bazy 
+- [Cognition] wydobadz wiecej info z jednej wypowiedzi.
+- [fb webhooks] dopracuj karuzelę 3 ofert
+- 
+
+

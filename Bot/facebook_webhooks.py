@@ -148,8 +148,8 @@ class Bot:
         # TODO character limit error
         if type(message) == list:
             message = random.choice(message)
-        if use_database: db.add_conversation(str(userid), 'User', message)
-        logging.info("BOT({0}): '{1}'".format(str(userid)[0:5], message))
+        # if use_database: db.add_conversation(str(userid), 'User', message)
+        logging.info("BOT({0}): '{1}'".format(str(userid)[0:5], message.split('\n', 1)[0]))
         return self.fb_send_message(userid, {
             'text': message
         }, notification_type)
@@ -313,7 +313,11 @@ class Bot:
         """
         return self.fb_send_attachment_url(userid, "image", image_url, notification_type)
 
-    def fb_send_quick_replies(self, userid, reply_message = "", replies = ['a','b','c'], location=False, notification_type=NotificationType.regular):
+
+    # def fb_send_quick_replies(self, userid, reply_message = "", replies = ['a','b','c'], location=False, notification_type=NotificationType.regular):
+    # TODO Temp:
+    def fb_send_quick_replies(self, userid, reply_message="", replies=['a', 'b', 'c'], location=False, notification_type=NotificationType.regular):
+
         """Send quick replies to the specified recipient.
         https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies
         Input:
@@ -323,6 +327,7 @@ class Bot:
         Output:
             Response from API as <dict>
         """
+
         # TODO add icon near quick replies: {...,"image_url":"http://example.com/img/red.png"}
         reply_options = []
         if location:
@@ -335,7 +340,7 @@ class Bot:
             }
             reply_options.append(content)
 
-        if use_database: db.add_conversation(str(userid), 'User', message)
+        # if use_database: db.add_conversation(str(userid), 'User', message)
         logging.info("BOT({0}): '{1}' Replies{2}".format(str(userid)[0:5], str(reply_message), str(replies)))
 
         return self.fb_send_message(userid, {

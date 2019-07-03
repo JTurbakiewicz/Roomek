@@ -36,16 +36,13 @@ class Message:
             self.timestamp = date.fromtimestamp(float(self.messaging['timestamp'])/1000).strftime('%Y-%m-%d %H:%M:%S')
             self.senderID = self.messaging['sender']['id']
             self.recipientID = self.messaging['recipient']['id']
-            if self.senderID not in users:
-                # create new user and add to the dictionary (in class creator)
-                self.user = User(self.senderID)
-            else:
-                # assign existing user to this object
-                self.user = users[self.senderID]
+            # create new user and add to the dictionary (in class creator)
+            self.user = User(self.senderID)
             if 'delivery' in self.messaging: self.type = "Delivery"
             elif 'read' in self.messaging: self.type = "ReadConfirmation"
             elif 'message' in self.messaging:
                 self.mid = 1234567890
+                self.NLP = False
                 # self.mid = self.messaging['message']['mid']
                 # TODO: delivery has mids not mid
                 if 'attachments' in self.messaging['message']:
@@ -86,7 +83,16 @@ class Message:
                             self.NLP = True
                             self.NLP_entities = []
                             nlp = self.messaging['message']['nlp']['entities']
+                            print(nlp)
                             entities = list(nlp.keys())
+                            self.NLP_language = []
+                            try:
+                                for n in self.messaging['message']['nlp']['detected_locales']:
+                                    self.NLP_language.append([n['locale'], n['confidence']])
+                                    print(self.NLP_language)
+                            except:
+                                logging.warning("ERROR02 " + str(self.messaging))
+
                             if 'intent' in entities:
                                 if nlp['intent'][0]['confidence'] > minimum_confidence:
                                     self.NLP_intent = nlp['intent'][0]['value']
@@ -108,9 +114,7 @@ class Message:
                                             nlp[e][0]['_body']
                                         ])
                                     except:
-                                        logging.warning(self.messaging)
-                        else:
-                            self.NLP = False
+                                        logging.warning("NIE UDAŁO SIĘ ZNALEŹĆ JAKIEGOŚ PARAMETRU NLP! "+str(self.messaging))
             else:
                 self.type = "UnknownType"
         else:
