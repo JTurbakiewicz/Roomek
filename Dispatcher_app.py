@@ -4,12 +4,7 @@
 
 import os
 import logging
-
-# ------------------app-configuration----------------------------------------------------------------
-use_database = True            # turns the database connection on and off
-fake_typing = False
-logging_level = logging.INFO   # levels in order: DEBUG, INFO, WARNING, EXCEPTION, ERROR, CRITICAL
-# ---------------------------------------------------------------------------------------------------
+from settings import *
 
 logging.basicConfig(level=logging_level,
                     # filename='/folder/myapp.log',
@@ -24,17 +19,14 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 from flask import Flask, request
-# import from own modules:
-if use_database: from Databases import mysql_connection as db
-from Bot.logic import *
+from Databases import mysql_connection
+from Bot.logic import handle_message
 from Bot.facebook_webhooks import verify_fb_token
 
 # initiate the web app
 app = Flask(__name__)
 
 # We will receive messages that Facebook sends to our bot at this endpoint:
-
-
 @app.route("/", methods=['GET', 'POST'])
 def receive_message():
     logging.debug(request.get_json())          # Full json content
@@ -49,5 +41,5 @@ def receive_message():
 
 # If the program is executed (double-clicked), it will set name to main, thus run app:
 if __name__ == "__main__":
-    logging.info("Main app has been restarted. New Flask app initialized (database: "+str(use_database)+").")
+    logging.info("Main app has been restarted. New Flask app initialized")
     app.run()

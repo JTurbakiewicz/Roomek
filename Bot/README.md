@@ -27,7 +27,10 @@ Milestones:   __________________________________________________________________
 - rozdzielić user i query (user może mieć kilka query)
 
 TODO - Dziennik zadań (od najnowszych):   _____________________________________________________________
-- [wymaga Kuby] Spraw aby dodawał usera do bazy 
+zacznij od:
+- [cognition 83] # TODO MAJOR FUCKUP: no user in message!
+potem:
+- [wymaga Kuby] Spraw aby dodawał usera do bazy   
 - [Cognition] wydobadz wiecej info z jednej wypowiedzi.
 - [fb webhooks] dopracuj karuzelę 3 ofert
 - 

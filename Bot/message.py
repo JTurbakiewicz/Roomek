@@ -5,18 +5,10 @@
 import os
 import logging
 from datetime import date
-from Dispatcher_app import use_database
 from Bot.cognition import recognize_sticker
 from Bot.user import *
 import tokens
-# TODO if use_database: from Databases.... import update_user
 
-# # in the future fetch user ids from the DB:
-# users = {}  # { userID : User() }
-# if use_database:
-#     users_in_db = db.get_all(table_name='users', fields_to_get='facebook_id')
-#     for user_in_db in users_in_db:
-#         users[user['facebook_id']] = user_in_db
 
 class Message:
     """
@@ -58,19 +50,31 @@ class Message:
             self.messaging = self.entry[0]['messaging'][0]
             self.time = date.fromtimestamp(float(self.entry[0]['time'])/1000).strftime('%Y-%m-%d %H:%M:%S')
             self.timestamp = date.fromtimestamp(float(self.messaging['timestamp'])/1000).strftime('%Y-%m-%d %H:%M:%S')
-            self.senderID = self.messaging['sender']['id']
-            self.recipientID = self.messaging['recipient']['id']
 
-            # create new user and add to the dictionary (in class creator)
-            self.user = User(self.senderID)
+            self.is_echo = False
+            try:
+                if 'is_echo' in self.messaging['message']:
+                    if self.messaging['message']['is_echo']:
+                        self.is_echo = True
+            except KeyError:
+                logging.warning("messaging without message")
 
-            if 'delivery' in self.messaging: self.type = "Delivery"
-            elif 'read' in self.messaging: self.type = "ReadConfirmation"
+            # get user_id, check if already in db and create if not:
+            if self.is_echo:
+                self.user_id = self.messaging['recipient']['id']
+            else:
+                self.user_id = self.messaging['sender']['id']
+
+
+            if 'delivery' in self.messaging:
+                self.type = "Delivery"
+            elif 'read' in self.messaging:
+                self.type = "ReadConfirmation"
             elif 'message' in self.messaging:
-                self.mid = 1234567890
-                self.NLP = False
-                # self.mid = self.messaging['message']['mid']
+                self.mid = 1234567890   # TODO mid z wiadomości
                 # TODO: delivery has mids not mid
+                # self.mid = self.messaging['message']['mid']
+
                 if 'attachments' in self.messaging['message']:
                     if 'sticker_id' in self.messaging['message']:
                         self.type = "StickerMessage"
@@ -105,6 +109,7 @@ class Message:
                     else:
                         self.type = "TextMessage"
                         self.text = self.messaging['message']['text']
+
                         if 'nlp' in self.messaging['message']:
                             self.NLP = True
                             self.NLP_entities = []
@@ -146,53 +151,42 @@ class Message:
         else:
             self.type = "UnknownType"
 
-        try:
-            if int(self.senderID) == int(tokens.fb_bot_id):
-                self.sender = "bot"
-                self.recipient = "user"
+
+        # Logs:
+        short_id = str(self.user_id)[0:5]
+        if self.is_echo:
+            if self.type == "UnknownType":
+                logging.warning(
+                    "This wasn't a message, perhaps it's an info request.")
+            elif self.type == "Delivery":
+                logging.info("BOT({0}) message has been delivered.".format(short_id))
+            elif self.type == "ReadConfirmation":
+                logging.info("BOT({0}) message has been read.".format(short_id))
+            elif self.type == "StickerMessage":
+                logging.info("BOT({0}): <sticker id={1}>".format(short_id, self.stickerID))
+            elif self.type == "MessageWithAttachment":
+                logging.info("BOT({0}): <GIF link={1}>".format(short_id, self.url))
+            elif self.type == "TextMessage":
+                logging.info("BOT({0}): '{1}'".format(short_id, self.text))
             else:
-                self.sender = "user"
-                self.recipient = "bot"
-            # Logs:
-            if self.sender == "user":
-                short_id = str(self.senderID)[0:5]
-                if self.type == "UnknownType":
-                    logging.warning("This wasn't a message, perhaps it's an info request. Content:  \n"+str(user_message))
-                elif self.type == "Delivery":
-                    logging.debug("USER({0}) message has been delivered.".format(short_id))
-                elif self.type == "ReadConfirmation":
-                    logging.debug("USER({0}) message read by bot.".format(short_id))
-                elif self.type == "StickerMessage":
-                    logging.info("USER({0}): <sticker id={1}>".format(short_id, self.stickerID))
-                elif self.type == "GifMessage":
-                    logging.info("USER({0}): <GIF link={1}>".format(short_id, self.url))
-                elif self.type == "MessageWithAttachment":
-                    logging.info("USER({0}): <MessageWithAttachment>".format(short_id))
-                elif self.type == "LocationAnswer":
-                    logging.info("USER({0}): <Location: lat={1}, long={2}>".format(short_id, self.latitude, self.longitude))
-                elif self.type == "TextMessage":
-                    logging.info("USER({0}): '{1}'".format(short_id, self.text))
-                else:
-                    logging.error("Unknown message type! Content: " + str(self.messaging))
-            # if self.sender == "bot":
-            #     try:
-            #         short_id = str(self.recipientID)[0:5]
-            #         if self.type == "UnknownType":
-            #             logging.warning(
-            #                 "This wasn't a message, perhaps it's an info request. Content:  \n" + str(self.messaging))
-            #         elif self.type == "Delivery":
-            #             logging.info("BOT({0}) message has been delivered.".format(short_id))
-            #         elif self.type == "ReadConfirmation":
-            #             logging.info("BOT({0}) message has been read.".format(short_id))
-            #         elif self.type == "StickerMessage":
-            #             logging.info("BOT({0}): <sticker id={1}>".format(short_id, self.stickerID))
-            #         elif self.type == "MessageWithAttachment":
-            #             logging.info("BOT({0}): <GIF link={1}>".format(short_id, self.url))
-            #         elif self.type == "TextMessage":
-            #             logging.info("BOT({0}): '{1}'".format(short_id, self.text))
-            #         else:
-            #             logging.error("Unknown message type! Content: " + self.messaging)
-            #     except:
-            #         logging.warning("Couldn't assign a recipientID. Content:  \n"+str(self.messaging))
-        except AttributeError:
-            logging.error("that was probably a sample test message")
+                logging.error("Unknown message type! Content: " + self.messaging)
+
+        else:
+            if self.type == "UnknownType":
+                logging.warning("This wasn't a message, perhaps it's an info request.")
+            elif self.type == "Delivery":
+                logging.debug("USER({0}) message has been delivered.".format(short_id))
+            elif self.type == "ReadConfirmation":
+                logging.debug("USER({0}) message read by bot.".format(short_id))
+            elif self.type == "StickerMessage":
+                logging.info("USER({0}): <sticker id={1}>".format(short_id, self.stickerID))
+            elif self.type == "GifMessage":
+                logging.info("USER({0}): <GIF link={1}>".format(short_id, self.url))
+            elif self.type == "MessageWithAttachment":
+                logging.info("USER({0}): <MessageWithAttachment>".format(short_id))
+            elif self.type == "LocationAnswer":
+                logging.info("USER({0}): <Location: lat={1}, long={2}>".format(short_id, self.latitude, self.longitude))
+            elif self.type == "TextMessage":
+                logging.info("USER({0}): '{1}'".format(short_id, self.text))
+            else:
+                logging.error("Unknown message type! Content: " + str(self.messaging))

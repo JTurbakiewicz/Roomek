@@ -80,6 +80,8 @@ def collect_information(message, bot):
 
         else:   # ma nlp, ale intent=none i brak mu entities, więc freetext do wyłapania
 
+            # TODO MAJOR FUCKUP: no user in message!
+
             if message.user.city is None:
                 try: message.user.set_city(recognize_location(message.text).city)
                 except: pass

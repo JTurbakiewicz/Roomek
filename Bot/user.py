@@ -6,11 +6,10 @@ import os
 import logging
 from datetime import date
 import re
-from Dispatcher_app import use_database
 from Bot.cognition import recognize_sticker, replace_emojis
 from Bot.geoinfo import recognize_location
 from OfferParser.translator import translate
-if use_database: from Databases import mysql_connection as db
+from Databases import mysql_connection as db
 
 
 class User:
