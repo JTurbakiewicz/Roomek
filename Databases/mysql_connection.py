@@ -265,6 +265,7 @@ def get_user(facebook_id):
                  FROM users
                  WHERE facebook_id = %s
                  """ % (facebook_id)
+        print(query)
         cursor.execute(query)
         data = cursor.fetchone()
 
@@ -300,7 +301,7 @@ def create_user(user_obj = None, facebook_id = None, first_name = None, last_nam
                 country = None, housing_type = None, features = None, confirmed_data = None, add_more = None,
                 shown_input = None, update = False):
     if user_obj is None:
-        user_obj = User('default')
+        user_obj = User('0')
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         fields_to_add = 'facebook_id'
         if facebook_id:

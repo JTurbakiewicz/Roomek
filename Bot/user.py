@@ -46,7 +46,7 @@ class User:
 
         db.create_user(user_obj=self, update=True)
 
-        print(db.get_user(self.facebook_id))
+        #print(db.get_user(self.facebook_id))
 
     # TODO universal setter?
     # def set_field(self, field_name, filed_value):

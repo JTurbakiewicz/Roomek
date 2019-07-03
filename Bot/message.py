@@ -18,15 +18,12 @@ import tokens
 #     for user_in_db in users_in_db:
 #         users[user['facebook_id']] = user_in_db
 
-self.minimum_confidence = 0.85
-
 class Message:
     """
         Has attributes taken from json post that was sent to the server from facebook.
         Types: TextMessage/StickerMessage/MessageWithAttachment/Delivery/ReadConfirmation/UnknownType
         """
-
-    self.minimum_confidence = 0.85
+    minimum_confidence = 0.85
 
     def __init__(self, json_data):
 
