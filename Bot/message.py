@@ -18,26 +18,55 @@ import tokens
 #     for user_in_db in users_in_db:
 #         users[user['facebook_id']] = user_in_db
 
+self.minimum_confidence = 0.85
 
 class Message:
     """
-    Has attributes taken from json post that was sent to the server from facebook.
-    Types: TextMessage/StickerMessage/MessageWithAttachment/Delivery/ReadConfirmation/UnknownType
-    """
+        Has attributes taken from json post that was sent to the server from facebook.
+        Types: TextMessage/StickerMessage/MessageWithAttachment/Delivery/ReadConfirmation/UnknownType
+        """
+
+    self.minimum_confidence = 0.85
 
     def __init__(self, json_data):
-        minimum_confidence = 0.85
+
         self.__dict__ = json_data  # previously json.loads
-        self.id = self.entry[0]['id']
-        # TODO już teraz wiadomo czy od usera czy od bota!
+
+        self.is_echo = None     # rozróżnia bota od usera
+        self.user_id = None     # niezależnie czy od czy do niego
+        self.mid = None         # id wiadomości z jsona, może nieprzydatne
+
+        self.time = None
+        self.timestamp = None
+
+        self.type = None
+
+        self.text = None
+
+        self.NLP = None
+        self.NLP_entities = None
+        self.NLP_language = None
+        self.NLP_intent = None
+
+        self.latitude = None
+        self.longitude = None
+
+        self.stickerID = None
+        self.sticker_name = None
+
+        self.url = None
+
+
         if 'messaging' in self.entry[0]:
             self.messaging = self.entry[0]['messaging'][0]
             self.time = date.fromtimestamp(float(self.entry[0]['time'])/1000).strftime('%Y-%m-%d %H:%M:%S')
             self.timestamp = date.fromtimestamp(float(self.messaging['timestamp'])/1000).strftime('%Y-%m-%d %H:%M:%S')
             self.senderID = self.messaging['sender']['id']
             self.recipientID = self.messaging['recipient']['id']
+
             # create new user and add to the dictionary (in class creator)
             self.user = User(self.senderID)
+
             if 'delivery' in self.messaging: self.type = "Delivery"
             elif 'read' in self.messaging: self.type = "ReadConfirmation"
             elif 'message' in self.messaging:
@@ -62,7 +91,7 @@ class Message:
                         elif self.messaging['message']['attachments'][0]['type'] == 'template':
                             self.type = "MessageWithAttachment"
                             if self.messaging['message']['attachments'][0]['payload']['template_type'] == 'button':
-                                    # button message
+                                # button message
                                 self.url = str(self.messaging['message']['attachments'][0]['payload']['buttons'])
                             elif self.messaging['message']['attachments'][0]['payload']['template_type'] == 'list':
                                 # list message
@@ -94,7 +123,7 @@ class Message:
                                 logging.warning("ERROR02 " + str(self.messaging))
 
                             if 'intent' in entities:
-                                if nlp['intent'][0]['confidence'] > minimum_confidence:
+                                if nlp['intent'][0]['confidence'] > self.minimum_confidence:
                                     self.NLP_intent = nlp['intent'][0]['value']
                                 else:
                                     self.NLP_intent = None
@@ -102,7 +131,7 @@ class Message:
                             else:
                                 self.NLP_intent = None
                             for e in entities:
-                                if float(nlp[e][0]['confidence']) > 0.8:   # minimum_confidence:
+                                if float(nlp[e][0]['confidence']) > self.minimum_confidence:
                                     logging.info(self.NLP_entities)
                                     logging.info(nlp[e][0])
 
