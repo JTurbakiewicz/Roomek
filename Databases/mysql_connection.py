@@ -307,17 +307,17 @@ def create_user(user_obj = None, facebook_id = None, first_name = None, last_nam
             else:
                 user_data.append(user_obj.price_limit)
             fields_to_add = fields_to_add + ',price_limit'
-        if location_latitude or user_obj.location_latitude:
+        if location_latitude or user_obj.latitude:
             if location_latitude:
                 user_data.append(location_latitude)
             else:
-                user_data.append(user_obj.location_latitude)
+                user_data.append(user_obj.latitude)
             fields_to_add = fields_to_add + ',location_latitude'
-        if location_longitude or user_obj.location_longitude:
+        if location_longitude or user_obj.longitude:
             if location_longitude:
                 user_data.append(location_longitude)
             else:
-                user_data.append(user_obj.location_longitude)
+                user_data.append(user_obj.longitude)
             fields_to_add = fields_to_add + ',location_longitude'
         if city or user_obj.city:
             if city:

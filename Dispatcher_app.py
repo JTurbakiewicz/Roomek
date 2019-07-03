@@ -42,7 +42,6 @@ def receive_message():
         token_sent = request.args.get("hub.verify_token")
         return verify_fb_token(request, token_sent)
     else:                                  # if type is not 'GET' it must be 'POST' - we have a message
-        # print("______________________________________________________________________________________________")
         json_message = request.get_json()  # read message as json
         handle_message(json_message)       # process the message and respond
     return "Message Processed"

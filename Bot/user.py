@@ -112,7 +112,7 @@ class User:
             self.longitude = float(long)
             loc = recognize_location(lat=lat, long=long)
             if hasattr(loc, 'display_name'):
-                logging.info(("LOCATION OBJECT: " + loc.display_name)
+                logging.info("LOCATION OBJECT: " + loc.display_name)
             else:
                 logging.warning('Location missing!')
 

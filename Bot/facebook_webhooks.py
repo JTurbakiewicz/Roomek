@@ -149,7 +149,7 @@ class Bot:
         if type(message) == list:
             message = random.choice(message)
         # if use_database: db.add_conversation(str(userid), 'User', message)
-        logging.info("BOT({0}): '{1}'".format(str(userid)[0:5], message))
+        logging.info("BOT({0}): '{1}'".format(str(userid)[0:5], message.split('\n', 1)[0]))
         return self.fb_send_message(userid, {
             'text': message
         }, notification_type)

@@ -187,16 +187,55 @@ def recognize_location(location="", lat=0, long=0):
         # TODO get subregions (dzielnice żeby zasugerować) http://www.geonames.org/export/place-hierarchy.html#children
 
     except GeocoderTimedOut as e:
-        print("Error: geocode failed on input %s with message %s" % ("XYZ", e.message))
+        print("Error: geocode failed on input %s with message %s" % ("XYZ", str(e)))
     except GeocoderUnavailable as e:
-        print("Error: geocode failed on input %s with message %s" % ("XYZ", e.message))
+        print("Error: geocode failed on input %s with message %s" % ("XYZ", str(e)))
     except GeocoderQuotaExceeded as e:
-        print("Error: geocode failed on input %s with message %s" % ("XYZ", e.message))
+        print("Error: geocode failed on input %s with message %s" % ("XYZ", str(e)))
     except GeocoderAuthenticationFailure as e:
-        print("Error: geocode failed on input %s with message %s" % ("XYZ", e.message))
+        print("Error: geocode failed on input %s with message %s" % ("XYZ", str(e)))
     except:
         print("GeoCoder unknown error.")
 
-print(recognize_location(lat=51, long=19))
+format = "JSON"
+querry = "Mokotów"
+username = "ar3i"
 
-print(recognize_location(location="Mokotów"))
+# print("\nMiejsce na podstawie Lat i Long:")
+# print(" -->  "+str(recognize_location(lat=51, long=19)))
+#
+# print("\nMiejsce na podstawie nazwy:")
+# print(" -->  "+str(recognize_location(location="Mokotów")))
+#
+# print("\nMiejsce na podstawie nazwy, odmienione:")
+# print(" -->  "+str(recognize_location(location="Mokotowie")))
+#
+# print("\nMiejsce na podstawie nazwy 2:")
+# geolocate = requests.get(url = "http://api.geonames.org/search"+format+"?"+"q="+querry+"&fuzzy=0.9&username="+username)
+# for n in geolocate.json()['geonames']:
+#     print(" -->  "+n["name"])
+#
+# print("\nNeighbours na podstawie nazwy 3:")
+# geolocate = requests.get(url = "http://api.geonames.org/neighbours"+format+"?"+"q="+querry+"&username="+username)
+# print(geolocate.json())
+# # for n in geolocate.json()['geonames']:
+# #     print(" -->  "+n["name"])
+#
+# print("\nNeighbours na podstawie nazwy 4:")
+# geolocate = requests.get(url = "http://api.geonames.org/containsJSON"+format+"?"+"q="+querry+"&username="+username)
+# print(geolocate.json())
+#
+# print("\nNeighbours na podstawie nazwy 5:")
+# geolocate = requests.get(url = "http://api.geonames.org/siblings"+format+"?"+"q="+querry+"&username="+username)
+# for n in geolocate.json()['geonames']:
+#     print(" -->  "+n["name"])
+#
+# print("\nMiejsca pokrewne:")
+# geolocate = requests.get(url = "http://api.geonames.org/search"+format+"?"+"q="+querry+"&username="+username)
+# for n in geolocate.json()['geonames']:
+#     print(" -->  "+n["name"])
+#
+# print("\nMiejsca równorzędne (siblings):")
+# geoId = 764484
+# siblings = requests.get(url="http://api.geonames.org/siblings"+format+"?"+"geonameId="+str(geoId)+"&username="+username)
+# print(siblings.json())
