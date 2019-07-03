@@ -260,40 +260,43 @@ def update_user(facebook_id, field_to_update, field_value, if_null_required = Fa
         cnx.commit()
 
 def get_user(facebook_id):
+
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query =  """SELECT *
                  FROM users
                  WHERE facebook_id = %s
                  """ % (facebook_id)
-        print(query)
         cursor.execute(query)
         data = cursor.fetchone()
 
-        created_user = User(data['facebook_id'])
+        if len(data) != 0:
+            created_user = User(data['facebook_id'])
 
-        created_user.first_name = data['first_name']
-        created_user.last_name = data['last_name']
-        created_user.gender = data['gender']
-        created_user.language = data['language']
-        created_user.business_type = data['business_type']
-        created_user.housing_type = data['housing_type']
-        created_user.price_limit = data['price_limit']
-        created_user.features = data['features']
-        created_user.country = data['country']
-        created_user.city = data['city']
-        created_user.street = data['street']
-        created_user.latitude = data['latitude']
-        created_user.longitude = data['longitude']
-        created_user.context = data['context']
-        created_user.interactions = data['interactions']
-        created_user.shown_input = data['shown_input']
-        created_user.asked_for_features = data['asked_for_features']
-        created_user.wants_more_features = data['wants_more_features']
-        created_user.wants_more_locations = data['wants_more_locations']
-        created_user.confirmed_data = data['confirmed_data']
-        created_user.add_more = data['add_more']
+            created_user.first_name = data['first_name']
+            created_user.last_name = data['last_name']
+            created_user.gender = data['gender']
+            created_user.language = data['language']
+            created_user.business_type = data['business_type']
+            created_user.housing_type = data['housing_type']
+            created_user.price_limit = data['price_limit']
+            created_user.features = data['features']
+            created_user.country = data['country']
+            created_user.city = data['city']
+            created_user.street = data['street']
+            created_user.latitude = data['latitude']
+            created_user.longitude = data['longitude']
+            created_user.context = data['context']
+            created_user.interactions = data['interactions']
+            created_user.shown_input = data['shown_input']
+            created_user.asked_for_features = data['asked_for_features']
+            created_user.wants_more_features = data['wants_more_features']
+            created_user.wants_more_locations = data['wants_more_locations']
+            created_user.confirmed_data = data['confirmed_data']
+            created_user.add_more = data['add_more']
 
-        return created_user
+            return created_user
+        else:
+            return -1
 
 
 def create_user(user_obj = None, facebook_id = None, first_name = None, last_name = None, gender = None, business_type = None,
