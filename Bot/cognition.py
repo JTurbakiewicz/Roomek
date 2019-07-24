@@ -22,16 +22,17 @@ pattern_dictionary = {
     }
 
 
-def collect_information(message, bot):
+def collect_information(message, user, bot):
     """
     Function that parses message to find as many information as possible and add as parameters to the user object.
     """
 
     if message.type == "LocationAnswer":
-        if message.user.context == "ask_for_location":
-            message.user.add_location(message.latitude, message.longitude)
-        elif message.user.context == "ask_for_city":
-            message.user.add_city(message.latitude, message.longitude)
+
+        if user.context == "ask_for_location":
+            user.add_location(message.latitude, message.longitude)
+        elif user.context == "ask_for_city":
+            user.add_city(message.latitude, message.longitude)
 
     elif message.NLP:
 
@@ -47,71 +48,71 @@ def collect_information(message, bot):
 
                 # TODO zamiana logów na observer pattern - loguj jak zmiana usera
 
-                if message.user.city is None and entity[0] == "location":
-                    message.user.set_city(entity[1])
+                if user.city is None and entity[0] == "location":
+                    user.set_city(entity[1])
 
-                elif message.user.wants_more_locations:
+                elif user.wants_more_locations:
                     if entity[0] == "boolean" and entity[1] == "no":
-                        message.user.wants_more_locations = False
+                        user.wants_more_locations = False
                     elif message.type == "LocationAnswer":
-                        message.user.add_location(lat=message.latitude, long=message.longitude)
+                        user.add_location(lat=message.latitude, long=message.longitude)
                     elif entity[0] == "location":
-                        message.user.add_location(entity[1])
+                        user.add_location(entity[1])
 
-                elif message.user.wants_more_features and entity[0] == "boolean" and entity[1] == "no":
-                    message.user.wants_more_features = False
-                    logging.info("[User {0} Update] wants_more_features = False".format(message.user.facebook_id))
+                elif user.wants_more_features and entity[0] == "boolean" and entity[1] == "no":
+                    user.wants_more_features = False
+                    logging.info("[User {0} Update] wants_more_features = False".format(user.facebook_id))
 
-                elif message.user.housing_type is None and entity[0] == "housing_type":
-                    message.user.set_housing_type(entity[1])
+                elif user.housing_type is None and entity[0] == "housing_type":
+                    user.set_housing_type(entity[1])
 
-                elif message.user.price_limit is None:
-                    message.user.set_price_limit(entity[3])
+                elif user.price_limit is None:
+                    user.set_price_limit(entity[3])
 
-                elif not message.user.wants_more_features and not message.user.confirmed_data:
+                elif not user.wants_more_features and not user.confirmed_data:
                     if entity[0] == "boolean" and entity[1] == "yes":
-                        message.user.confirmed_data = True
-                        logging.info("[User {0} Update] confirmed_data = True".format(message.user.facebook_id))
+                        user.confirmed_data = True
+                        logging.info("[User {0} Update] confirmed_data = True".format(user.facebook_id))
 
                     elif entity[0] == "boolean" and entity[1] == "no":
-                        message.user.confirmed_data = False
-                        logging.info("[User {0} Update] confirmed_data = False".format(message.user.facebook_id))
+                        user.confirmed_data = False
+                        logging.info("[User {0} Update] confirmed_data = False".format(user.facebook_id))
                         # TODO dead end.
 
         else:   # ma nlp, ale intent=none i brak mu entities, więc freetext do wyłapania
 
             # TODO MAJOR FUCKUP: no user in message!
 
-            if message.user.city is None:
-                try: message.user.set_city(recognize_location(message.text).city)
+            if user.city is None:
+                try: user.set_city(recognize_location(message.text).city)
                 except: pass
 
-            elif not message.user.location and message.type == "LocationAnswer":
-                message.user.add_location(message.latitude, message.longitude)
+            elif not user.location and message.type == "LocationAnswer":
+                user.add_location(message.latitude, message.longitude)
 
-            elif not message.user.location:
-                try: message.user.add_location(recognize_location(message.text).city)
+            elif not user.location:
+                try: user.add_location(recognize_location(message.text).city)
                 except: pass
 
-            elif message.user.housing_type is None:
-                message.user.set_housing_type(message.text)
+            elif user.housing_type is None:
+                user.set_housing_type(message.text)
 
-            elif message.user.price_limit is None:
+            elif user.price_limit is None:
                 print("tutaj 001")
-                message.user.set_price_limit(message.text)
+                user.set_price_limit(message.text)
 
-            elif message.user.wants_more_features:
-                message.user.add_feature(message.text)
+            elif user.wants_more_features:
+                user.add_feature(message.text)
 
-            elif message.user.wants_more_features and entity[0] == "boolean" and entity[1] == "no":
-                message.user.wants_more_features = False
-                logging.info("[User {0} Update] wants_more_features = False".format(message.user.facebook_id))
+            elif user.wants_more_features and entity[0] == "boolean" and entity[1] == "no":
+                user.wants_more_features = False
+                logging.info("[User {0} Update] wants_more_features = False".format(user.facebook_id))
             else:
-                response.default_message(message, bot)
+                response.default_message(message, user, bot)
     else:
-        if message.user.price_limit is None and message.type == "TextMessage":
+        if user.price_limit is None and message.type == "TextMessage":
             print("tutaj 004")
-            message.user.set_price_limit(99999999)
+            user.set_price_limit(99999999)
 
 
 def regex_pattern_matcher(str, pat_dic=pattern_dictionary):

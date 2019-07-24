@@ -22,7 +22,7 @@ class Message:
         self.__dict__ = json_data  # previously json.loads
 
         self.is_echo = None     # rozróżnia bota od usera
-        self.user_id = None     # niezależnie czy od czy do niego
+        self.facebook_id = None     # niezależnie czy od czy do niego
         self.mid = None         # id wiadomości z jsona, może nieprzydatne
 
         self.time = None
@@ -59,11 +59,11 @@ class Message:
             except KeyError:
                 logging.warning("messaging without message")
 
-            # get user_id, check if already in db and create if not:
+            # get facebook_id, check if already in db and create if not:
             if self.is_echo:
-                self.user_id = self.messaging['recipient']['id']
+                self.facebook_id = self.messaging['recipient']['id']
             else:
-                self.user_id = self.messaging['sender']['id']
+                self.facebook_id = self.messaging['sender']['id']
 
 
             if 'delivery' in self.messaging:
@@ -153,7 +153,7 @@ class Message:
 
 
         # Logs:
-        short_id = str(self.user_id)[0:5]
+        short_id = str(self.facebook_id)[0:5]
         if self.is_echo:
             if self.type == "UnknownType":
                 logging.warning(

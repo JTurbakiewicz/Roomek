@@ -259,6 +259,23 @@ def update_user(facebook_id, field_to_update, field_value, if_null_required = Fa
         cursor.execute(query, (field_value,facebook_id))
         cnx.commit()
 
+
+def user_exists(facebook_id):
+
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        query =  """SELECT *
+                 FROM users
+                 WHERE facebook_id = %s
+                 """ % (facebook_id)
+        cursor.execute(query)
+        data = cursor.fetchone()
+
+        if data:
+            return True
+        else:
+            return False
+
+
 def get_user(facebook_id):
 
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
@@ -269,131 +286,98 @@ def get_user(facebook_id):
         cursor.execute(query)
         data = cursor.fetchone()
 
-        if len(data) != 0:
-            created_user = User(data['facebook_id'])
+        if data:
+            if len(data) != 0:
+                created_user = User(data['facebook_id'])
 
-            created_user.first_name = data['first_name']
-            created_user.last_name = data['last_name']
-            created_user.gender = data['gender']
-            created_user.language = data['language']
-            created_user.business_type = data['business_type']
-            created_user.housing_type = data['housing_type']
-            created_user.price_limit = data['price_limit']
-            created_user.features = data['features']
-            created_user.country = data['country']
-            created_user.city = data['city']
-            created_user.street = data['street']
-            created_user.latitude = data['latitude']
-            created_user.longitude = data['longitude']
-            created_user.context = data['context']
-            created_user.interactions = data['interactions']
-            created_user.shown_input = data['shown_input']
-            created_user.asked_for_features = data['asked_for_features']
-            created_user.wants_more_features = data['wants_more_features']
-            created_user.wants_more_locations = data['wants_more_locations']
-            created_user.confirmed_data = data['confirmed_data']
-            created_user.add_more = data['add_more']
+                created_user.first_name = data['first_name']
+                created_user.last_name = data['last_name']
+                created_user.gender = data['gender']
+                created_user.language = data['language']
+                created_user.business_type = data['business_type']
+                created_user.housing_type = data['housing_type']
+                created_user.price_limit = data['price_limit']
+                created_user.features = data['features']
+                created_user.country = data['country']
+                created_user.city = data['city']
+                created_user.street = data['street']
+                created_user.latitude = data['latitude']
+                created_user.longitude = data['longitude']
+                created_user.context = data['context']
+                created_user.interactions = data['interactions']
+                created_user.shown_input = data['shown_input']
+                created_user.asked_for_features = data['asked_for_features']
+                created_user.wants_more_features = data['wants_more_features']
+                created_user.wants_more_locations = data['wants_more_locations']
+                created_user.confirmed_data = data['confirmed_data']
+                created_user.add_more = data['add_more']
 
-            return created_user
+                return created_user
+            else:
+                return False
         else:
-            return -1
+            return False
 
 
-def create_user(user_obj = None, facebook_id = None, first_name = None, last_name = None, gender = None, business_type = None,
-                price_limit = None, location_latitude = None, location_longitude = None, city = None,
-                country = None, housing_type = None, features = None, confirmed_data = None, add_more = None,
-                shown_input = None, update = False):
-    if user_obj is None:
-        user_obj = User('0')
+def push_user(user_obj = None, update = False):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         fields_to_add = 'facebook_id'
-        if facebook_id:
-            user_data = [facebook_id]
-        else:
-            user_data = [user_obj.facebook_id]
-        if first_name or user_obj.first_name:
-            if first_name:
-                user_data.append(first_name)
-            else:
-                user_data.append(user_obj.first_name)
+        user_data = [user_obj.facebook_id]
+
+        if user_obj.first_name:
+            user_data.append(user_obj.first_name)
             fields_to_add = fields_to_add + ',first_name'
-        if last_name or user_obj.last_name:
-            if last_name:
-                user_data.append(last_name)
-            else:
-                user_data.append(user_obj.last_name)
+
+        if user_obj.last_name:
+            user_data.append(user_obj.last_name)
             fields_to_add = fields_to_add + ',last_name'
-        if gender or user_obj.gender:
-            if gender:
-                user_data.append(gender)
-            else:
-                user_data.append(user_obj.gender)
+
+        if user_obj.gender:
+            user_data.append(user_obj.gender)
             fields_to_add = fields_to_add + ',gender'
-        if business_type or user_obj.business_type:
-            if business_type:
-                user_data.append(business_type)
-            else:
-                user_data.append(user_obj.business_type)
+
+        if user_obj.business_type:
+            user_data.append(user_obj.business_type)
             fields_to_add = fields_to_add + ',business_type'
-        if price_limit or user_obj.price_limit:
-            if price_limit:
-                user_data.append(price_limit)
-            else:
-                user_data.append(user_obj.price_limit)
+
+        if user_obj.price_limit:
+            user_data.append(user_obj.price_limit)
             fields_to_add = fields_to_add + ',price_limit'
-        if location_latitude or user_obj.latitude:
-            if location_latitude:
-                user_data.append(location_latitude)
-            else:
-                user_data.append(user_obj.latitude)
+
+        if user_obj.latitude:
+            user_data.append(user_obj.latitude)
             fields_to_add = fields_to_add + ',location_latitude'
-        if location_longitude or user_obj.longitude:
-            if location_longitude:
-                user_data.append(location_longitude)
-            else:
-                user_data.append(user_obj.longitude)
+
+        if user_obj.longitude:
+            user_data.append(user_obj.longitude)
             fields_to_add = fields_to_add + ',location_longitude'
-        if city or user_obj.city:
-            if city:
-                user_data.append(city)
-            else:
-                user_data.append(user_obj.city)
+
+        if user_obj.city:
+            user_data.append(user_obj.city)
             fields_to_add = fields_to_add + ',city'
-        if country or user_obj.country:
-            if country:
-                user_data.append(country)
-            else:
-                user_data.append(user_obj.country)
+
+        if user_obj.country:
+            user_data.append(user_obj.country)
             fields_to_add = fields_to_add + ',country'
-        if housing_type or user_obj.housing_type:
-            if housing_type:
-                user_data.append(housing_type)
-            else:
-                user_data.append(user_obj.housing_type)
+
+        if user_obj.housing_type:
+            user_data.append(user_obj.housing_type)
             fields_to_add = fields_to_add + ',housing_type'
-        if features or user_obj.features:
-            if features:
-                user_data.append(features)
-            else:
-                user_data.append(user_obj.features)
+
+        if user_obj.features:
+            user_data.append(user_obj.features)
             fields_to_add = fields_to_add + ',features'
-        if confirmed_data or user_obj.confirmed_data:
-            if confirmed_data:
-                user_data.append(confirmed_data)
-            else:
-                user_data.append(user_obj.confirmed_data)
+
+        if user_obj.confirmed_data:
+            user_data.append(user_obj.confirmed_data)
             fields_to_add = fields_to_add + ',confirmed_data'
-        if add_more or user_obj.add_more:
-            if add_more:
-                user_data.append(add_more)
-            else:
-                user_data.append(user_obj.add_more)
+
+        if user_obj.add_more:
+            user_data.append(user_obj.add_more)
             fields_to_add = fields_to_add + ',add_more'
-        if shown_input or user_obj.shown_input:
-            if shown_input:
-                user_data.append(shown_input)
-            else:
-                user_data.append(user_obj.shown_input)
+
+        if user_obj.shown_input:
+            user_data.append(user_obj.shown_input)
             fields_to_add = fields_to_add + ',shown_input'
 
         placeholders = '%s,' * len(fields_to_add.split(','))
@@ -419,6 +403,126 @@ def create_user(user_obj = None, facebook_id = None, first_name = None, last_nam
                     VALUES ({})""".format(fields_to_add,placeholders)
             cursor.execute(query, user_data)
         cnx.commit()
+
+# def create_user(facebook_id = None, first_name = None, last_name = None, gender = None, business_type = None,
+#                 price_limit = None, location_latitude = None, location_longitude = None, city = None,
+#                 country = None, housing_type = None, features = None, confirmed_data = None, add_more = None,
+#                 shown_input = None, update = False):
+#
+#     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+#         fields_to_add = 'facebook_id'
+#         if facebook_id:
+#             user_data = [facebook_id]
+#         else:
+#             user_data = [user_obj.facebook_id]
+#         if first_name or user_obj.first_name:
+#             if first_name:
+#                 user_data.append(first_name)
+#             else:
+#                 user_data.append(user_obj.first_name)
+#             fields_to_add = fields_to_add + ',first_name'
+#         if last_name or user_obj.last_name:
+#             if last_name:
+#                 user_data.append(last_name)
+#             else:
+#                 user_data.append(user_obj.last_name)
+#             fields_to_add = fields_to_add + ',last_name'
+#         if gender or user_obj.gender:
+#             if gender:
+#                 user_data.append(gender)
+#             else:
+#                 user_data.append(user_obj.gender)
+#             fields_to_add = fields_to_add + ',gender'
+#         if business_type or user_obj.business_type:
+#             if business_type:
+#                 user_data.append(business_type)
+#             else:
+#                 user_data.append(user_obj.business_type)
+#             fields_to_add = fields_to_add + ',business_type'
+#         if price_limit or user_obj.price_limit:
+#             if price_limit:
+#                 user_data.append(price_limit)
+#             else:
+#                 user_data.append(user_obj.price_limit)
+#             fields_to_add = fields_to_add + ',price_limit'
+#         if location_latitude or user_obj.latitude:
+#             if location_latitude:
+#                 user_data.append(location_latitude)
+#             else:
+#                 user_data.append(user_obj.latitude)
+#             fields_to_add = fields_to_add + ',location_latitude'
+#         if location_longitude or user_obj.longitude:
+#             if location_longitude:
+#                 user_data.append(location_longitude)
+#             else:
+#                 user_data.append(user_obj.longitude)
+#             fields_to_add = fields_to_add + ',location_longitude'
+#         if city or user_obj.city:
+#             if city:
+#                 user_data.append(city)
+#             else:
+#                 user_data.append(user_obj.city)
+#             fields_to_add = fields_to_add + ',city'
+#         if country or user_obj.country:
+#             if country:
+#                 user_data.append(country)
+#             else:
+#                 user_data.append(user_obj.country)
+#             fields_to_add = fields_to_add + ',country'
+#         if housing_type or user_obj.housing_type:
+#             if housing_type:
+#                 user_data.append(housing_type)
+#             else:
+#                 user_data.append(user_obj.housing_type)
+#             fields_to_add = fields_to_add + ',housing_type'
+#         if features or user_obj.features:
+#             if features:
+#                 user_data.append(features)
+#             else:
+#                 user_data.append(user_obj.features)
+#             fields_to_add = fields_to_add + ',features'
+#         if confirmed_data or user_obj.confirmed_data:
+#             if confirmed_data:
+#                 user_data.append(confirmed_data)
+#             else:
+#                 user_data.append(user_obj.confirmed_data)
+#             fields_to_add = fields_to_add + ',confirmed_data'
+#         if add_more or user_obj.add_more:
+#             if add_more:
+#                 user_data.append(add_more)
+#             else:
+#                 user_data.append(user_obj.add_more)
+#             fields_to_add = fields_to_add + ',add_more'
+#         if shown_input or user_obj.shown_input:
+#             if shown_input:
+#                 user_data.append(shown_input)
+#             else:
+#                 user_data.append(user_obj.shown_input)
+#             fields_to_add = fields_to_add + ',shown_input'
+#
+#         placeholders = '%s,' * len(fields_to_add.split(','))
+#         placeholders = placeholders[:-1]
+#
+#         if update:
+#             duplicate_condition = ''
+#             for field in fields_to_add.split(','):
+#                 duplicate_condition = duplicate_condition + field + '=%s,'
+#             duplicate_condition = duplicate_condition[:-1]
+#
+#             query = f"""
+#                         INSERT INTO users
+#                         ({fields_to_add})
+#                         VALUES ({placeholders})
+#                         ON DUPLICATE KEY UPDATE {duplicate_condition}
+#                      """
+#             cursor.execute(query, user_data*2)
+#         else:
+#
+#             query = """INSERT INTO users
+#                     ({})
+#                     VALUES ({})""".format(fields_to_add,placeholders)
+#             cursor.execute(query, user_data)
+#         cnx.commit()
 
 # def create_conversation(facebook_id, who_said_it, text = None, sticker_id = None, nlp_intent = None, nlp_entity = None, nlp_value = None, message_time = None):
 #     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
@@ -473,9 +577,9 @@ def create_message(msg_obj = None, update = False):
         if msg_obj.timestamp:
             msg_data.append(msg_obj.timestamp)
             fields_to_add = fields_to_add + ',timestamp'
-        if msg_obj.user_id:
-            msg_data.append(str(msg_obj.user_id))
-            fields_to_add = fields_to_add + ',user_id'
+        if msg_obj.facebook_id:
+            msg_data.append(str(msg_obj.facebook_id))
+            fields_to_add = fields_to_add + ',facebook_id'
         if msg_obj.type:
             msg_data.append(str(msg_obj.type))
             fields_to_add = fields_to_add + ',type'
@@ -538,12 +642,12 @@ def create_message(msg_obj = None, update = False):
         cnx.commit()
 
 
-def get_messages(user_id):
+def get_messages(facebook_id):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query =  """SELECT *
                  FROM conversations
-                 WHERE user_id = %s
-                 """ % (user_id)
+                 WHERE facebook_id = %s
+                 """ % (facebook_id)
         cursor.execute(query)
         data = cursor.fetchall()
 
@@ -578,7 +682,7 @@ def get_messages(user_id):
             created_message.messaging = message['messaging']
             created_message.time = message['time']
             created_message.timestamp = message['timestamp']
-            created_message.user = message['user_id']
+            created_message.user = message['facebook_id']
             created_message.type = message['type']
             created_message.mid = message['mid']
             created_message.NLP = message['NLP']
@@ -759,7 +863,7 @@ db_tables['conversations'] = (
     "  `messaging` varchar(5000),"   
     "  `time` date,"
     "  `timestamp` date," 
-    "  `user_id` char(100),"
+    "  `facebook_id` char(100),"
     "  `type` char(100),"
     "  `mid` varchar(1000),"
     "  `NLP` BOOLEAN,"

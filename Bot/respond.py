@@ -8,58 +8,58 @@ from Bot.cognition import collect_information
 
 # TODO bug: adding place yes/no returns nothing
 # TODO multiple parameters in one message
-def respond(message, bot):
+def respond(message, user, bot):
 
-    collect_information(message, bot)
+    collect_information(message, user, bot)
 
     # TODO no greeting start
     if hasattr(message, 'NLP_intent'):
         if message.NLP_intent == "greeting":
-            response.greeting(message, bot)
+            response.greeting(message, user, bot)
         elif message.NLP_intent == "looking for":
-            message.user.set_business_type("rent")
-            ask_for_information(message, bot)
+            user.set_business_type("rent")
+            ask_for_information(message, user, bot)
         elif message.NLP_intent == "offering":
-            message.user.set_business_type("offer")
-            response.unable_to_answer(message, bot)
+            user.set_business_type("offer")
+            response.unable_to_answer(message, user, bot)
         # TODO inne opcje jak kupno itd
         else:
-            ask_for_information(message, bot)
+            ask_for_information(message, user, bot)
     else:
-        ask_for_information(message, bot)
+        ask_for_information(message, user, bot)
 
 
-def ask_for_information(message, bot):
+def ask_for_information(message, user, bot):
 
-    if message.user.city is None:
-        response.ask_for_city(message, bot)
+    if user.city is None:
+        response.ask_for_city(message, user, bot)
 
-    elif not message.user.latitude:
-        response.ask_for_location(message, bot)
+    elif not user.latitude:
+        response.ask_for_location(message, user, bot)
 
-    elif message.user.wants_more_locations:
-        response.ask_more_locations(message, bot)
+    elif user.wants_more_locations:
+        response.ask_more_locations(message, user, bot)
 
-    elif message.user.housing_type is None:
-        response.ask_for_housing_type(message, bot)
+    elif user.housing_type is None:
+        response.ask_for_housing_type(message, user, bot)
 
-    elif message.user.price_limit is None:
-        response.ask_for_price_limit(message, bot)
+    elif user.price_limit is None:
+        response.ask_for_price_limit(message, user, bot)
 
-    elif not message.user.features and not message.user.asked_for_features and message.user.wants_more_features:
-        response.ask_for_features(message, bot)
-        message.user.asked_for_features = True
+    elif not user.features and not user.asked_for_features and user.wants_more_features:
+        response.ask_for_features(message, user, bot)
+        user.asked_for_features = True
 
-    elif message.user.wants_more_features is True:
-        response.ask_for_more_features(message, bot)
+    elif user.wants_more_features is True:
+        response.ask_for_more_features(message, user, bot)
 
-    elif not message.user.wants_more_features and not message.user.confirmed_data:
-        response.show_input_data(message, bot)
+    elif not user.wants_more_features and not user.confirmed_data:
+        response.show_input_data(message, user, bot)
 
-    # TODO response.ask_what_wrong(message, bot)
+    # TODO response.ask_what_wrong(message, user, bot)
 
-    elif message.user.confirmed_data:
-        response.show_offers(message, bot)
+    elif user.confirmed_data:
+        response.show_offers(message, user, bot)
 
     else:
-        response.default_message(message, bot)
+        response.default_message(message, user, bot)

@@ -19,8 +19,10 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 from flask import Flask, request
-from Databases import mysql_connection
+from Databases import mysql_connection as db
 from Bot.logic import handle_message
+from Bot.message import Message
+from Bot.user import User
 from Bot.facebook_webhooks import verify_fb_token
 
 # initiate the web app
@@ -35,7 +37,12 @@ def receive_message():
         return verify_fb_token(request, token_sent)
     else:                                  # if type is not 'GET' it must be 'POST' - we have a message
         json_message = request.get_json()  # read message as json
-        handle_message(json_message)       # process the message and respond
+        message = Message(json_message)
+        if db.user_exists(message.facebook_id):
+            user = db.get_user(message.facebook_id)
+        else:
+            user = User(message.facebook_id)
+        handle_message(message, user)       # process the message and respond
     return "Message Processed"
 
 
