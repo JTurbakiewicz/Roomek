@@ -266,7 +266,8 @@ def user_exists(facebook_id):
         query =  """SELECT *
                  FROM users
                  WHERE facebook_id = %s
-                 """ % (facebook_id)
+                 """ % ("'"+facebook_id+"'") #TODO change
+        print(query)
         cursor.execute(query)
         data = cursor.fetchone()
 
@@ -367,7 +368,10 @@ def push_user(user_obj = None, update = False):
             fields_to_add = fields_to_add + ',housing_type'
 
         if user_obj.features:
-            user_data.append(user_obj.features)
+            if isinstance(user_obj.features, list):
+                user_data.append(",".join(user_obj.features))
+            else:
+                user_data.append(user_obj.features)
             fields_to_add = fields_to_add + ',features'
 
         if user_obj.confirmed_data:
@@ -397,169 +401,16 @@ def push_user(user_obj = None, update = False):
                         VALUES ({placeholders})
                         ON DUPLICATE KEY UPDATE {duplicate_condition}
                      """
+            print(query)
             cursor.execute(query, user_data*2)
         else:
 
             query = """INSERT INTO users
                     ({})
                     VALUES ({})""".format(fields_to_add,placeholders)
+            print(query)
             cursor.execute(query, user_data)
         cnx.commit()
-
-# def create_user(facebook_id = None, first_name = None, last_name = None, gender = None, business_type = None,
-#                 price_limit = None, location_latitude = None, location_longitude = None, city = None,
-#                 country = None, housing_type = None, features = None, confirmed_data = None, add_more = None,
-#                 shown_input = None, update = False):
-#
-#     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-#         fields_to_add = 'facebook_id'
-#         if facebook_id:
-#             user_data = [facebook_id]
-#         else:
-#             user_data = [user_obj.facebook_id]
-#         if first_name or user_obj.first_name:
-#             if first_name:
-#                 user_data.append(first_name)
-#             else:
-#                 user_data.append(user_obj.first_name)
-#             fields_to_add = fields_to_add + ',first_name'
-#         if last_name or user_obj.last_name:
-#             if last_name:
-#                 user_data.append(last_name)
-#             else:
-#                 user_data.append(user_obj.last_name)
-#             fields_to_add = fields_to_add + ',last_name'
-#         if gender or user_obj.gender:
-#             if gender:
-#                 user_data.append(gender)
-#             else:
-#                 user_data.append(user_obj.gender)
-#             fields_to_add = fields_to_add + ',gender'
-#         if business_type or user_obj.business_type:
-#             if business_type:
-#                 user_data.append(business_type)
-#             else:
-#                 user_data.append(user_obj.business_type)
-#             fields_to_add = fields_to_add + ',business_type'
-#         if price_limit or user_obj.price_limit:
-#             if price_limit:
-#                 user_data.append(price_limit)
-#             else:
-#                 user_data.append(user_obj.price_limit)
-#             fields_to_add = fields_to_add + ',price_limit'
-#         if location_latitude or user_obj.latitude:
-#             if location_latitude:
-#                 user_data.append(location_latitude)
-#             else:
-#                 user_data.append(user_obj.latitude)
-#             fields_to_add = fields_to_add + ',location_latitude'
-#         if location_longitude or user_obj.longitude:
-#             if location_longitude:
-#                 user_data.append(location_longitude)
-#             else:
-#                 user_data.append(user_obj.longitude)
-#             fields_to_add = fields_to_add + ',location_longitude'
-#         if city or user_obj.city:
-#             if city:
-#                 user_data.append(city)
-#             else:
-#                 user_data.append(user_obj.city)
-#             fields_to_add = fields_to_add + ',city'
-#         if country or user_obj.country:
-#             if country:
-#                 user_data.append(country)
-#             else:
-#                 user_data.append(user_obj.country)
-#             fields_to_add = fields_to_add + ',country'
-#         if housing_type or user_obj.housing_type:
-#             if housing_type:
-#                 user_data.append(housing_type)
-#             else:
-#                 user_data.append(user_obj.housing_type)
-#             fields_to_add = fields_to_add + ',housing_type'
-#         if features or user_obj.features:
-#             if features:
-#                 user_data.append(features)
-#             else:
-#                 user_data.append(user_obj.features)
-#             fields_to_add = fields_to_add + ',features'
-#         if confirmed_data or user_obj.confirmed_data:
-#             if confirmed_data:
-#                 user_data.append(confirmed_data)
-#             else:
-#                 user_data.append(user_obj.confirmed_data)
-#             fields_to_add = fields_to_add + ',confirmed_data'
-#         if add_more or user_obj.add_more:
-#             if add_more:
-#                 user_data.append(add_more)
-#             else:
-#                 user_data.append(user_obj.add_more)
-#             fields_to_add = fields_to_add + ',add_more'
-#         if shown_input or user_obj.shown_input:
-#             if shown_input:
-#                 user_data.append(shown_input)
-#             else:
-#                 user_data.append(user_obj.shown_input)
-#             fields_to_add = fields_to_add + ',shown_input'
-#
-#         placeholders = '%s,' * len(fields_to_add.split(','))
-#         placeholders = placeholders[:-1]
-#
-#         if update:
-#             duplicate_condition = ''
-#             for field in fields_to_add.split(','):
-#                 duplicate_condition = duplicate_condition + field + '=%s,'
-#             duplicate_condition = duplicate_condition[:-1]
-#
-#             query = f"""
-#                         INSERT INTO users
-#                         ({fields_to_add})
-#                         VALUES ({placeholders})
-#                         ON DUPLICATE KEY UPDATE {duplicate_condition}
-#                      """
-#             cursor.execute(query, user_data*2)
-#         else:
-#
-#             query = """INSERT INTO users
-#                     ({})
-#                     VALUES ({})""".format(fields_to_add,placeholders)
-#             cursor.execute(query, user_data)
-#         cnx.commit()
-
-# def create_conversation(facebook_id, who_said_it, text = None, sticker_id = None, nlp_intent = None, nlp_entity = None, nlp_value = None, message_time = None):
-#     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-#         fields_to_add = 'facebook_id, who_said_it'
-#         conversation_data = [facebook_id, who_said_it]
-#         if text:
-#             fields_to_add = fields_to_add + ',text'
-#             conversation_data.append(text)
-#         if sticker_id:
-#             fields_to_add = fields_to_add + ',sticker_id'
-#             conversation_data.append(sticker_id)
-#         if nlp_intent:
-#             fields_to_add = fields_to_add + ',nlp_intent'
-#             conversation_data.append(nlp_intent)
-#         if nlp_entity:
-#             fields_to_add = fields_to_add + ',nlp_entity'
-#             conversation_data.append(nlp_entity)
-#         if nlp_value:
-#             fields_to_add = fields_to_add + ',nlp_value'
-#             conversation_data.append(nlp_value)
-#         if nlp_entity:
-#             fields_to_add = fields_to_add + ',nlp_entity'
-#             conversation_data.append(nlp_entity)
-#         if message_time:
-#             fields_to_add = fields_to_add + ',message_time'
-#             conversation_data.append(message_time)
-#         placeholders = '%s,' * len(fields_to_add.split(','))
-#         placeholders = placeholders[:-1]
-#
-#         query = """INSERT INTO conversations
-#                 ({})
-#                 VALUES ({})""".format(fields_to_add,placeholders)
-#         cursor.execute(query, conversation_data)
-#         cnx.commit()
-
 
 def create_message(msg_obj = None, update = False):
 
@@ -953,117 +804,8 @@ db_config = tokens.sql_config
 
 set_up_db(db_config)
 
-# json_text = {'entry': [{
-#    'id': '1368143226655403',
-#    'messaging': [{
-#       'message': {
-#          'mid': 'GZ1aEkkMhti8WBa22tk5lXWJoZXN9QKZWH8NjK5DYEFKf7dFmM-QZEUThzNoJk73q2QSR5AD_aEDnRjNS6XHbw',
-#          'nlp': {
-#             'entities': {
-#                'bye': [{
-#                   '_entity': 'bye',
-#                   'confidence': 0.29891659254789,
-#                   'value': 'true'}],
-#                'greetings': [{
-#                   '_entity': 'greetings',
-#                   'confidence': 0.99988770484656,
-#                   'value': 'true'}],
-#                'sentiment': [{
-#                   '_entity': 'sentiment',
-#                   'confidence': 0.54351806476846,
-#                   'value': 'positive'},
-#                   {'_entity': 'sentiment',
-#                   'confidence': 0.43419978802319,
-#                   'value': 'neutral'},
-#                   {'_entity': 'sentiment',
-#                   'confidence': 0.022282101881069,
-#                   'value': 'negative'}],
-#                'thanks': [{
-#                   '_entity': 'thanks',
-#                   'confidence': 0.056984366913182,
-#                   'value': 'true'}]}},
-#          'seq': 671186,
-#          'text': 'hello'},
-#    'recipient': {'id': '1368143226655403'},
-#    'sender': {'id': '2231584683532589'},
-#    'timestamp': 1550245454526}],
-#    'time': 1550245455532}],
-# 'object': 'page'}
-#
-# json_sticker = {'entry': [{
-#    'id': '1368143226655403',
-#    'messaging': [{
-#       'message': {
-#          'attachments': [{
-#             'payload': {
-#                'sticker_id': 139084406650204,
-#                'url': 'https://scontent.xx.fbcdn.net/v/t39.1997-6/p100x100/18601789_139084409983537_1112176674583085056_n.png?_nc_cat=1&_nc_ad=z-m&_nc_cid=0&_nc_zor=9&_nc_ht=scontent.xx&oh=58dcff07f7efab2581eb2bf46ad09b69&oe=5D2622E6'},
-#                'type': 'image'}],
-#          'mid': 'vTPBDAg3IFSvojFSoA-hc3WJoZXN9QKZWH8NjK5DYEFtpDoGWGtpfyyd39iwwpoX3UKTT03qWPoLw9dKCPmgbw',
-#          'seq': 671191,
-#          'sticker_id': 139084406650204},
-#       'recipient': {'id': '1368143226655403'},
-#       'sender': {'id': '2231584683532589'},
-#       'timestamp': 1550245813786}],
-#    'time': 1550245814781}],
-# 'object': 'page'}
-#
-# json_location = {'object': 'page', 'entry': [{'id': '371953230018877', 'time': 1555281043795, 'messaging': [
-#     {'sender': {'id': '2046412982111085'}, 'recipient': {'id': '371953230018877'}, 'timestamp': 1555264002482,
-#      'message': {'mid': 'DdF-MlFpNZDrbxkE68kCNYqbfPNS9lyKlT61---k1D4QCj3DOAeMtT6yyYUviIHA8ZlIA71-vkrb-uv2Muqrlg',
-#                  'seq': 711130, 'attachments': [{'title': "Artur's Location",
-#                                                  'url': 'https://l.facebook.com/l.php?u=https%3A%2F%2Fwww.bing.com%2Fmaps%2Fdefault.aspx%3Fv%3D2%26pc%3DFACEBK%26mid%3D8100%26where1%3D52.221069523573%252C%2B21.005859375%26FORM%3DFBKPL1%26mkt%3Den-US&h=AT2Zyxelz8ZK0Jod6SDT6I-lXNGPzxzAYTLNBg7Z2JjiclGERs1k9Jk5kAiHCRVF6BUb_DWtLJ0NNIKsxlXOvpv6RlxFUIlAWahFnFbURhiVRM3VOY61-RVHcWRNLO44rsUqqdtalhLl&s=1',
-#                                                  'type': 'location', 'payload': {
-#                  'coordinates': {'lat': 52.221069523573, 'long': 21.005859375}}}]}}]}]}
-#
-# json_wit = {'object': 'page', 'entry':
-# [{'id': '371953230018877',
-# 'time': 1553348850822,
-# 'messaging': [{
-#    'sender': {'id': '2046412982111085'},
-#    'recipient': {'id': '371953230018877'},
-#    'timestamp': 1553348849836,
-#    'message':
-#       {'mid': 'qN8omcX5vWrOSUaepj5gnIqbfPNS9lyKlT61---k1D59qd3_oMN-A9tKNZRmLp5MEnhAoyCvgAtS7ql06IMSsQ',
-#       'seq': 697389,
-#       'text': 'szukam mieszkania w okolicy',
-#       'nlp': {
-#          'entities':
-#             {'housing_type': [{'confidence': 0.99150295898905, 'value': 'apartment', 'type': 'value', '_entity': 'housing_type', '_body': 'mieszkania', '_start': 7, '_end': 17}],
-#              'location': [{'suggested': True, 'confidence': 0.83922, 'value': 'okolicy', 'type': 'value', '_entity': 'location', '_body': 'okolicy', '_start': 20, '_end': 27}],
-#              'intent': [{'confidence': 0.99914076780032, 'value': 'looking for', '_entity': 'intent'}]}}}}]}]}
-#
-# json_confirmation = {'entry': [{
-#    'id': '1368143226655403',
-#    'messaging': [{
-#       'delivery': {
-#          'mids': [
-#             'fJo_skAtj0UAj5GgomOw53WJoZXN9QKZWH8NjK5DYEE9B5dnUilQaMt-2X-DZRfZPmQnzikom5h1pXysIono0w',
-#             'THFi2alVD8V3n83TUhy5IXWJoZXN9QKZWH8NjK5DYEHQCUziMeG424BvnntyRSwsrCFBtvlVEcJc2g3akNjrsg',
-#             'a0jKJ7wGYETe-n5xjhOK-nWJoZXN9QKZWH8NjK5DYEGO9a4neOVsmrjMyO4OkNUliCY0OnwVakSKkc1C2_c55g'],
-#          'seq': 0,
-#          'watermark': 1550245456341},
-#       'recipient': {'id': '1368143226655403'},
-#       'sender': {'id': '2231584683532589'},
-#       'timestamp': 1550245459149}],
-#    'time': 1550245459170}],
-# 'object': 'page'}
+features = 'dla_studenta'
+uzy = User('test1')
+uzy.features = features
 
-# create_user(facebook_id='1', last_name='Kuba', update=True)
-# msg = Message(json_text)
-# create_message(msg_obj=msg)
-#
-# msg = Message(json_sticker)
-# create_message(msg_obj=msg)
-#
-# msg = Message(json_location)
-# create_message(msg_obj=msg)
-#
-# msg = Message(json_wit)
-# create_message(msg_obj=msg)
-#
-# msg = Message(json_confirmation)
-# create_message(msg_obj=msg)
-#
-# a = get_messages('1368143226655403')
-
+push_user(user_obj=uzy, update=True)
