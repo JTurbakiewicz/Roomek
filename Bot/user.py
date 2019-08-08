@@ -7,7 +7,7 @@ import logging
 from datetime import date
 import re
 from Bot.cognition import recognize_sticker, replace_emojis
-from Bot.geoinfo import recognize_location
+from Bot.geolocate import recognize_location
 from OfferParser.translator import translate
 from Databases import mysql_connection as db
 
@@ -35,14 +35,14 @@ class User:
         self.latitude = 0
         self.longitude = 0
         # dialogue parameters:
-        self.context = "initialization"
+        self.context = "initialization"  # initialiation, greeting, ...
         self.interactions = 0
         self.shown_input = False
         self.asked_for_features = False
         self.wants_more_features = True
         self.wants_more_locations = True
         self.confirmed_data = False
-        self.add_more = True    # TEMP
+        self.add_more = False
 
         if not db.user_exists(self.facebook_id):
             db.push_user(user_obj=self, update=False)
@@ -117,44 +117,32 @@ class User:
 
     # TODO narazie nadpisuje, a powinno dodawać bo przecież może chcieć Mokotów Wolę i Pragę
     def add_location(self, location="", lat=0, long=0):
-        if lat != 0 and long != 0:
-            self.latitude = float(lat)
-            self.longitude = float(long)
-            loc = recognize_location(lat=lat, long=long)
-            if hasattr(loc, 'display_name'):
-                logging.info("LOCATION OBJECT: " + loc.display_name)
-            else:
-                logging.warning('Location missing!')
 
-        # elif "entrum" in str(location):
-        #     if hasattr(self, 'city'):
-        #         loc = recognize_location(location="centrum", city=self.city)
-        #     else:
-        #         loc = recognize_location(location=str(location))
+        if lat != 0 and long != 0:
+            loc = recognize_location(lat=lat, long=long)
+        elif "entrum" in str(location):
+            if hasattr(self, 'city'):
+                loc = recognize_location(location="centrum", city=self.city)
+            else:
+                loc = recognize_location(location=str(location))
         else:
             loc = recognize_location(location=str(location))
 
-        if not self.latitude and hasattr(loc, 'latitude'):
-            self.latitude.append(float(loc.latitude))
-            self.longitude.append(float(loc.longitude))
-        if not self.city and hasattr(loc, 'city'):
-            self.city = loc.city
-        if not self.street and hasattr(loc, 'road'):
-            self.street = loc.address.road
-        if not self.location:
-            self.location.append(loc)
-            # TODO teraz daje pelny adres a moze samą dzielnicę
-        else:
-            logging.warning('location missing!')
-        if not (hasattr(loc, 'latitude') or hasattr(loc, 'city') or hasattr(loc, 'road')):
-            logging.warning("Unable to discover location!")
+        self.latitude = float(loc.lat)
+        self.longitude = float(loc.lon)
+        self.country = loc.country
+        self.city = loc.city
+        # self.state = loc.state
+        # self.county = loc.county
+
         db.update_user(self.facebook_id, field_to_update="latitude", field_value=self.latitude)
         db.update_user(self.facebook_id, field_to_update="longitude", field_value=self.longitude)
         db.update_user(self.facebook_id, field_to_update="city", field_value=self.city)
         db.update_user(self.facebook_id, field_to_update="street", field_value=self.street)
-        db.update_user(self.facebook_id, field_to_update="location", field_value=self.location)
-        logging.info("User({0})'s location changed to: latitude={1}, longitude={2}, city={3}, street={4}, location={5}".format(
-            self.facebook_id[0:5], self.latitude, self.longitude, self.city, self.street, self.location))
+        db.update_user(self.facebook_id, field_to_update="country", field_value=self.country)
+
+        logging.info("User({0})'s location changed to: latitude={1}, longitude={2}, city={3}, street={4}, country={5}".format(
+            self.facebook_id[0:5], self.latitude, self.longitude, self.city, self.street, self.country))
 
     def add_feature(self, feature):
         feature = replace_emojis(feature)

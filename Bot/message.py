@@ -8,6 +8,7 @@ from datetime import date
 from Bot.cognition import recognize_sticker
 from Bot.user import *
 import tokens
+from settings import MINIMUM_CONFIDENCE
 
 
 class Message:
@@ -15,7 +16,6 @@ class Message:
         Has attributes taken from json post that was sent to the server from facebook.
         Types: TextMessage/StickerMessage/MessageWithAttachment/Delivery/ReadConfirmation/UnknownType
         """
-    minimum_confidence = 0.85
 
     def __init__(self, json_data):
 
@@ -98,10 +98,10 @@ class Message:
                                 # list message
                                 self.url = str(self.messaging['message']['attachments'][0]['payload']['buttons'])
                             else:
-                                print("Unknown Template message with attachment: " + str(self.messaging['message']))
+                                logging.warning("Unknown Template message with attachment: " + str(self.messaging['message']))
                         else:
                             self.type = "MessageWithAttachment"
-                            print("Unknown message with attachment: " + str(self.messaging['message']))
+                            logging.warning("Unknown message with attachment: " + str(self.messaging['message']))
                 else:
                     self.text = self.messaging['message']['text']
                     if self.text.startswith('bottest'):
@@ -114,28 +114,25 @@ class Message:
                             self.NLP = True
                             self.NLP_entities = []
                             nlp = self.messaging['message']['nlp']['entities']
-                            print(nlp)
                             entities = list(nlp.keys())
                             self.NLP_language = []
                             try:
                                 for n in self.messaging['message']['nlp']['detected_locales']:
                                     self.NLP_language.append([n['locale'], n['confidence']])
-                                    print(self.NLP_language)
                             except:
                                 logging.warning("ERROR02 " + str(self.messaging))
 
                             if 'intent' in entities:
-                                if nlp['intent'][0]['confidence'] > self.minimum_confidence:
+                                if nlp['intent'][0]['confidence'] >= MINIMUM_CONFIDENCE:
                                     self.NLP_intent = nlp['intent'][0]['value']
                                 else:
                                     self.NLP_intent = None
                                 entities.remove("intent")
                             else:
                                 self.NLP_intent = None
+
                             for e in entities:
-                                if float(nlp[e][0]['confidence']) > self.minimum_confidence:
-                                    logging.info(self.NLP_entities)
-                                    logging.info(nlp[e][0])
+                                if float(nlp[e][0]['confidence']) >= MINIMUM_CONFIDENCE:
 
                                     try:
                                         self.NLP_entities.append([
@@ -167,9 +164,10 @@ class Message:
             elif self.type == "MessageWithAttachment":
                 logging.info("BOT({0}): <GIF link={1}>".format(short_id, self.url))
             elif self.type == "TextMessage":
-                logging.info("BOT({0}): '{1}'".format(short_id, self.text))
+                pass
+                # logging.info("BOT({0}): '{1}'".format(short_id, self.text))
             else:
-                logging.error("Unknown message type! Content: " + self.messaging)
+                logging.error("Unknown message type! Content: " + str(self.messaging))
 
         else:
             if self.type == "UnknownType":

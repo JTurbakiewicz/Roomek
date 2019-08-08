@@ -10,21 +10,10 @@ from Bot.cognition import collect_information
 # TODO multiple parameters in one message
 def respond(message, user, bot):
 
-    collect_information(message, user, bot)
-
-    # TODO no greeting start
-    if hasattr(message, 'NLP_intent'):
-        if message.NLP_intent == "greeting":
-            response.greeting(message, user, bot)
-        elif message.NLP_intent == "looking for":
-            user.set_business_type("rent")
-            ask_for_information(message, user, bot)
-        elif message.NLP_intent == "offering":
-            user.set_business_type("offer")
-            response.unable_to_answer(message, user, bot)
-        # TODO inne opcje jak kupno itd
-        else:
-            ask_for_information(message, user, bot)
+    if message.NLP_intent == "greeting":
+        response.greeting(message, user, bot)
+    elif user.confirmed_data:
+        response.show_offers(message, user, bot)
     else:
         ask_for_information(message, user, bot)
 

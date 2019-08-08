@@ -18,42 +18,36 @@ bot = Bot(tokens.fb_access)
 def handle_message(message, user):
     """ Recognize the content and respond accordingly. """
 
-    if message.type == "TextMessage" \
-            or message.type == "StickerMessage" \
-            or message.type == "MessageWithAttachment" \
-            or message.type == "LocationAnswer" \
-            or message.type == "BotTest":
-        if not message.is_echo:
-            bot.fb_send_action(str(message.facebook_id), 'mark_seen')
-            
-            if message.type == "TextMessage":
-                handle_text(message, user, bot)
-            elif message.type == "StickerMessage":
-                handle_sticker(message, user, bot)
-            if message.type == "LocationAnswer":
-                handle_location(message, user, bot)
-            elif message.type == "MessageWithAttachment":
-                handle_attachment(message, user, bot)
-            elif message.type == "BotTest":
-                handle_test(message, user, bot)
-    elif message.type == "Delivery":
-        pass
-    elif message.type == "ReadConfirmation":
-        pass
-    elif message.type == "UnknownType":
+    if message.is_echo:
         pass
     else:
-        logging.warning("Didn't recognize the message type.")
+        bot.fb_send_action(str(message.facebook_id), 'mark_seen')
+
+        if message.type == "Delivery":
+            pass
+        elif message.type == "ReadConfirmation":
+            pass
+        elif message.type == "UnknownType":
+            pass
+        elif message.type == "TextMessage":
+            handle_text(message, user, bot)
+        elif message.type == "StickerMessage":
+            handle_sticker(message, user, bot)
+        elif message.type == "LocationAnswer":
+            handle_location(message, user, bot)
+        elif message.type == "MessageWithAttachment":
+            handle_attachment(message, user, bot)
+        elif message.type == "BotTest":
+            handle_test(message, user, bot)
+        else:
+            logging.warning("Didn't recognize the message type: {0}".format(message.type))
 
 
 def handle_text(message, user, bot):
     """ React when the user sends any text. """
     if message.NLP:
-        if hasattr(message, "NLP_intent") or message.NLP_entities is not None:
-            concat = ""
-            for m in range(len(message.NLP_entities)):
-                concat += str(message.NLP_entities[m][0])+" = "+str(message.NLP_entities[m][1])+' ('+str(float(message.NLP_entities[m][2])*100)[0:5]+'%);'
-            logging.info("NLP recognized: '{0}' as: intent=[{1}], entities=[{2}]".format(message.text, message.NLP_intent, concat))
+        logging.info("-NLP→ intent: {0}, entities: {1}".format(str(message.NLP_intent), str(message.NLP_entities)))
+        collect_information(message, user, bot)
         respond(message, user, bot)
     else:
         default_message(message, user, bot)
@@ -79,6 +73,10 @@ def handle_attachment(message, user, bot):
 
 def handle_location(message, user, bot):
     """ React when the user replies with location."""
+    if user.context == "ask_for_location":
+        user.add_location(message.latitude, message.longitude)
+    elif user.context == "ask_for_city":
+        user.add_city(message.latitude, message.longitude)
     respond(message, user, bot)
 
 
@@ -86,10 +84,8 @@ def handle_test(message, user, bot):
     if 'quick' in message.text:
         bot.fb_send_quick_replies(message.facebook_id, "This is a test of quick replies", ['test_value_1', 'test_value_2', 'test_value_3'])
     elif 'list' in message.text:
-        print("TEMP GOT HERE")
         bot.fb_send_list_message(message.facebook_id, element_titles=['test_value_1', 'test_value_2'], button_titles=['test_value_3', 'test_value_4'])  # TODO not working
     elif 'menu' in message.text:
-        print("TEMP GOT HERE TO MENY TRY")
         bot.fb_create_menu()
     elif 'button' in message.text:
         bot.fb_send_button_message(message.facebook_id, "test", ['test_value_1', 'test_value_2'])  # TODO not working

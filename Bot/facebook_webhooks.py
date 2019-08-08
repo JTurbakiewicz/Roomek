@@ -146,10 +146,10 @@ class Bot:
         if type(message) == list:
             message = random.choice(message)
         # if use_database: db.add_conversation(str(userid), 'User', message)
-        logging.info("BOT({0}): '{1}'".format(str(userid)[0:5], message.split('\n', 1)[0]))
         return self.fb_send_message(userid, {
             'text': message
         }, notification_type)
+        logging.info("BOT({0}): '{1}'".format(str(userid)[0:5], str(message)))
 
     def fb_send_generic_message(self, userid, elements_titles=['a', 'b'], buttons_titles=['b1', 'b2'], notification_type=NotificationType.regular):
         """Send generic messages to the specified recipient.
@@ -312,6 +312,7 @@ class Bot:
 
 
     # def fb_send_quick_replies(self, userid, reply_message = "", replies = ['a','b','c'], location=False, notification_type=NotificationType.regular):
+
     # TODO Temp:
     def fb_send_quick_replies(self, userid, reply_message="", replies=['a', 'b', 'c'], location=False, notification_type=NotificationType.regular):
 

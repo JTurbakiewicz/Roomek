@@ -298,11 +298,13 @@ def get_user(facebook_id):
                 created_user.housing_type = data['housing_type']
                 created_user.price_limit = data['price_limit']
                 created_user.features = data['features']
+
                 created_user.country = data['country']
                 created_user.city = data['city']
                 created_user.street = data['street']
                 created_user.latitude = data['latitude']
                 created_user.longitude = data['longitude']
+
                 created_user.context = data['context']
                 created_user.interactions = data['interactions']
                 created_user.shown_input = data['shown_input']

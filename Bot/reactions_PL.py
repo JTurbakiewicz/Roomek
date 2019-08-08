@@ -7,7 +7,7 @@ import random
 import logging
 from Bot.cognition import *
 from settings import *
-from OfferBrowser.best_offer import best_offer
+#from OfferBrowser.best_offer import best_offer
 from OfferParser.translator import translate
 from pprint import pprint, pformat
 
@@ -24,7 +24,7 @@ def response_decorator(original_function):
 
         # The original function:
 
-        original_function(message, user, bot)
+        original_function(message, user, bot, *args, **kwargs)
 
         # Do something AFTER the original function:
         # TODO: bot.fb_send_text_message(str(message.facebook_id), response)
@@ -56,6 +56,9 @@ def greeting(message, user, bot):
 def ask_for_housing_type(message, user, bot):
     bot.fb_send_quick_replies(message.facebook_id, "Jakiego typu lokal Cię interesuje?", ['🚪 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący'])
 
+@response_decorator
+def ask_if_new_housing_type(message, user, bot, new_value):
+    bot.fb_send_quick_replies(message.facebook_id, "Czy chcesz zmienić typ z {0} na {1}?".format(user.housing_type, new_value), ['Tak', 'Nie'])
 
 @response_decorator
 def ask_for_city(message, user, bot):
@@ -114,7 +117,7 @@ def ask_what_wrong(message, user, bot):
 def show_offers(message, user, bot):
     # bot.fb_send_text_message(str(message.facebook_id), "Znalazłem dla Ciebie takie oferty:")
     if fake_typing: bot.fb_fake_typing(message.facebook_id, 0.4)
-    best = best_offer(user_obj=message.user, count=3)
+    #best = best_offer(user_obj=message.user, count=3)
     bot.fb_send_text_message(str(message.facebook_id), best[0])
     bot.fb_send_text_message(str(message.facebook_id), best[1])
     bot.fb_send_text_message(str(message.facebook_id), best[2])

@@ -9,16 +9,19 @@
 # 7 = "W" = Wołacz (hej? o?) zatrzymaj się
 # 8 = "Q" = Z bazy danych
 
+
+
 glossary = [
         # housing type:
         ["room", "pokój", "pokoju", "pokojowi", "pokój", "pokojem", "pokoju", "pokoju", "stancje-pokoje"],
         ["block", "blok", "bloku", "blokowi", "blok", "blokiem", "bloku", "bloku", "blok"],
-        ["apartment", "mieszkanie", "mieszkania", "mieszkaniu", "mieszkanie", "mieszkaniem", "mieszkaniu", "mieszkanie", "mieszkanie"],
         ["apartment", "mieszkanie", "mieszkania", "mieszkaniu", "mieszkanie", "mieszkaniem", "mieszkaniu", "mieszkanie", "apartament"],
         ["", "", "", "", "", "", "", "", "kamienica"],
         # offer type:
         ["sale", "sprzedaż", "sprzedaży", "sprzedaży", "sprzedaż", "sprzedażą", "sprzedaży", "sprzedaż", "sprzedaz"],
         ["rent", "wynajem", "wynajmu", "wynajmowi", "wynajem", "wynajmem", "wynajmie", "wynajmie", "wynajem"],
+        ["offering", "oferuję", "", "", "", "", "", "", "oferuję"],
+        ["looking for", "szukam", "", "", "", "", "", "", "szukam"],
         ["", "", "", "", "", "", "", "", "kupno"],
         ["other", "", "", "", "", "", "", "", "pozostałe"],
         ["tenement house", "kamienica", "kamienicy", "kamienicy", "kamienicę", "kamienicą", "kamienicy", "kamienico", "kamienica"],
@@ -56,8 +59,6 @@ glossary = [
         ["men", "", "", "", "", "", "", "", "mężczyźni"],
         ["women", "", "", "", "", "", "", "", "kobiety"],
     ]
-
-
 def translate(word, case = 'E'):
     for line in glossary:
         if word.lower() in line:

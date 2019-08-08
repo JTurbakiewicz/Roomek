@@ -11,31 +11,36 @@ How it works:   ________________________________________________________________
 7. 'Cognition' contains functions to parse user message like 'recognize_location'.
 8. Message is being send using send functions from 'facebook_webhooks'.
 
-Milestones:   __________________________________________________________________________________________
-- dojść do zwracania 3 ofert (obecnie problem z user.confirmeddata)
-- 3 oferty jako linki
-- 3 oferty jako generic message
-- ma umieć zbierać kilka informacji na raz ("szukam mieszkania na wynajem w Warszawie" -> apartment, rent, Warszawa)
-- poprawić zbieranie np. lokalizacji.
-- ułatwić przyszłe zmiany struktury.
-- Postawić to na pyany
-- Sprawdzić jak sobie radzi z wieloma użytkownikami
-- Przejrzeć bazę danych o użytkownikach i rozmowach.
-- rozdzielić na osobne obiekty: User i Query (jeden user może mieć kilka "zapytań")
-- po udanym szukaniu dopytuj dalej lub nowe wyszukiwanie
-- wizualizacja grafu odpowiedzi (jak graf na szkoleniu z ML)
-- rozdzielić user i query (user może mieć kilka query)
+TODO - Dziennik zadań (zacznij od góry):   _____________________________________________________________
 
-TODO - Dziennik zadań (od najnowszych):   _____________________________________________________________
-zacznij od:
-- [cognition 83] # TODO MAJOR FUCKUP: no user in message!
-potem:
-- [wymaga Kuby] Spraw aby dodawał usera do bazy   
+[!] [user/cognition] fix location error
 
-- [Cognition] wydobadz wiecej info z jednej wypowiedzi.
-- [fb webhooks] dopracuj karuzelę 3 ofert
-- 
+[ ] [user/cognition] ma dawać dzielnice osobną funkcją
 
-HOW TO USE LOCAL COMMANDS:
+[+/-] [Postman] learn postman api calls - can we talk without facebook?
 
+[+/-] [PyCharm] learn debugging
 
+[ ] [Cognition] wydobadz wiecej info z jednej wypowiedzi.
+
+[ ] [logic] dojść do zwracania 3 ofert jako linki
+     
+[ ] [pyany] Postaw na pyany i zobacz jak reaguje po czasie i na kilka osób
+
+[ ] [fb webhooks] dopracuj karuzelę 3 ofert i podobne generic message
+
+[ ] [fb webhooks] dodaj hamburgera (może z Postmana?)
+
+[ ] [???] (czy warto) rozdzielić na osobne obiekty: User i Query (jeden user może mieć kilka "zapytań")
+
+[ ] [logic] po udanym szukaniu dopytuj dalej lub nowe wyszukiwanie
+
+[ ] [Python] learn testing (unitary tests)
+
+[ ] [logic] wizualizacja grafu odpowiedzi (jak graf na szkoleniu z ML)
+
+[ ] [logic] pytania powinny być na bazie klastrowania - czyli, że pyta o konkretną cechę jeżeli wie że to mu zawęzi wyszukiwanie (Akinator)
+
+[ ] [check this out] https://realpython.com/testing-third-party-apis-with-mocks/
+[ ] [check this out] https://seminar.io/2013/09/27/testing-your-rest-client-in-python/
+[ ] [check this out] https://semaphoreci.com/community/tutorials/bdd-testing-a-restful-web-application-in-python
