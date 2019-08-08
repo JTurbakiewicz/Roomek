@@ -9,7 +9,7 @@ from Bot.cognition import recognize_sticker
 from Bot.user import *
 import tokens
 from settings import MINIMUM_CONFIDENCE
-
+from pprint import pprint
 
 class Message:
     """
@@ -18,6 +18,8 @@ class Message:
         """
 
     def __init__(self, json_data):
+
+        pprint(json_data)
 
         self.__dict__ = json_data  # previously json.loads
 
@@ -134,13 +136,24 @@ class Message:
                             for e in entities:
                                 if float(nlp[e][0]['confidence']) >= MINIMUM_CONFIDENCE:
 
+                                    #TODO popraw to. powinno być atrybutami, lub slownikiem nie listą
                                     try:
-                                        self.NLP_entities.append([
-                                            nlp[e][0]['_entity'],
-                                            nlp[e][0]['value'],
-                                            nlp[e][0]['confidence'],
-                                            nlp[e][0]['_body']
-                                        ])
+                                        try:
+                                            self.NLP_entities.append([
+                                                nlp[e][0]['_entity'],
+                                                nlp[e][0]['value'],
+                                                nlp[e][0]['confidence'],
+                                                nlp[e][0]['_body'],
+                                                nlp[e][0]['_role']
+                                            ])
+                                        except:
+                                            self.NLP_entities.append([
+                                                nlp[e][0]['_entity'],
+                                                nlp[e][0]['value'],
+                                                nlp[e][0]['confidence'],
+                                                nlp[e][0]['_body']
+                                            ])
+
                                     except:
                                         logging.warning("NIE UDAŁO SIĘ ZNALEŹĆ JAKIEGOŚ PARAMETRU NLP! "+str(self.messaging))
             else:
@@ -148,6 +161,7 @@ class Message:
         else:
             self.type = "UnknownType"
 
+        print("NLP: "+str(self.NLP_entities))
 
         # Logs:
         short_id = str(self.facebook_id)[0:5]

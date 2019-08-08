@@ -128,12 +128,13 @@ class User:
         else:
             loc = recognize_location(location=str(location))
 
-        self.latitude = float(loc.lat)
-        self.longitude = float(loc.lon)
-        self.country = loc.country
-        self.city = loc.city
-        # self.state = loc.state
-        # self.county = loc.county
+        self.latitude = float(loc['lat'])
+        self.longitude = float(loc['lon'])
+        self.country = loc['country']
+        self.city = loc['city']
+        self.street = loc['street']
+        # self.state = loc['state']
+        # self.county = loc['county']
 
         db.update_user(self.facebook_id, field_to_update="latitude", field_value=self.latitude)
         db.update_user(self.facebook_id, field_to_update="longitude", field_value=self.longitude)

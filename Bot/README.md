@@ -13,29 +13,30 @@ How it works:   ________________________________________________________________
 
 TODO - Dziennik zadań (zacznij od góry):   _____________________________________________________________
 
-[!] [user/cognition] fix location error
-
-[ ] [user/cognition] ma dawać dzielnice osobną funkcją
-
-[+/-] [Postman] learn postman api calls - can we talk without facebook?
-
-[+/-] [PyCharm] learn debugging
+[ ] [python] fstring zamiast format! 
+response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {user.city} w okolicy {user.location} ({user.location_latitude},{user.location_longitude})"
 
 [ ] [Cognition] wydobadz wiecej info z jednej wypowiedzi.
 
-[ ] [logic] dojść do zwracania 3 ofert jako linki
-     
+[ ] [logic] dojść do zwracania 3 ofert jako Karuzela
+
+[ ] [logic] get user name, language, gender etc (see Postman!)
+
+[ ] [user/cognition] ma dawać dzielnice osobną funkcją
+
 [ ] [pyany] Postaw na pyany i zobacz jak reaguje po czasie i na kilka osób
 
-[ ] [fb webhooks] dopracuj karuzelę 3 ofert i podobne generic message
 
-[ ] [fb webhooks] dodaj hamburgera (może z Postmana?)
 
-[ ] [???] (czy warto) rozdzielić na osobne obiekty: User i Query (jeden user może mieć kilka "zapytań")
+
+
+[ ] [fb webhooks] dopracuj karuzelę 3 ofert i podobne generic message - łatwe funkcje pls
 
 [ ] [logic] po udanym szukaniu dopytuj dalej lub nowe wyszukiwanie
 
-[ ] [Python] learn testing (unitary tests)
+[ ] [???] (czy warto) rozdzielić na osobne obiekty: User i Query (jeden user może mieć kilka "zapytań")
+
+[ ] [Python] learn testing (unitary tests, automated testing)
 
 [ ] [logic] wizualizacja grafu odpowiedzi (jak graf na szkoleniu z ML)
 

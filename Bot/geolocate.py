@@ -16,16 +16,14 @@ def recognize_location(location="", lat=0, long=0, city=""):
         zoom = 10       # 3	country, 10	city, 14 suburb, 16	major streets, 17 major and minor streets, 18 building
         req = requests.get(url="https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat={0}&lon={1}&zoom={2}&limit=5".format(lat, long, zoom))
 
-    elif city != "":
-        # using https://nominatim.org/release-docs/develop/api/Search/
-        req = requests.get(url="https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q={0}&limit=5".format(city))
-        tloc = json.loads(req.text)
-        if isinstance(tloc, list):
-            tloc = loc[0]
-        box = # x1, y1, x2, y2
-        req = requests.get(url="https://nominatim.openstreetmap.org/?format=json&bounded=1&viewbox={0}&addressdetails=1&q={1}&limit=5".format(box, location))
-
-
+    # elif city != "":
+    #     # using https://nominatim.org/release-docs/develop/api/Search/
+    #     req = requests.get(url="https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q={0}&limit=5".format(city))
+    #     tloc = json.loads(req.text)
+    #     if isinstance(tloc, list):
+    #         tloc = loc[0]
+    #     box = # x1, y1, x2, y2
+    #     req = requests.get(url="https://nominatim.openstreetmap.org/?format=json&bounded=1&viewbox={0}&addressdetails=1&q={1}&limit=5".format(box, location))
     else:
         # using https://nominatim.org/release-docs/develop/api/Search/
         req = requests.get(url="https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q={0}&limit=5".format(location))
@@ -42,6 +40,7 @@ def recognize_location(location="", lat=0, long=0, city=""):
         "name": "",
         "lat": "",
         "lon": "",
+        "street": "",
         "city": "",
         "county": "",
         "state": "",
@@ -59,6 +58,9 @@ def recognize_location(location="", lat=0, long=0, city=""):
 
     if "lon" in loc:
         loca["lon"] = loc["lon"]
+
+    if "road" in loc["address"]:
+        loca["street"] = loc["address"]["road"]
 
     if "city" in loc["address"]:
         loca["city"] = loc["address"]["city"]

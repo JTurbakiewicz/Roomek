@@ -7,6 +7,7 @@ import logging
 from settings import MINIMUM_CONFIDENCE
 import Bot.reactions_PL as response
 from OfferParser.translator import translate
+from pprint import pprint
 
 
 def collect_information(message, user, bot):
@@ -31,7 +32,11 @@ def collect_information(message, user, bot):
                 logging.warning("Didn't catch what user said! Intent: {0}".format(message.NLP_intent))
 
         if message.NLP_entities:
-            for entity in message.NLP_entities:     # [entity, value, confidence, body]
+            for entity in message.NLP_entities:     # [name, value, confidence, body, (role)]
+                try:
+                    print(entity, 'to jest to')
+                except:
+                    pass
                 if entity[2] >= MINIMUM_CONFIDENCE:
 
                     if entity[0] == "housing_type":
@@ -47,9 +52,12 @@ def collect_information(message, user, bot):
                     if entity[0] == "location":
                         user.add_location(location=entity[1])
 
-                    if entity[0] == "price_limit":
-                        user.set_price_limit(entity[1])
 
+                    try:
+                        if entity[4] == "price_limit":
+                            user.set_price_limit(entity[1])
+                    except:
+                        print("Żałuję że to była lista a nie słownik")
 
                     """
 
@@ -69,16 +77,14 @@ def collect_information(message, user, bot):
                         if entity[0] == "boolean" and entity[1] == "no":
                             user.wants_more_locations = False
 
+                    """
 
-                    if user.wants_more_features and user.asked_for_features and entity[0] == "boolean" and entity[1] == "no":
-                        user.wants_more_features = False
+                    # TODO!
+                    # if user.wants_more_features and user.asked_for_features and entity[0] == "boolean" and entity[1] == "no":
+                    #     user.wants_more_features = False
 
-
-                    if user.price_limit is None:
-                        user.set_price_limit(entity[3])
-
-
-                    if not user.wants_more_features and not user.confirmed_data:
+                    # TODO!
+                    if user.context == "show_input_data":
                         if entity[0] == "boolean" and entity[1] == "yes":
                             user.confirmed_data = True
                             logging.info("[User {0} Update] confirmed_data = True".format(user.facebook_id))
@@ -88,7 +94,6 @@ def collect_information(message, user, bot):
                             logging.info("[User {0} Update] confirmed_data = False".format(user.facebook_id))
                             # TODO dead end.
 
-                    """
 
         if not message.NLP_intent and not message.NLP_entities:   # ma nlp, ale intent=none i brak mu entities, więc freetext do wyłapania
 

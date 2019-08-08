@@ -1,5 +1,5 @@
 
-import Databases.mysql_connection as sql
+from Databases import mysql_connection as sql
 # from Bot.user import User
 
 
@@ -25,31 +25,33 @@ def best_offer(user_obj = None, count = 1):
         else:
             query = query + f" and city = '{user_obj.city}'"
 
-    if user_obj.business_type:
-        if type(user_obj.business_type) is list:
-            query = query + ' and ( '
-            for preference in user_obj.business_type:
-                query = query + f"business_type = '{preference}' or "
-            query = query[:-4] + ' )'
-        else:
-            query = query + f" and business_type = '{user_obj.business_type}'"
-
-    if user_obj.housing_type:
-        if type(user_obj.housing_type) is list:
-            query = query + ' and ( '
-            for preference in user_obj.housing_type:
-                query = query + f"housing_type = '{preference}' or "
-            query = query[:-4] + ' )'
-        else:
-            query = query + f" and housing_type = '{user_obj.housing_type}'"
+    # if user_obj.business_type:
+    #     if type(user_obj.business_type) is list:
+    #         query = query + ' and ( '
+    #         for preference in user_obj.business_type:
+    #             query = query + f"business_type = '{preference}' or "
+    #         query = query[:-4] + ' )'
+    #     else:
+    #         query = query + f" and business_type = '{user_obj.business_type}'"
+    #
+    # if user_obj.housing_type:
+    #     if type(user_obj.housing_type) is list:
+    #         query = query + ' and ( '
+    #         for preference in user_obj.housing_type:
+    #             query = query + f"housing_type = '{preference}' or "
+    #         query = query[:-4] + ' )'
+    #     else:
+    #         query = query + f" and housing_type = '{user_obj.housing_type}'"
 
     if user_obj.gender:
         query = query + f" and (preferred_locator like '{user_obj.gender[0]}%' or preferred_locator is Null)"
 
+    print(query)
     offers = sql.get_custom(query)
 
     relatable_urls = [x['offer_url'] for x in offers]
 
+    print(relatable_urls)
     return relatable_urls
 
 # uzy = User('1')

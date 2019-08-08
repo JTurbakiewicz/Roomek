@@ -7,7 +7,7 @@ import random
 import logging
 from Bot.cognition import *
 from settings import *
-#from OfferBrowser.best_offer import best_offer
+from OfferBrowser.best_offer import best_offer
 from OfferParser.translator import translate
 from pprint import pprint, pformat
 
@@ -97,13 +97,16 @@ def ask_for_price_limit(message, user, bot):
 def show_input_data(message, user, bot):
     user.shown_input = True
     housing_type = translate(user.housing_type, "D")
-    print(housing_type)
-    response1 = "Zanotowałem, że szukasz {0} w mieście {1} w okolicy {2} ({3},{4})".format(housing_type, user.city, user.location, user.location_latitude, user.location_longitude)
+    response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {user.city} w okolicy {user.street} ({user.latitude},{user.longitude})"
     bot.fb_send_text_message(str(message.facebook_id), response1)
     response2 = "które ma {0} i kosztuje do {1}zł.".format(str(user.features), user.price_limit)
     bot.fb_send_text_message(str(message.facebook_id), response2)
+
     # TODO add more params...
-    logging.debug("ADD OTHER FEATURES: "+str(message.user))
+    # reply = ""
+    # for key, val in vars(message).items():
+    #     reply += str(key) + " = " + str(val) + "\n"
+
     bot.fb_send_quick_replies(message.facebook_id, "Czy wszystko się zgadza?",
                               ['Tak, pokaż oferty 🔮', 'Tak, chcę coś dodać', 'Nie'])
 
@@ -117,7 +120,7 @@ def ask_what_wrong(message, user, bot):
 def show_offers(message, user, bot):
     # bot.fb_send_text_message(str(message.facebook_id), "Znalazłem dla Ciebie takie oferty:")
     if fake_typing: bot.fb_fake_typing(message.facebook_id, 0.4)
-    #best = best_offer(user_obj=message.user, count=3)
+    best = best_offer(user_obj=user, count=3)
     bot.fb_send_text_message(str(message.facebook_id), best[0])
     bot.fb_send_text_message(str(message.facebook_id), best[1])
     bot.fb_send_text_message(str(message.facebook_id), best[2])
