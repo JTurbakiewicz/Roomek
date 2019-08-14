@@ -13,8 +13,6 @@ How it works:   ________________________________________________________________
 
 TODO - Dziennik zadań (zacznij od góry):   _____________________________________________________________
 
-[ ] [python] fstring zamiast format! 
-response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {user.city} w okolicy {user.location} ({user.location_latitude},{user.location_longitude})"
 
 [ ] [Cognition] wydobadz wiecej info z jednej wypowiedzi.
 

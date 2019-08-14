@@ -40,13 +40,13 @@ def handle_message(message, user):
         elif message.type == "BotTest":
             handle_test(message, user, bot)
         else:
-            logging.warning("Didn't recognize the message type: {0}".format(message.type))
+            logging.warning(f"Didn't recognize the message type: {message.type}")
 
 
 def handle_text(message, user, bot):
     """ React when the user sends any text. """
     if message.NLP:
-        logging.info("-NLP→ intent: {0}, entities: {1}".format(str(message.NLP_intent), str(message.NLP_entities)))
+        logging.info(f"-NLP→ intent: {str(message.NLP_intent)}, entities: {str(message.NLP_entities)}")
         collect_information(message, user, bot)
         respond(message, user, bot)
     else:
@@ -59,8 +59,8 @@ def handle_sticker(message, user, bot):
     response = sticker_response(message, user, bot)
     if response != "already sent":
         bot.fb_send_text_message(str(message.facebook_id), response)
-    logging.info("Message '{0}' from {1} recognized as '{2}' sticker (id={3})".format("<sticker>", str(message.facebook_id)[0:5], message.sticker_name, message.stickerID))
-    logging.info("Bot's response to user {1} sticker:  '{0}'".format(response, str(message.facebook_id)))
+    logging.info(f"Message <sticker> from {str(message.facebook_id)[0:5]} recognized as '{message.sticker_name}' sticker (id={message.stickerID})")
+    logging.info(f"Bot's response to user {str(message.facebook_id)} sticker:  '{response}'")
 
 
 def handle_attachment(message, user, bot):
@@ -68,7 +68,7 @@ def handle_attachment(message, user, bot):
     if fake_typing: bot.fb_fake_typing(str(message.facebook_id), 0.8)
     image_url = r'https://media.giphy.com/media/L7ONYIPYXyc8/giphy.gif'
     bot.fb_send_image_url(str(message.facebook_id), image_url)
-    logging.info("Bot's response to user {1} gif:  '{0}'".format('<GIF>', str(message.facebook_id)))
+    logging.info(f"Bot's response to user {str(message.facebook_id)} gif:  '<GIF>'")
 
 
 def handle_location(message, user, bot):

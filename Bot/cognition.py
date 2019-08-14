@@ -29,7 +29,7 @@ def collect_information(message, user, bot):
             elif message.NLP_intent == "looking for":
                 user.set_business_type("looking for")
             else:
-                logging.warning("Didn't catch what user said! Intent: {0}".format(message.NLP_intent))
+                logging.warning(f"Didn't catch what user said! Intent: {message.NLP_intent}")
 
         if message.NLP_entities:
             for entity in message.NLP_entities:     # [name, value, confidence, body, (role)]
@@ -87,11 +87,11 @@ def collect_information(message, user, bot):
                     if user.context == "show_input_data":
                         if entity[0] == "boolean" and entity[1] == "yes":
                             user.confirmed_data = True
-                            logging.info("[User {0} Update] confirmed_data = True".format(user.facebook_id))
+                            logging.info(f"[User {user.facebook_id} Update] confirmed_data = True")
 
                         elif entity[0] == "boolean" and entity[1] == "no":
                             user.confirmed_data = False
-                            logging.info("[User {0} Update] confirmed_data = False".format(user.facebook_id))
+                            logging.info(f"[User {user.facebook_id} Update] confirmed_data = False")
                             # TODO dead end.
 
 
@@ -138,7 +138,7 @@ def collect_information(message, user, bot):
                 print("____________________ TEST 008 ________________________")
 
                 user.wants_more_features = False
-                logging.info("[User {0} Update] wants_more_features = False".format(user.facebook_id))
+                logging.info(f"[User {user.facebook_id} Update] wants_more_features = False")
             else:
                 print("____________________ TEST 009 ________________________")
 
@@ -210,7 +210,7 @@ def replace_emojis(to_replace):
 def replace_if_contains(to_replace, if_contains, replace_with):
     if str(if_contains) in str(to_replace):
         return to_replace.replace(str(if_contains), str(replace_with))
-        logging.debug("replaced {0} with {1}").format(str(if_contains), str(replace_with))
+        logging.debug(f"replaced {str(if_contains)} with {str(replace_with)}")
     else:
         return str(to_replace)
 

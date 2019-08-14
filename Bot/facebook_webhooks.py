@@ -53,7 +53,7 @@ class Bot:
 
         self.api_version = kwargs.get('api_version') or DEFAULT_API_VERSION
         self.app_secret = kwargs.get('app_secret')
-        self.graph_url = 'https://graph.facebook.com/v{0}'.format(self.api_version)
+        self.graph_url = f'https://graph.facebook.com/v{self.api_version}'
         self.access_token = access_token
 
     @property
@@ -149,7 +149,7 @@ class Bot:
         return self.fb_send_message(userid, {
             'text': message
         }, notification_type)
-        logging.info("BOT({0}): '{1}'".format(str(userid)[0:5], str(message)))
+        logging.info(f"BOT({str(userid)[0:5]}): '{str(message)}'")
 
     def fb_send_generic_message(self, userid, elements_titles=['a', 'b'], buttons_titles=['b1', 'b2'], notification_type=NotificationType.regular):
         """Send generic messages to the specified recipient.
@@ -339,7 +339,7 @@ class Bot:
             reply_options.append(content)
 
         # if use_database: db.add_conversation(str(userid), 'User', message)
-        logging.info("BOT({0}): '{1}' Replies{2}".format(str(userid)[0:5], str(reply_message), str(replies)))
+        logging.info(f"BOT({str(userid)[0:5]}): '{str(reply_message)}' Replies{str(replies)}")
 
         return self.fb_send_message(userid, {
             "text": reply_message,
@@ -367,7 +367,7 @@ class Bot:
 
             params.update(self.auth_args)
 
-            request_endpoint = '{0}/{1}'.format(self.graph_url, userid)
+            request_endpoint = f'{self.graph_url}/{userid}'
             response = requests.get(request_endpoint, params=params)
             if response.status_code == 200:
                 return response.json()
@@ -445,7 +445,7 @@ class Bot:
         return self.fb_send_attachment_url(userid, "file", file_url, notification_type)
 
     def fb_send_raw(self, payload):
-        request_endpoint = '{0}/me/messages'.format(self.graph_url)
+        request_endpoint = f'{self.graph_url}/me/messages'
         response = requests.post(
             request_endpoint,
             params=self.auth_args,
@@ -455,41 +455,17 @@ class Bot:
 
         return result
 
-    # TODO hamburger menu
-    def fb_create_menu(self):
-        request_endpoint = '{0}/me/messenger_profile?access_token='.format(self.graph_url)
+#TODO fix this method:
+def get_user_info(facebook_id):
+    request_endpoint = "https://graph.facebook.com/"
+    response = requests.get(
+        request_endpoint,
+        params="access_token="+str(tokens.fb_access),
+        json="fields=first_name, last_name, profile_pic, gender, locale, timezone"
+    )
+    result = response.json()
 
-        logging.debug("EVEN GOT INSIDE THIS ONE")
-
-        payload = {
-            "persistent_menu": [
-                {
-                    "locale": "default",
-                    "composer_input_disabled": "true",
-                    "call_to_actions": [
-                        {
-                            "title": "My Account",
-                            "type": "nested",
-                            "call_to_actions": [
-                                {
-                                    "title": "Pay Bill",
-                                    "type": "postback",
-                                    "payload": "PAYBILL_PAYLOAD"
-                                },
-                                {
-                                    "type": "web_url",
-                                    "title": "Latest News",
-                                    "url": "https://www.messenger.com/",
-                                    "webview_height_ratio": "full"
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        }
-
-        return self.fb_send_raw(payload=payload)
+    return result
 
 
 def validate_hub_signature(app_secret, request_payload, hub_signature_header):

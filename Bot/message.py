@@ -170,16 +170,16 @@ class Message:
                 logging.warning(
                     "This wasn't a message, perhaps it's an info request.")
             elif self.type == "Delivery":
-                logging.info("BOT({0}) message has been delivered.".format(short_id))
+                logging.info(f"BOT({short_id}) message has been delivered.")
             elif self.type == "ReadConfirmation":
-                logging.info("BOT({0}) message has been read.".format(short_id))
+                logging.info(f"BOT({short_id}) message has been read.")
             elif self.type == "StickerMessage":
-                logging.info("BOT({0}): <sticker id={1}>".format(short_id, self.stickerID))
+                logging.info(f"BOT({short_id}): <sticker id={self.stickerID}>")
             elif self.type == "MessageWithAttachment":
-                logging.info("BOT({0}): <GIF link={1}>".format(short_id, self.url))
+                logging.info(f"BOT({short_id}): <GIF link={self.url}>")
             elif self.type == "TextMessage":
                 pass
-                # logging.info("BOT({0}): '{1}'".format(short_id, self.text))
+                # logging.info(f"BOT({short_id}): '{self.text}'")
             else:
                 logging.error("Unknown message type! Content: " + str(self.messaging))
 
@@ -187,18 +187,18 @@ class Message:
             if self.type == "UnknownType":
                 logging.warning("This wasn't a message, perhaps it's an info request.")
             elif self.type == "Delivery":
-                logging.debug("USER({0}) message has been delivered.".format(short_id))
+                logging.debug(f"USER({short_id}) message has been delivered.")
             elif self.type == "ReadConfirmation":
-                logging.debug("USER({0}) message read by bot.".format(short_id))
+                logging.debug(f"USER({short_id}) message read by bot.")
             elif self.type == "StickerMessage":
-                logging.info("USER({0}): <sticker id={1}>".format(short_id, self.stickerID))
+                logging.info(f"USER({short_id}): <sticker id={self.stickerID}>")
             elif self.type == "GifMessage":
-                logging.info("USER({0}): <GIF link={1}>".format(short_id, self.url))
+                logging.info(f"USER({short_id}): <GIF link={self.url}>")
             elif self.type == "MessageWithAttachment":
-                logging.info("USER({0}): <MessageWithAttachment>".format(short_id))
+                logging.info(f"USER({short_id}): <MessageWithAttachment>")
             elif self.type == "LocationAnswer":
-                logging.info("USER({0}): <Location: lat={1}, long={2}>".format(short_id, self.latitude, self.longitude))
+                logging.info(f"USER({short_id}): <Location: lat={self.latitude}, long={self.longitude}>")
             elif self.type == "TextMessage":
-                logging.info("USER({0}): '{1}'".format(short_id, self.text))
+                logging.info(f"USER({short_id}): '{self.text}'")
             else:
                 logging.error("Unknown message type! Content: " + str(self.messaging))

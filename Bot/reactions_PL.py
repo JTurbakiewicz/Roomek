@@ -45,8 +45,8 @@ def default_message(message, user, bot):
 @response_decorator
 def greeting(message, user, bot):
     response = random.choice([
-        "{0}! Jestem Roomek i jestem na bieżąco z rynkiem nieruchomości.".format(message.text.split(' ', 1)[0].capitalize()),
-        "{0}! Nazywam się Roomek i zajmuję się znajdywaniem najlepszych nieruchomości.".format(message.text.split(' ', 1)[0].capitalize())
+        f"{message.text.split(' ', 1)[0].capitalize()}! Jestem Roomek i jestem na bieżąco z rynkiem nieruchomości.",
+        f"{message.text.split(' ', 1)[0].capitalize()}! Nazywam się Roomek i zajmuję się znajdywaniem najlepszych nieruchomości."
         ])
     bot.fb_send_text_message(str(message.facebook_id), response)
     bot.fb_send_quick_replies(message.facebook_id, "Jak mogę Ci dzisiaj pomóc?", ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', 'Sprzedaję mieszkanie'])
@@ -58,7 +58,7 @@ def ask_for_housing_type(message, user, bot):
 
 @response_decorator
 def ask_if_new_housing_type(message, user, bot, new_value):
-    bot.fb_send_quick_replies(message.facebook_id, "Czy chcesz zmienić typ z {0} na {1}?".format(user.housing_type, new_value), ['Tak', 'Nie'])
+    bot.fb_send_quick_replies(message.facebook_id, f"Czy chcesz zmienić typ z {user.housing_type} na {new_value}?", ['Tak', 'Nie'])
 
 @response_decorator
 def ask_for_city(message, user, bot):
@@ -99,7 +99,7 @@ def show_input_data(message, user, bot):
     housing_type = translate(user.housing_type, "D")
     response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {user.city} w okolicy {user.street} ({user.latitude},{user.longitude})"
     bot.fb_send_text_message(str(message.facebook_id), response1)
-    response2 = "które ma {0} i kosztuje do {1}zł.".format(str(user.features), user.price_limit)
+    response2 = f"które ma {str(user.features)} i kosztuje do {user.price_limit}zł."
     bot.fb_send_text_message(str(message.facebook_id), response2)
 
     # TODO add more params...
@@ -107,8 +107,7 @@ def show_input_data(message, user, bot):
     # for key, val in vars(message).items():
     #     reply += str(key) + " = " + str(val) + "\n"
 
-    bot.fb_send_quick_replies(message.facebook_id, "Czy wszystko się zgadza?",
-                              ['Tak, pokaż oferty 🔮', 'Tak, chcę coś dodać', 'Nie'])
+    bot.fb_send_quick_replies(message.facebook_id, "Czy wszystko się zgadza?", ['Tak, pokaż oferty 🔮', 'Tak, chcę coś dodać', 'Nie'])
 
 
 @response_decorator
@@ -152,7 +151,7 @@ def no(message, user, bot):
 
 @response_decorator
 def maybe(message, user, bot):
-    response = "'{0}'? Potrzebuejesz chwilę, żeby się zastanowić?".format(message.text.capitalize())
+    response = f"'{message.text.capitalize()}'? Potrzebuejesz chwilę, żeby się zastanowić?"
     bot.fb_send_text_message(str(message.facebook_id), response)
 
 

@@ -14,19 +14,19 @@ def recognize_location(location="", lat=0, long=0, city=""):
     if lat != 0 or long != 0:
         # https://nominatim.org/release-docs/develop/api/Reverse/
         zoom = 10       # 3	country, 10	city, 14 suburb, 16	major streets, 17 major and minor streets, 18 building
-        req = requests.get(url="https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat={0}&lon={1}&zoom={2}&limit=5".format(lat, long, zoom))
+        req = requests.get(url=f"https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat={lat}&lon={long}&zoom={zoom}&limit=5")
 
     # elif city != "":
     #     # using https://nominatim.org/release-docs/develop/api/Search/
-    #     req = requests.get(url="https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q={0}&limit=5".format(city))
+    #     req = requests.get(url=f"https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q={city}&limit=5")
     #     tloc = json.loads(req.text)
     #     if isinstance(tloc, list):
     #         tloc = loc[0]
     #     box = # x1, y1, x2, y2
-    #     req = requests.get(url="https://nominatim.openstreetmap.org/?format=json&bounded=1&viewbox={0}&addressdetails=1&q={1}&limit=5".format(box, location))
+    #     req = requests.get(url=f"https://nominatim.openstreetmap.org/?format=json&bounded=1&viewbox={box}&addressdetails=1&q={location}&limit=5")
     else:
         # using https://nominatim.org/release-docs/develop/api/Search/
-        req = requests.get(url="https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q={0}&limit=5".format(location))
+        req = requests.get(url=f"https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q={location}&limit=5")
 
     loc = json.loads(req.text)
 
