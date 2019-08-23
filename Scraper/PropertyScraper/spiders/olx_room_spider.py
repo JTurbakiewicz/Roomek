@@ -1,11 +1,11 @@
 import scrapy
 import os
-if '/home/RoomekBot' in os.path.abspath(''):
-    from Scraper.PropertyScraper.items import OfferRoomItem, OfferFeaturesItem
-    from Scraper.PropertyScraper.itemloaders import OlxRoomLoader, OtodomOfferLoader
-else:
-    from items import OfferRoomItem, OfferFeaturesItem
-    from itemloaders import OlxRoomLoader, OtodomOfferLoader
+# if '/home/RoomekBot' in os.path.abspath(''):
+from Scraper.PropertyScraper.items import OfferRoomItem, OfferFeaturesItem
+from Scraper.PropertyScraper.itemloaders import OlxRoomLoader, OtodomOfferLoader
+# else:
+#     from items import OfferRoomItem, OfferFeaturesItem
+#     from itemloaders import OlxRoomLoader, OtodomOfferLoader
 from scrapy.linkextractors import LinkExtractor
 import Databases.mysql_connection as db
 

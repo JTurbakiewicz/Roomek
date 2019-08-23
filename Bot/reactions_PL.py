@@ -9,14 +9,15 @@ from Bot.cognition import *
 from settings import *
 from OfferBrowser.best_offer import best_offer
 from OfferParser.translator import translate
-from pprint import pprint, pformat
 
 
 def response_decorator(original_function):
     def wrapper(message, user, bot, *args, **kwargs):
 
         # Do something BEFORE the original function:
-        if fake_typing: bot.fb_fake_typing(message.facebook_id, 0.4)
+        if fake_typing:
+            delay = len(str(message.text))/20 +0.2
+            bot.fb_fake_typing(message.facebook_id, duration=delay)
         show_user_object(message, user, bot)
         # show_message_object(message, user, bot)
         user.set_context(original_function.__name__)
@@ -56,13 +57,16 @@ def greeting(message, user, bot):
 def ask_for_housing_type(message, user, bot):
     bot.fb_send_quick_replies(message.facebook_id, "Jakiego typu lokal Cię interesuje?", ['🚪 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący'])
 
+
 @response_decorator
 def ask_if_new_housing_type(message, user, bot, new_value):
     bot.fb_send_quick_replies(message.facebook_id, f"Czy chcesz zmienić typ z {user.housing_type} na {new_value}?", ['Tak', 'Nie'])
 
+
 @response_decorator
 def ask_for_city(message, user, bot):
     bot.fb_send_quick_replies(message.facebook_id, "Które miasto Cię interesuje?", ['Warszawa', 'Kraków', 'Łódź', 'Wrocław', 'Poznań', 'Gdańsk', 'Szczecin', 'Bydgoszcz', 'Białystok'])
+
 
 @response_decorator
 def ask_for_features(message, user, bot):
@@ -119,12 +123,44 @@ def ask_what_wrong(message, user, bot):
 def show_offers(message, user, bot):
     # bot.fb_send_text_message(str(message.facebook_id), "Znalazłem dla Ciebie takie oferty:")
     if fake_typing: bot.fb_fake_typing(message.facebook_id, 0.4)
-    best = best_offer(user_obj=user, count=3)
-    bot.fb_send_text_message(str(message.facebook_id), best[0])
-    bot.fb_send_text_message(str(message.facebook_id), best[1])
-    bot.fb_send_text_message(str(message.facebook_id), best[2])
-    bot.fb_send_generic_message(message.facebook_id, ['Oferta 1', 'Oferta 2', 'Oferta 3'])
 
+    # TODO: Kuba popraw best_offer lub baze ofert bo nic nie zwraca :(
+    #  best = best_offer(user_obj=user, count=3)
+    # TEMP mock:
+    best = [
+            {"link": "https://www.olx.pl/oferta/kawalerka-blisko-metro-tramwaj-i-autobus-CID3-IDB2466.html#f3c4691bd2;promoted",
+            "title": "Kawalerka - blisko METRO, tramwaj i autobus",
+            "price": 1900,
+            "picUrl": "https://apollo-ireland.akamaized.net/v1/files/t8tyd4jkc7zi3-PL/image;s=644x461",
+            "area": 26,
+            "location": "Bielany",
+            "provider": "OLX"
+            },
+            {
+            "link": "https://www.otodom.pl/oferta/kawalerka-niedaleko-galerii-mokotow-i-w-ID3aEIV.html?",
+            "title": "Kawalerka niedaleko Galerii Mokotów i W",
+            "price": 2100,
+            "picUrl": "https://apollo-ireland.akamaized.net/v1/files/eyJmbiI6Imswemo1cW1pa2w5ay1BUEwiLCJ3IjpbeyJmbiI6ImoxajNvMTNtNmJnbjEtQVBMIiwicyI6IjE0IiwicCI6IjEwLC0xMCIsImEiOiIwIn1dfQ.e207Jhvt63TLA_RfTLnsfOnkcKmYMApweapiEoFBS-0/image;s=1280x1024;q=80",
+            "area": 31,
+            "location": "Górny Mokotów",
+            "provider": "OtoDom"
+            },
+            {
+            "link": "https://www.otodom.pl/oferta/3-pokojowe-super-lokalizacja-w-centrum-ID2AjZI.html?",
+            "title": "3-pokojowe - super lokalizacja w Centrum",
+            "price": 3500,
+            "picUrl": "https://apollo-ireland.akamaized.net/v1/files/eyJmbiI6IjlmbWdsYWI5ZWp2cTMtQVBMIiwidyI6W3siZm4iOiJqMWozbzEzbTZiZ24xLUFQTCIsInMiOiIxNCIsInAiOiIxMCwtMTAiLCJhIjoiMCJ9XX0.ibTs1WaI7GAavtM2VgE3CIVgrkPV0uIoUQwBQff5jZk/image;s=1280x1024;q=80",
+            "area": 65,
+            "location": "Centrum",
+            "provider": "OtoDom"
+            }
+    ]
+
+    if len(best) != 0:
+        bot.fb_send_text_message(message.facebook_id, "Zobacz co znalazłem:")
+        bot.fb_send_offers_carousel(message.facebook_id, best)
+    else:
+        bot.fb_send_text_message(message.facebook_id, "Niestety nie znalazłem ofert spełniających Twoje kryteria :(")
 
 @response_decorator
 def yes(message, user, bot):
@@ -135,7 +171,7 @@ def yes(message, user, bot):
         "zanotowałem",
         "(y)"
     ])
-    bot.fb_send_text_message(str(message.facebook_id), response)
+    bot.fb_send_text_message(message.facebook_id, response)
 
 
 @response_decorator

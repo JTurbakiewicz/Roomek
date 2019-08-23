@@ -13,33 +13,69 @@ How it works:   ________________________________________________________________
 
 TODO - Dziennik zadań (zacznij od góry):   _____________________________________________________________
 
+[x] [logic] dojść do zwracania 3 ofert jako Karuzela
 
 [ ] [Cognition] wydobadz wiecej info z jednej wypowiedzi.
-
-[ ] [logic] dojść do zwracania 3 ofert jako Karuzela
 
 [ ] [logic] get user name, language, gender etc (see Postman!)
 
 [ ] [user/cognition] ma dawać dzielnice osobną funkcją
 
-[ ] [pyany] Postaw na pyany i zobacz jak reaguje po czasie i na kilka osób
-
-
-
-
+[ ] [Bot] Zastąp wszystkie Print'y w BOTcie.
 
 [ ] [fb webhooks] dopracuj karuzelę 3 ofert i podobne generic message - łatwe funkcje pls
 
-[ ] [logic] po udanym szukaniu dopytuj dalej lub nowe wyszukiwanie
+[ ] [db] Zapis rozmowy w bazie (chyba nie działa)
+
+[ ] [db] Zapis Pytanie+odpowiedź żeby potem ulepszyć algorytm odpowiedzi na dane teksty (zakładam, że na start nie wyłapie wszystkiego)
+
+[ ] [pyany] Postaw na pyany i zobacz jak reaguje po czasie i na kilka osób
+
+***** Test na bliskich znajomych *****
+
+[ ] [feedback] zobaczyć co intuicyjnie ludzie piszą - przerobić flow
+
+[ ] [strategy] Ustalić
+    - problem/rozwiązanie, kim są klienci
+    - zarabianie? 
+    - cele biznesowe
+    - pomiary
+    - rozpisać założenia
+
+[ ] [???] 
+
+[ ] [feedback] spotkać się z Kubikiem
 
 [ ] [???] (czy warto) rozdzielić na osobne obiekty: User i Query (jeden user może mieć kilka "zapytań")
 
-[ ] [Python] learn testing (unitary tests, automated testing)
+[ ] [Bot] Czy lepsze funkcje reactions czy tabela (np. json) i parser (np rozpoznajacy quick replies)?
 
-[ ] [logic] wizualizacja grafu odpowiedzi (jak graf na szkoleniu z ML)
+[ ] [logic] po udanym szukaniu dopytuj dalej lub nowe wyszukiwanie
+
+[ ] [Bot] Usprawnić hamburger - obecnie placeholdery.
 
 [ ] [logic] pytania powinny być na bazie klastrowania - czyli, że pyta o konkretną cechę jeżeli wie że to mu zawęzi wyszukiwanie (Akinator)
 
+[ ] [Python] learn testing (unitary tests, automated testing)
+        -> simplified test: zobaczyć czy działa jak user wyśle okejke, naklejke, gifa, w innym języku, wiele odpowiedzi pod rząd itd.
 [ ] [check this out] https://realpython.com/testing-third-party-apis-with-mocks/
 [ ] [check this out] https://seminar.io/2013/09/27/testing-your-rest-client-in-python/
 [ ] [check this out] https://semaphoreci.com/community/tutorials/bdd-testing-a-restful-web-application-in-python
+
+***** Test na wielu znajomych *****
+
+[ ] [logic] wizualizacja grafu odpowiedzi (jak graf na szkoleniu z ML)
+
+[ ] [strategia] weryfikacja przyjętych założeń:
+ 
+***** Pivot? *****
+
+[ ] [marketing]
+    - napędzenie użytkowników do używania za darmo
+    - lej marketingowy (dużo osób przypadkowych, dla zabawy, potem część faktycznie szuka, a niewielka ilość chce np. płatną analizę)
+    - konwersja na płatne usługi
+    - kohorty
+    - content marketing - ciekawe statystyki mieszkań w polsce, na fanpage
+    - płatny ruch (fb ads, google ads)
+
+***** Feedback od ludzi napędzonych z ads *****

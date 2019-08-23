@@ -16,7 +16,7 @@ def collect_information(message, user, bot):
     """
 
     if user.context == "":
-        # TODO np. dodawania features
+        # TODO np. dodawanie features
         pass
 
     if message.NLP:

@@ -267,7 +267,6 @@ def user_exists(facebook_id):
                  FROM users
                  WHERE facebook_id = %s
                  """ % ("'"+facebook_id+"'") #TODO change
-        print(query)
         cursor.execute(query)
         data = cursor.fetchone()
 
@@ -284,6 +283,7 @@ def get_user(facebook_id):
                  FROM users
                  WHERE facebook_id = %s
                  """ % (facebook_id)
+
         cursor.execute(query)
         data = cursor.fetchone()
 
@@ -401,16 +401,16 @@ def push_user(user_obj = None, update = False):
                         VALUES ({placeholders})
                         ON DUPLICATE KEY UPDATE {duplicate_condition}
                      """
-            print(query)
             cursor.execute(query, user_data*2)
         else:
 
             query = """INSERT INTO users
                     ({})
                     VALUES ({})""".format(fields_to_add,placeholders)
-            print(query)
+
             cursor.execute(query, user_data)
         cnx.commit()
+
 
 def create_message(msg_obj = None, update = False):
 
@@ -804,8 +804,9 @@ db_config = tokens.sql_config
 
 set_up_db(db_config)
 
-features = 'dla_studenta'
-uzy = User('test1')
+features = 'piekielne'
+uzy = User('66666666666')
+uzy.city = 'Hell'
 uzy.features = features
 
 push_user(user_obj=uzy, update=True)

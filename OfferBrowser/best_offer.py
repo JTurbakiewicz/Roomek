@@ -51,6 +51,7 @@ def best_offer(user_obj = None, count = 1):
 
     relatable_urls = [x['offer_url'] for x in offers]
 
+    # TODO powinien zwracać niemal wszystkie parametry oferty jako obiekt lub słownik
     print(relatable_urls)
     return relatable_urls
 

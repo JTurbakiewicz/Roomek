@@ -83,18 +83,18 @@ def handle_location(message, user, bot):
 def handle_test(message, user, bot):
     if 'quick' in message.text:
         bot.fb_send_quick_replies(message.facebook_id, "This is a test of quick replies", ['test_value_1', 'test_value_2', 'test_value_3'])
-    elif 'list' in message.text:
-        bot.fb_send_list_message(message.facebook_id, element_titles=['test_value_1', 'test_value_2'], button_titles=['test_value_3', 'test_value_4'])  # TODO not working
-    elif 'menu' in message.text:
-        bot.fb_create_menu()
-    elif 'button' in message.text:
-        bot.fb_send_button_message(message.facebook_id, "test", ['test_value_1', 'test_value_2'])  # TODO not working
-    elif 'generic' in message.text:
-        bot.fb_send_generic_message(message.facebook_id, ['Test_value_1', 'Test_value_2'])
-        # temp: bot.fb_send_test_message(userid, ['test_value_1', 'test_value_2'])
-        # bot.fb_send_generic_message(
-        # userid, [['Title1','Subtitle1','image_url1',
-        # buttons=['title1','url1']],['Title2','Subtitle2',
-        # 'image_url2',buttons=['title2','url2']]])
+    # elif 'list' in message.text:
+    #     bot.fb_send_list_message(message.facebook_id, element_titles=['test_value_1', 'test_value_2'], button_titles=['test_value_3', 'test_value_4'])  # TODO not working
+    # elif 'menu' in message.text:
+    #     bot.fb_create_menu()
+    # elif 'button' in message.text:
+    #     bot.fb_send_button_message(message.facebook_id, "test", ['test_value_1', 'test_value_2'])  # TODO not working
+    # elif 'generic' in message.text:
+    #     bot.fb_send_generic_message(message.facebook_id, ['Test_value_1', 'Test_value_2'])
+    #     # temp: bot.fb_send_test_message(userid, ['test_value_1', 'test_value_2'])
+    #     # bot.fb_send_generic_message(
+    #     # userid, [['Title1','Subtitle1','image_url1',
+    #     # buttons=['title1','url1']],['Title2','Subtitle2',
+    #     # 'image_url2',buttons=['title2','url2']]])
     else:
         bot.fb_send_text_message(str(message.facebook_id), 'Hello world!')

@@ -145,13 +145,26 @@ class Bot:
         # TODO character limit error
         if type(message) == list:
             message = random.choice(message)
+
         # if use_database: db.add_conversation(str(userid), 'User', message)
+        logging.info(f"BOT({str(userid)[0:5]}): '{str(message)}'")
+
         return self.fb_send_message(userid, {
             'text': message
         }, notification_type)
-        logging.info(f"BOT({str(userid)[0:5]}): '{str(message)}'")
 
-    def fb_send_generic_message(self, userid, elements_titles=['a', 'b'], buttons_titles=['b1', 'b2'], notification_type=NotificationType.regular):
+    def fb_send_offers_carousel(self, userid, offers):
+        elements = []
+        for offer in offers:
+            t = f"{offer['area']}m2 za {offer['price']}zł, {offer['location']}"
+            st = f"{offer['provider']}: {offer['title']}"
+            buttons = [self.fb_create_button(title="Sprawdź", url=offer['link']),
+                self.fb_create_button(title="Podoba mi się!", url=offer['link'])]
+            elements.append(self.fb_create_element(title=t, subtitle=st, image_url=offer['picUrl'], url=offer['link'], buttons=buttons, height="TALL"))
+
+        self.fb_send_generic_message(userid, elements)
+
+    def fb_send_generic_message(self, userid, elements, notification_type=NotificationType.regular):
         """Send generic messages to the specified recipient.
         https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template
         Input:
@@ -160,9 +173,7 @@ class Bot:
         Output:
             Response from API as <dict>
         """
-        logging.debug("Trying to send generic message...")
-
-        elements = self.fb_define_elements(elements_titles, buttons_titles)
+        logging.debug("Trying to send generic message.")
 
         return self.fb_send_message(userid, {
             "attachment": {
@@ -174,103 +185,96 @@ class Bot:
             }
         }, notification_type)
 
-    def fb_send_list_message(self, userid, element_titles=['a', 'b'], button_titles=['a', 'b'], notification_type=NotificationType.regular):
-        """TEST"""
-        logging.debug("Trying to send TEST list message.")
+    # def fb_send_list_message(self, userid, elements=[], buttons=[], notification_type=NotificationType.regular):
+    #     logging.debug("Trying to send list message.")
+    #
+    #     return self.fb_send_message(userid, {
+    #         "attachment": {
+    #             "type": "template",
+    #             "payload": {
+    #                 "template_type": "list",
+    #                 "top_element_style": "compact",
+    #                 "elements": [
+    #                     {
+    #                         "title": "Proba",
+    #                         "subtitle": "See all our colors",
+    #                         "default_action": {
+    #                             "type": "web_url",
+    #                             "url": "https://peterssendreceiveapp.ngrok.io/view?item=100",
+    #                             "messenger_extensions": "false",
+    #                             # "messenger_extensions": False,
+    #                             "webview_height_ratio": "tall"
+    #                         }
+    #                     },
+    #                     {
+    #                         "title": "Gruba",
+    #                         "subtitle": "See all our colors 2",
+    #                         "default_action": {
+    #                             "type": "web_url",
+    #                             "url": "https://peterssendreceiveapp.ngrok.io/view?item=100",
+    #                             "messenger_extensions": "false",
+    #                             # "messenger_extensions": False,
+    #                             "webview_height_ratio": "tall"
+    #                         }
+    #                     }
+    #                 ],
+    #                  "buttons": buttons
+    #             }
+    #         }
+    #     }, notification_type)
 
-        elements = self.fb_define_elements(element_titles, button_titles)
-        buttons = self.fb_define_buttons(button_titles)
+    # def fb_send_button_message(self, userid, text="abc", buttons=[], notification_type=NotificationType.regular):
+    #     """Send text messages to the specified recipient.
+    #     https://developers.facebook.com/docs/messenger-platform/send-api-reference/button-template
+    #     Input:
+    #         userid: recipient id to send to
+    #         text: text of message to send
+    #         buttons: buttons to send
+    #     Output:
+    #         Response from API as <dict>
+    #     """
+    #     logging.debug("Trying to send button message.")
+    #
+    #     return self.fb_send_message(userid, {
+    #         "attachment": {
+    #             "type": "template",
+    #             "payload": {
+    #                 "template_type": "button",
+    #                 "text": text,
+    #                 "buttons": buttons
+    #             }
+    #         }
+    #     }, notification_type)
 
-        return self.fb_send_message(userid, {
-            "attachment": {
-                "type": "template",
-                "payload": {
-                    "template_type": "list",
-                    "top_element_style": "compact",
-                    "elements": [
-                        {
-                            "title": "Proba",
-                            "subtitle": "See all our colors",
-                            "default_action": {
-                                "type": "web_url",
-                                "url": "https://peterssendreceiveapp.ngrok.io/view?item=100",
-                                "messenger_extensions": "false",
-                                # "messenger_extensions": False,
-                                "webview_height_ratio": "tall"
-                            }
-                        },
-                        {
-                            "title": "Gruba",
-                            "subtitle": "See all our colors 2",
-                            "default_action": {
-                                "type": "web_url",
-                                "url": "https://peterssendreceiveapp.ngrok.io/view?item=100",
-                                "messenger_extensions": "false",
-                                # "messenger_extensions": False,
-                                "webview_height_ratio": "tall"
-                            }
-                        }
-                    ],
-                     "buttons": buttons
-                }
-            }
-        }, notification_type)
-
-    def fb_send_button_message(self, userid, text="abc", button_names=['a', 'b'], notification_type=NotificationType.regular):
-        """Send text messages to the specified recipient.
-        https://developers.facebook.com/docs/messenger-platform/send-api-reference/button-template
-        Input:
-            userid: recipient id to send to
-            text: text of message to send
-            buttons: buttons to send
-        Output:
-            Response from API as <dict>
+    def fb_create_button(self, title, url):
         """
-        logging.debug("Trying to send button message.")
-        buttons = self.fb_define_buttons(button_names)
-
-        return self.fb_send_message(userid, {
-            "attachment": {
-                "type": "template",
-                "payload": {
-                    "template_type": "button",
-                    "text": text,
-                    "buttons": buttons
-                }
-            }
-        }, notification_type)
-
-    def fb_define_buttons(self, button_names=['a', 'b']):
-        buttons = []
-        for b in button_names:
-            buttons.append({
-                "title": str(b),
+        https://developers.facebook.com/docs/messenger-platform/send-messages/buttons
+        """
+        button = {
+                "title": str(title),
                 "type": "web_url",
                 # "type":"postback",
-                "url": "http://www.olx.com"
+                "url": url
                 # "messenger_extensions": "true",
                 # "webview_height_ratio": "tall",
                 # "payload":"DEVELOPER_DEFINED_PAYLOAD"
                 # "fallback_url": "http://www.olx.com"
-            })
-        return buttons
+            }
+        return button
 
-    def fb_define_elements(self, element_titles=['a', 'b'], buttons_titles=['c','d']):
-        elements = []
-        buttons = self.fb_define_buttons(buttons_titles)
-        for e in element_titles:
-            elements.append({
-            "title": str(e),
-            "subtitle": "This is a subtitle",
-            "image_url": "http://www.gatewayapartments.com.hk/img/GatewayApartments.png",
+    def fb_create_element(self, title="", subtitle="", image_url="", url="", height="TALL", buttons=[]):
+        element={
+            "title": str(title),
+            "subtitle": str(subtitle),
+            "image_url": image_url,
             "buttons": buttons,
             "default_action": {
-                "type": "web_url",
-                "url": "www.olx.com",
-                "webview_height_ratio": "tall",
+                "type": "web_url",      # web_url,
+                "url": url,
+                "webview_height_ratio": height     # COMPACT, TALL, FULL
                 }
-            })
-        return elements
+            }
+        return element
 
     def fb_send_action(self, userid, action, notification_type=NotificationType.regular):
         """Send typing indicators or send read receipts to the specified recipient.

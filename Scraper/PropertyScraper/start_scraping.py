@@ -1,8 +1,8 @@
 import os
-if '/home/RoomekBot' in os.path.abspath(''):
-    from Scraper.PropertyScraper.spiders import olx_spider_main, olx_room_spider
-else:
-    from spiders import olx_spider_main, olx_room_spider
+#if '/home/RoomekBot' in os.path.abspath(''):
+from Scraper.PropertyScraper.spiders import olx_spider_main, olx_room_spider
+#else:
+#    from spiders import olx_spider_main, olx_room_spider
 from twisted.internet import reactor, defer
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
@@ -88,7 +88,7 @@ base_string = 'https://www.olx.pl/nieruchomosci'
 housing_types = ['mieszkania', 'stancje-pokoje']
 business_types = ['sprzedaz', 'wynajem']
 cities = ['warszawa', 'krakow', 'lodz', 'wroclaw', 'poznan', 'gdansk', 'szczecin', 'bydgoszcz', 'lublin', 'bialystok']
-cities = ['warszawa']
+# cities = ['warszawa']
 urls_flats_OLX = []
 urls_rooms_OLX = []
 

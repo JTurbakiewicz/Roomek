@@ -19,7 +19,7 @@ class Message:
 
     def __init__(self, json_data):
 
-        pprint(json_data)
+        logging.debug(json_data)
 
         self.__dict__ = json_data  # previously json.loads
 
@@ -99,6 +99,10 @@ class Message:
                             elif self.messaging['message']['attachments'][0]['payload']['template_type'] == 'list':
                                 # list message
                                 self.url = str(self.messaging['message']['attachments'][0]['payload']['buttons'])
+                            elif self.messaging['message']['attachments'][0]['payload']['template_type'] == 'generic':
+                                # generic message
+                                # TODO po co to? nie działa
+                                self.url = str(self.messaging['message']['attachments'][0]['payload'])
                             else:
                                 logging.warning("Unknown Template message with attachment: " + str(self.messaging['message']))
                         else:
@@ -161,8 +165,6 @@ class Message:
         else:
             self.type = "UnknownType"
 
-        print("NLP: "+str(self.NLP_entities))
-
         # Logs:
         short_id = str(self.facebook_id)[0:5]
         if self.is_echo:
@@ -176,7 +178,8 @@ class Message:
             elif self.type == "StickerMessage":
                 logging.info(f"BOT({short_id}): <sticker id={self.stickerID}>")
             elif self.type == "MessageWithAttachment":
-                logging.info(f"BOT({short_id}): <GIF link={self.url}>")
+                # TODO rozroznic na generic message (karuzela) i gify
+                logging.info(f"BOT({short_id}): <GIF link={self.url[:15]}...>")
             elif self.type == "TextMessage":
                 pass
                 # logging.info(f"BOT({short_id}): '{self.text}'")
