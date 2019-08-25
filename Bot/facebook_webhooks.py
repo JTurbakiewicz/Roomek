@@ -459,13 +459,15 @@ class Bot:
 
         return result
 
-#TODO fix this method:
+
 def get_user_info(facebook_id):
-    request_endpoint = "https://graph.facebook.com/"
+    request_endpoint = f"https://graph.facebook.com/v2.6/{facebook_id}"
     response = requests.get(
         request_endpoint,
-        params="access_token="+str(tokens.fb_access),
-        json="fields=first_name, last_name, profile_pic, gender, locale, timezone"
+        params={
+            "access_token": str(tokens.fb_access),
+            "fields": "first_name,last_name,profile_pic,gender,locale,timezone"
+        }
     )
     result = response.json()
 

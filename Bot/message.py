@@ -109,6 +109,7 @@ class Message:
                             self.type = "MessageWithAttachment"
                             logging.warning("Unknown message with attachment: " + str(self.messaging['message']))
                 else:
+
                     self.text = self.messaging['message']['text']
                     if self.text.startswith('bottest'):
                         self.type = "BotTest"
@@ -126,7 +127,7 @@ class Message:
                                 for n in self.messaging['message']['nlp']['detected_locales']:
                                     self.NLP_language.append([n['locale'], n['confidence']])
                             except:
-                                logging.warning("ERROR02 " + str(self.messaging))
+                                logging.warning(str(self.messaging))
 
                             if 'intent' in entities:
                                 if nlp['intent'][0]['confidence'] >= MINIMUM_CONFIDENCE:
@@ -138,28 +139,24 @@ class Message:
                                 self.NLP_intent = None
 
                             for e in entities:
+                                print(e)
                                 if float(nlp[e][0]['confidence']) >= MINIMUM_CONFIDENCE:
-
-                                    #TODO popraw to. powinno być atrybutami, lub slownikiem nie listą
-                                    try:
-                                        try:
-                                            self.NLP_entities.append([
-                                                nlp[e][0]['_entity'],
-                                                nlp[e][0]['value'],
-                                                nlp[e][0]['confidence'],
-                                                nlp[e][0]['_body'],
-                                                nlp[e][0]['_role']
-                                            ])
-                                        except:
-                                            self.NLP_entities.append([
-                                                nlp[e][0]['_entity'],
-                                                nlp[e][0]['value'],
-                                                nlp[e][0]['confidence'],
-                                                nlp[e][0]['_body']
-                                            ])
-
-                                    except:
-                                        logging.warning("NIE UDAŁO SIĘ ZNALEŹĆ JAKIEGOŚ PARAMETRU NLP! "+str(self.messaging))
+                                    if e != 'datetime':
+                                        self.NLP_entities.append({
+                                            'entity': nlp[e][0]['_entity'],
+                                            'value': nlp[e][0]['value'],
+                                            'confidence': nlp[e][0]['confidence'],
+                                            'body': nlp[e][0]['_body']})
+                                        if '_role' in nlp[e][0]:
+                                            self.NLP_entities[-1]['role'] = nlp[e][0]['_role']
+                                    else:   # process date and time entities:
+                                        self.NLP_entities.append({
+                                            'entity': 'datetime',
+                                            'value': nlp[e][0]['values'][0]['to']['value'],
+                                            'confidence': nlp[e][0]['confidence'],
+                                            'body': nlp[e][0]['_body']})
+                                else:
+                                    logging.warning(f"NLP entity not correct: {e}")
             else:
                 self.type = "UnknownType"
         else:

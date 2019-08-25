@@ -29,7 +29,7 @@ from Bot.facebook_webhooks import verify_fb_token
 app = Flask(__name__)
 
 # We will receive messages that Facebook sends to our bot at this endpoint:
-@app.route("/", methods=['GET', 'POST'])
+@app.route("/fb/", methods=['GET', 'POST'])
 def receive_message():
     logging.debug(request.get_json())          # Full json content
     if request.method == 'GET':            # if type is 'GET' it means FB wants to verify tokens
@@ -45,6 +45,13 @@ def receive_message():
         handle_message(message, user)       # process the message and respond
     return "Message Processed"
 
+# TODO dodać API żeby np. zacząć od nowa po kliknięciu w menu
+@app.route("/api/", methods=['GET', 'POST'])
+def call_api():
+    logging.debug(request.get_json())       # Full json content
+    json_message = request.get_json()       # read message as json
+    print(json_message)
+    return "Message Processed"
 
 # If the program is executed (double-clicked), it will set name to main, thus run app:
 if __name__ == "__main__":

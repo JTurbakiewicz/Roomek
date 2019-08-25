@@ -15,10 +15,6 @@ def collect_information(message, user, bot):
     Function that parses message to find as many information as possible and add as parameters to the user object.
     """
 
-    if user.context == "":
-        # TODO np. dodawanie features
-        pass
-
     if message.NLP:
 
         if message.NLP_intent is not None:
@@ -32,119 +28,83 @@ def collect_information(message, user, bot):
                 logging.warning(f"Didn't catch what user said! Intent: {message.NLP_intent}")
 
         if message.NLP_entities:
-            for entity in message.NLP_entities:     # [name, value, confidence, body, (role)]
-                try:
-                    print(entity, 'to jest to')
-                except:
-                    pass
-                if entity[2] >= MINIMUM_CONFIDENCE:
+            for entity in message.NLP_entities:
+                if entity['entity'] == "housing_type":
+                    if user.housing_type is None:
+                        user.set_housing_type(entity['value'])
+                    # TODO add translation and replacement values
+                    # else:
+                    #     new = translate(entity[1], "Q")
+                    #     if user.housing_type != new:
+                    #         response.ask_if_new_housing_type(message, user, bot, new)
+                    #     else:
+                    #         logging.info("Housing_type already has this value.")
 
-                    if entity[0] == "housing_type":
-                        if user.housing_type is None:
-                            user.set_housing_type(entity[1])
-                        # else:
-                        #     new = translate(entity[1], "Q")
-                        #     if user.housing_type != new:
-                        #         response.ask_if_new_housing_type(message, user, bot, new)
-                        #     else:
-                        #         logging.info("Housing_type already has this value.")
+                if entity['entity'] == "location":
+                    user.add_location(location=entity['value'])
 
-                    if entity[0] == "location":
-                        user.add_location(location=entity[1])
+                if entity['entity'] == "datetime":
+                    user.add_since(entity['value'])
 
+                if entity['entity'] == "amount_of_money" or entity['entity'] == "number":
+                    # TODO potencjalnie sie psuje jak inne liczby
+                    user.set_price_limit(entity['value'])
 
-                    try:
-                        if entity[4] == "price_limit":
-                            user.set_price_limit(entity[1])
-                    except:
-                        print("Żałuję że to była lista a nie słownik")
+                if entity['entity'] == "person_type":
+                    user.set_person_type(entity['value'])
 
-                    """
+                if entity['entity'] == "business_type":
+                    user.set_business_type(entity['value'])
 
-                    if entity[0] == "housing_type":
-                        if user.housing_type is None:
-                            user.set_housing_type(entity[1])
-                        else:
-                            new = translate(entity[1], "Q")
-                            if user.housing_type != new:
-                                response.ask_if_new_housing_type(message, user, bot, new)
-                            else:
-                                logging.info("Housing_type already has this value.")
-
-                    if entity[0] == "location":
-                        
-                    if user.wants_more_locations:
-                        if entity[0] == "boolean" and entity[1] == "no":
-                            user.wants_more_locations = False
-
-                    """
-
-                    # TODO!
-                    # if user.wants_more_features and user.asked_for_features and entity[0] == "boolean" and entity[1] == "no":
-                    #     user.wants_more_features = False
-
-                    # TODO!
+                # TODO Add more yes/no contexts.
+                if entity['entity'] == "boolean":
                     if user.context == "show_input_data":
-                        if entity[0] == "boolean" and entity[1] == "yes":
-                            user.confirmed_data = True
-                            logging.info(f"[User {user.facebook_id} Update] confirmed_data = True")
+                        if entity['value'] == "yes":
+                            user.set_confirmed_data(True)
+                        else:
+                            user.set_confirmed_data(False)
+                    elif user.context == "asked_for_features":
+                        if entity['value'] == "yes":
+                            user.set_wants_more_features(True)
+                        else:
+                            user.set_wants_more_features(False)
 
-                        elif entity[0] == "boolean" and entity[1] == "no":
-                            user.confirmed_data = False
-                            logging.info(f"[User {user.facebook_id} Update] confirmed_data = False")
-                            # TODO dead end.
-
-
+"""
         if not message.NLP_intent and not message.NLP_entities:   # ma nlp, ale intent=none i brak mu entities, więc freetext do wyłapania
-
-            print("____________________ TEST 001 ________________________")
-
             if user.city is None:
-                print("____________________ TEST 002 ________________________")
                 try:
                     user.set_city(recognize_location(message.text).city)
                 except:
                     pass
 
             elif user.latitude == 0 and message.type == "LocationAnswer":
-                print("____________________ TEST 003 ________________________")
-
                 user.add_location(lat=message.latitude, long=message.longitude)
 
             elif user.latitude == 0:
-                print("____________________ TEST 004 ________________________")
-
                 try:
                     user.add_location(location=recognize_location(message.text).city)
                 except:
                     pass
 
             elif user.housing_type is None:
-                print("____________________ TEST 005 ________________________")
-
                 user.set_housing_type(message.text)
 
             elif user.price_limit is None:
-                print("____________________ TEST 006 ________________________")
-
                 user.set_price_limit(message.text)
 
             elif user.wants_more_features:
-                print("____________________ TEST 007 ________________________")
 
                 user.add_feature(message.text)
 
             elif user.wants_more_features and entity[0] == "boolean" and entity[1] == "no":
-                print("____________________ TEST 008 ________________________")
-
                 user.wants_more_features = False
                 logging.info(f"[User {user.facebook_id} Update] wants_more_features = False")
             else:
-                print("____________________ TEST 009 ________________________")
-
                 response.default_message(message, user, bot)
     else:
         logging.warning("Didn't catch what user said! ")
+
+"""
 
 
 # Set of intents and patterns to recognize them:

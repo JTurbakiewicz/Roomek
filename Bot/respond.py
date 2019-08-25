@@ -52,3 +52,6 @@ def ask_for_information(message, user, bot):
 
     else:
         response.default_message(message, user, bot)
+
+    x =2
+    x=3

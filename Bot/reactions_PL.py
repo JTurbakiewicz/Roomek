@@ -9,6 +9,7 @@ from Bot.cognition import *
 from settings import *
 from OfferBrowser.best_offer import best_offer
 from OfferParser.translator import translate
+from time import sleep
 
 
 def response_decorator(original_function):
@@ -45,18 +46,20 @@ def default_message(message, user, bot):
 
 @response_decorator
 def greeting(message, user, bot):
+    userword = message.text.split(' ', 1)[0].capitalize()
+    if userword == 'Dzie' or userword == 'Dzien' or userword == 'Dzień':
+        userword = "Dzień dobry"
     response = random.choice([
-        f"{message.text.split(' ', 1)[0].capitalize()}! Jestem Roomek i jestem na bieżąco z rynkiem nieruchomości.",
-        f"{message.text.split(' ', 1)[0].capitalize()}! Nazywam się Roomek i zajmuję się znajdywaniem najlepszych nieruchomości."
+        f"{userword} {user.first_name}! Jestem Roomek i jestem na bieżąco z rynkiem nieruchomości.",
+        f"{userword} {user.first_name}! Nazywam się Roomek i zajmuję się znajdywaniem najlepszych nieruchomości."
         ])
     bot.fb_send_text_message(str(message.facebook_id), response)
-    bot.fb_send_quick_replies(message.facebook_id, "Jak mogę Ci dzisiaj pomóc?", ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', 'Sprzedaję mieszkanie'])
-
+    bot.fb_fake_typing(message.facebook_id, 0.5)
+    bot.fb_send_quick_replies(message.facebook_id, "Jak mogę Ci dzisiaj pomóc?", ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', '💰 Sprzedam', '💰 Kupię'])
 
 @response_decorator
 def ask_for_housing_type(message, user, bot):
-    bot.fb_send_quick_replies(message.facebook_id, "Jakiego typu lokal Cię interesuje?", ['🚪 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący'])
-
+    bot.fb_send_quick_replies(message.facebook_id, "Jakiego typu lokal Cię interesuje?", ['🚪 🛌 🛏 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący'])
 
 @response_decorator
 def ask_if_new_housing_type(message, user, bot, new_value):
@@ -105,13 +108,8 @@ def show_input_data(message, user, bot):
     bot.fb_send_text_message(str(message.facebook_id), response1)
     response2 = f"które ma {str(user.features)} i kosztuje do {user.price_limit}zł."
     bot.fb_send_text_message(str(message.facebook_id), response2)
-
-    # TODO add more params...
-    # reply = ""
-    # for key, val in vars(message).items():
-    #     reply += str(key) + " = " + str(val) + "\n"
-
-    bot.fb_send_quick_replies(message.facebook_id, "Czy wszystko się zgadza?", ['Tak, pokaż oferty 🔮', 'Tak, chcę coś dodać', 'Nie'])
+    # TODO add more params
+    bot.fb_send_quick_replies(message.facebook_id, "Czy wszystko się zgadza?", ['Tak 👍', '👎 Nie'])
 
 
 @response_decorator
@@ -121,9 +119,6 @@ def ask_what_wrong(message, user, bot):
 
 @response_decorator
 def show_offers(message, user, bot):
-    # bot.fb_send_text_message(str(message.facebook_id), "Znalazłem dla Ciebie takie oferty:")
-    if fake_typing: bot.fb_fake_typing(message.facebook_id, 0.4)
-
     # TODO: Kuba popraw best_offer lub baze ofert bo nic nie zwraca :(
     #  best = best_offer(user_obj=user, count=3)
     # TEMP mock:
@@ -157,10 +152,14 @@ def show_offers(message, user, bot):
     ]
 
     if len(best) != 0:
-        bot.fb_send_text_message(message.facebook_id, "Zobacz co znalazłem:")
+        bot.fb_send_text_message(message.facebook_id, ["Zobacz co dla Ciebie znalazłem:", "Takich ofert jest dużo, ale wybrałem kilka ciekawych", "Co powiesz o tych:", "Może któraś z tych ofert:"])
         bot.fb_send_offers_carousel(message.facebook_id, best)
+        sleep(4)
+        bot.fb_fake_typing(message.facebook_id, 0.7)
+        bot.fb_send_text_message(message.facebook_id, ["Czy któraś oferta Ci się podoba?", "Masz jakiegoś faworyta?", "Która z powyższych najbardziej Ci odpowiada?"])
     else:
         bot.fb_send_text_message(message.facebook_id, "Niestety nie znalazłem ofert spełniających Twoje kryteria :(")
+
 
 @response_decorator
 def yes(message, user, bot):

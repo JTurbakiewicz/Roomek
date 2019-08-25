@@ -689,7 +689,9 @@ db_tables['users'] = (
     "  `language` varchar(100),"
     "  `business_type` varchar(100),"
     "  `housing_type` varchar(100),"
+    "  `person_type` varchar(100),"
     "  `price_limit` int(1),"
+    "  `since` varchar(30),"    # TODO Date format?
     "  `features` varchar(1000),"
     "  `country` varchar(100),"  
     "  `city` varchar(100),"  
@@ -804,9 +806,9 @@ db_config = tokens.sql_config
 
 set_up_db(db_config)
 
-features = 'piekielne'
-uzy = User('66666666666')
-uzy.city = 'Hell'
-uzy.features = features
-
-push_user(user_obj=uzy, update=True)
+# features = 'piekielne'
+# uzy = User('66666666666')
+# uzy.city = 'Hell'
+# uzy.features = features
+#
+# push_user(user_obj=uzy, update=True)

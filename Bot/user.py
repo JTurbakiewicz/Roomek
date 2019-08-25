@@ -18,15 +18,12 @@ class User:
 
     def __init__(self, facebook_id):
 
+        # TODO decorator logging and add to database
+        # logging.info(f"[User info] facebook_id set to {facebook_id}")
+        # db.update_user(self.facebook_id, field_to_update="facebook_id", field_value=self.facebook_id)
+
         # permanent:
         self.facebook_id = facebook_id
-        #TODO auto fill info:
-        # info = get_user_info(facebook_id)
-        # print(info)
-        # self.first_name = info['first_name']
-        # self.last_name = info['last_name']
-        # self.gender = info['gender']
-        # self.language = info['locale']
         self.first_name = None
         self.last_name = None
         self.gender = None
@@ -34,7 +31,9 @@ class User:
         # query parameters:
         self.business_type = None
         self.housing_type = None
+        self.person_type = None
         self.price_limit = None
+        self.since = None
         self.features = []  # ["dla studenta", "nieprzechodni", "niepalacy"]
         # address:
         self.country = None
@@ -51,6 +50,13 @@ class User:
         self.wants_more_locations = True
         self.confirmed_data = False
         self.add_more = False
+
+
+        info = get_user_info(facebook_id)
+        self.first_name = info['first_name']
+        self.last_name = info['last_name']
+        self.gender = info['gender']
+        self.language = info['locale']  # TODO języka nie łapie
 
         if not db.user_exists(self.facebook_id):
             db.push_user(user_obj=self, update=False)
@@ -99,6 +105,17 @@ class User:
         self.housing_type = str(housing_type)
         logging.info(f"[User info] housing_type set to {housing_type}")
         db.update_user(self.facebook_id, field_to_update="housing_type", field_value=self.housing_type)
+
+    def set_person_type(self, person_type):
+        person = translate(person_type, "Q")  # TODO Skasuj mnie jak Kuba poprawi w bazie.
+        self.person_type = str(person_type)
+        logging.info(f"[User info] person_type set to {person_type}")
+        db.update_user(self.facebook_id, field_to_update="person_type", field_value=self.person_type)
+
+    def set_since(self, date):
+        self.since = str(date)
+        logging.info(f"[User info] since set to {date}")
+        db.update_user(self.facebook_id, field_to_update="since", field_value=self.since)
 
     def set_price_limit(self, price_limit):
         try:
@@ -167,3 +184,8 @@ class User:
         self.confirmed_data = confirmed_data
         logging.info(f"[User info] confirmed_data set to: {confirmed_data}")
         db.update_user(self.facebook_id, field_to_update="confirmed_data", field_value=self.confirmed_data)
+
+    def set_wants_more_features(self, wants_more_features):
+        self.wants_more_features = wants_more_features
+        logging.info(f"[User info] wants_more_features set to: {wants_more_features}")
+        db.update_user(self.facebook_id, field_to_update="wants_more_features", field_value=self.wants_more_features)
