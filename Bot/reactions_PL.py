@@ -120,9 +120,10 @@ def ask_what_wrong(message, user, bot):
 @response_decorator
 def show_offers(message, user, bot):
     # TODO: Kuba popraw best_offer lub baze ofert bo nic nie zwraca :(
-    #  best = best_offer(user_obj=user, count=3)
+    best = best_offer(user_obj=user, count=3)
+    print(best)
     # TEMP mock:
-    best = [
+    bestTemp = [
             {"link": "https://www.olx.pl/oferta/kawalerka-blisko-metro-tramwaj-i-autobus-CID3-IDB2466.html#f3c4691bd2;promoted",
             "title": "Kawalerka - blisko METRO, tramwaj i autobus",
             "price": 1900,
@@ -150,6 +151,8 @@ def show_offers(message, user, bot):
             "provider": "OtoDom"
             }
     ]
+
+
 
     if len(best) != 0:
         bot.fb_send_text_message(message.facebook_id, ["Zobacz co dla Ciebie znalazłem:", "Takich ofert jest dużo, ale wybrałem kilka ciekawych", "Co powiesz o tych:", "Może któraś z tych ofert:"])

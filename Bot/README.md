@@ -13,21 +13,27 @@ How it works:   ________________________________________________________________
 
 TODO - Dziennik zadań (zacznij od góry):   _____________________________________________________________
 
-[x] [logic] dojść do zwracania 3 ofert jako Karuzela
+[K] [parser] best offer doskonalić 
 
-[ ] [Cognition] wydobadz wiecej info z jednej wypowiedzi.
+[K] [offers] scrapping ogarnąć
 
-[ ] [logic] get user name, language, gender etc (see Postman!)
+[K] [offers] funkcja ile ofert spełnia aktualne kryteria
 
-[ ] [user/cognition] ma dawać dzielnice osobną funkcją
+[K] [conversations] nie włącza się zapis 
+
+[K] [users] nie zapisuje interactions i language
+
+[K] [conversations] połączenie wiadomości bot-człowiek (kto na co odpowiada)
+
+[A] [Cognition] why nie pyta o brakujące? np. features
+
+[A] [user/cognition] ma dawać dzielnice osobną funkcją
+
+[A] [fb webhooks] dopracuj karuzelę 3 ofert i podobne generic message - łatwe funkcje
+
+[A] [flow] na koniec pytanie czy od nowa czy kolejne oferty
 
 [ ] [Bot] Zastąp wszystkie Print'y w BOTcie.
-
-[ ] [fb webhooks] dopracuj karuzelę 3 ofert i podobne generic message - łatwe funkcje pls
-
-[ ] [db] Zapis rozmowy w bazie (chyba nie działa)
-
-[ ] [db] Zapis Pytanie+odpowiedź żeby potem ulepszyć algorytm odpowiedzi na dane teksty (zakładam, że na start nie wyłapie wszystkiego)
 
 [ ] [pyany] Postaw na pyany i zobacz jak reaguje po czasie i na kilka osób
 

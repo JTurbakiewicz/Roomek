@@ -153,14 +153,15 @@ class Bot:
             'text': message
         }, notification_type)
 
+    # TODO uwaga na puste pola
     def fb_send_offers_carousel(self, userid, offers):
         elements = []
         for offer in offers:
-            t = f"{offer['area']}m2 za {offer['price']}zł, {offer['location']}"
-            st = f"{offer['provider']}: {offer['title']}"
-            buttons = [self.fb_create_button(title="Sprawdź", url=offer['link']),
-                self.fb_create_button(title="Podoba mi się!", url=offer['link'])]
-            elements.append(self.fb_create_element(title=t, subtitle=st, image_url=offer['picUrl'], url=offer['link'], buttons=buttons, height="TALL"))
+            t = f"{offer['area']}m2 za {offer['price']}zł, {offer['district']} {offer['street']}, {offer['date_of_the_offer']}"
+            st = f"{offer['offer_name']}"
+            buttons = [self.fb_create_button(title="Sprawdź", url=offer['offer_url']),
+                self.fb_create_button(title="Podoba mi się!", url=offer['offer_url'])]
+            elements.append(self.fb_create_element(title=t, subtitle=st, image_url=offer['offer_thumbnail_url'], url=offer['offer_url'], buttons=buttons, height="TALL"))
 
         self.fb_send_generic_message(userid, elements)
 
