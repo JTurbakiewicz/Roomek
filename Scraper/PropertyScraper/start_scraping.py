@@ -1,8 +1,8 @@
 import os
-#if '/home/RoomekBot' in os.path.abspath(''):
-from Scraper.PropertyScraper.spiders import olx_spider_main, olx_room_spider
-#else:
-#    from spiders import olx_spider_main, olx_room_spider
+if '/home/RoomekBot' in os.path.abspath(''):
+    from Scraper.PropertyScraper.spiders import olx_spider_main, olx_room_spider
+else:
+   from Scraper.PropertyScraper.spiders import olx_spider_main, olx_room_spider
 from twisted.internet import reactor, defer
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
@@ -19,9 +19,13 @@ def closest_scrapy_cfg(path='.', prevpath=None):
         return ''
     path = os.path.abspath(path)
     cfgfile = os.path.join(path, 'scrapy.cfg')
+    #print(path)
+    print(cfgfile)
     if os.path.exists(cfgfile):
         return cfgfile
-    return closest_scrapy_cfg(os.path.dirname(path), path)
+        return r"D:\Users\Kuba\Documents\GitHub\roBOT\Scraper\scrapy.cfg"  #TODO
+    #return closest_scrapy_cfg(os.path.dirname(path), path)
+    return r"D:\Users\Kuba\Documents\GitHub\roBOT\Scraper\scrapy.cfg" #TODO
 
 def get_sources(use_closest=True):
     xdg_config_home = os.environ.get('XDG_CONFIG_HOME') or \
