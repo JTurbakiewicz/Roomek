@@ -5,8 +5,8 @@ import logging
 import os
 import tokens
 import sys
-from Bot.user import User
-from Bot.message import Message
+# from Bot.user import User
+# from Bot.message import Message
 
 # logging.basicConfig(level='DEBUG')
 """Funtion definition"""
@@ -267,6 +267,7 @@ def user_exists(facebook_id):
                  FROM users
                  WHERE facebook_id = %s
                  """ % ("'"+facebook_id+"'") #TODO change
+
         cursor.execute(query)
         data = cursor.fetchone()
 
@@ -282,7 +283,7 @@ def get_user(facebook_id):
         query =  """SELECT *
                  FROM users
                  WHERE facebook_id = %s
-                 """ % (facebook_id)
+                 """ % ("'"+facebook_id+"'") #TODO change
 
         cursor.execute(query)
         data = cursor.fetchone()
@@ -386,6 +387,14 @@ def push_user(user_obj = None, update = False):
             user_data.append(user_obj.shown_input)
             fields_to_add = fields_to_add + ',shown_input'
 
+        if user_obj.interactions:
+            user_data.append(user_obj.interactions)
+            fields_to_add = fields_to_add + ',interactions'
+
+        if user_obj.language:
+            user_data.append(user_obj.language)
+            fields_to_add = fields_to_add + ',language'
+
         placeholders = '%s,' * len(fields_to_add.split(','))
         placeholders = placeholders[:-1]
 
@@ -407,10 +416,8 @@ def push_user(user_obj = None, update = False):
             query = """INSERT INTO users
                     ({})
                     VALUES ({})""".format(fields_to_add,placeholders)
-
             cursor.execute(query, user_data)
         cnx.commit()
-
 
 def create_message(msg_obj = None, update = False):
 
@@ -491,6 +498,7 @@ def create_message(msg_obj = None, update = False):
             query = """INSERT INTO conversations
                     ({})
                     VALUES ({})""".format(fields_to_add, placeholders)
+            print(query)
             cursor.execute(query, msg_data)
         cnx.commit()
 
@@ -689,9 +697,7 @@ db_tables['users'] = (
     "  `language` varchar(100),"
     "  `business_type` varchar(100),"
     "  `housing_type` varchar(100),"
-    "  `person_type` varchar(100),"
     "  `price_limit` int(1),"
-    "  `since` varchar(30),"    # TODO Date format?
     "  `features` varchar(1000),"
     "  `country` varchar(100),"  
     "  `city` varchar(100),"  
@@ -806,9 +812,3 @@ db_config = tokens.sql_config
 
 set_up_db(db_config)
 
-# features = 'piekielne'
-# uzy = User('66666666666')
-# uzy.city = 'Hell'
-# uzy.features = features
-#
-# push_user(user_obj=uzy, update=True)

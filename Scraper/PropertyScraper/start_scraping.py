@@ -23,9 +23,9 @@ def closest_scrapy_cfg(path='.', prevpath=None):
     print(cfgfile)
     if os.path.exists(cfgfile):
         return cfgfile
-        return r"C:\Users\Artur\Desktop\CODE\roBOT\Scraper\scrapy.cfg"  #TODO
-    #return closest_scrapy_cfg(os.path.dirname(path), path)
-    return r"C:\Users\Artur\Desktop\CODE\roBOT\Scraper\scrapy.cfg" #TODO
+        #return r"C:\Users\Artur\Desktop\CODE\roBOT\Scraper\scrapy.cfg"  #TODO
+    return closest_scrapy_cfg(os.path.dirname(path), path)
+    #return r"C:\Users\Artur\Desktop\CODE\roBOT\Scraper\scrapy.cfg" #TODO
 
 def get_sources(use_closest=True):
     xdg_config_home = os.environ.get('XDG_CONFIG_HOME') or \

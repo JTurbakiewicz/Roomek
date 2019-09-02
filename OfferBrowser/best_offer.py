@@ -3,7 +3,7 @@ from Databases import mysql_connection as sql
 # from Bot.user import User
 
 
-def best_offer(user_obj = None, count = 1):
+def best_offer(user_obj = None, count = 1, return_amount = False):
 
     query = 'select * from offers where True'
 
@@ -51,8 +51,10 @@ def best_offer(user_obj = None, count = 1):
 
     relatable_urls = [x['offer_url'] for x in offers]
 
-    # TODO powinien zwracać niemal wszystkie parametry oferty jako obiekt lub słownik
-    return offers[0:count]
+    if return_amount is False:
+        return offers[0:count]
+    elif return_amount is True:
+        return len(offers)
 
 # uzy = User('1')
 # uzy.price_limit = [5100]

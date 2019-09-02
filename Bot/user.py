@@ -53,10 +53,22 @@ class User:
 
 
         info = get_user_info(facebook_id)
-        self.first_name = info['first_name']
-        self.last_name = info['last_name']
-        self.gender = info['gender']
-        self.language = info['locale']  # TODO języka nie łapie
+        try:
+            self.first_name = info['first_name']
+        except KeyError:
+            pass
+        try:
+            self.last_name = info['last_name']
+        except KeyError:
+            pass
+        try:
+            self.gender = info['gender']
+        except KeyError:
+            pass
+        try:
+            self.language = info['locale']  # TODO języka nie łapie
+        except KeyError:
+            pass
 
         if not db.user_exists(self.facebook_id):
             db.push_user(user_obj=self, update=False)
