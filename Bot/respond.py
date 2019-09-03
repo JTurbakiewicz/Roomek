@@ -20,10 +20,13 @@ def respond(message, user, bot):
 
 def ask_for_information(message, user, bot):
 
+    print(str(not user.wants_more_features) + " and "+ str(not user.confirmed_data))
+
     if user.city is None:
         response.ask_for_city(message, user, bot)
 
-    elif not user.latitude:
+    # TODO not the best approach
+    elif user.context == "ask_for_city":
         response.ask_for_location(message, user, bot)
 
     elif user.wants_more_locations:
@@ -35,14 +38,14 @@ def ask_for_information(message, user, bot):
     elif user.price_limit is None:
         response.ask_for_price_limit(message, user, bot)
 
-    elif not user.features and not user.asked_for_features and user.wants_more_features:
+    elif not user.features and user.wants_more_features:
         response.ask_for_features(message, user, bot)
-        user.asked_for_features = True
 
     elif user.wants_more_features is True:
         response.ask_for_more_features(message, user, bot)
 
     elif not user.wants_more_features and not user.confirmed_data:
+        print("fgdsngk")
         response.show_input_data(message, user, bot)
 
     # TODO response.ask_what_wrong(message, user, bot)
@@ -52,6 +55,3 @@ def ask_for_information(message, user, bot):
 
     else:
         response.default_message(message, user, bot)
-
-    x =2
-    x=3

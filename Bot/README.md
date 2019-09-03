@@ -13,31 +13,48 @@ How it works:   ________________________________________________________________
 
 TODO - Dziennik zadań (zacznij od góry):   _____________________________________________________________
 
-[K] [parser] best offer doskonalić 
 
-[K] [offers] scrapping ogarnąć
 
-[K] [offers] funkcja ile ofert spełnia aktualne kryteria
+[A] [Cognition] nie rozumie jak piszemy "ma garaż" bo błąd nr 007 (TODO)
 
-[K] [conversations] nie włącza się zapis 
+[ ] [parser] loca
 
-[K] [users] nie zapisuje interactions i language
+[A] [flow] na koniec pytanie czy od nowa czy kolejne oferty
 
-[K] [conversations] połączenie wiadomości bot-człowiek (kto na co odpowiada)
+[ ] [parser] napraw sticker
 
-[A] [Cognition] why nie pyta o brakujące? np. features
+[A] [flow] Zacznij od nowa button
+
+[A] [flow] test replying messge
+
+[A] [flow] test add sticker to messge
+
+[K] [flow] dodaj funkcję resetującą usera
+
+[ ] [...] tłumacz offer features (ma garaż itd)
+
+[ ] [...] nie dodaje np. Mokotów tylko miasto lub ulice 
+
+
+
+[ ] [...] zastap SLEEP np. timestamp checkerem
 
 [A] [user/cognition] ma dawać dzielnice osobną funkcją
 
 [A] [fb webhooks] dopracuj karuzelę 3 ofert i podobne generic message - łatwe funkcje
 
-[A] [flow] na koniec pytanie czy od nowa czy kolejne oferty
-
 [ ] [Bot] Zastąp wszystkie Print'y w BOTcie.
 
 [ ] [pyany] Postaw na pyany i zobacz jak reaguje po czasie i na kilka osób
 
+[ ] [data] Połącz z Jupyterem żeby wyświetlać dane np o ofertach
+
+[K] [parser] best offer doskonalić
+
 ***** Test na bliskich znajomych *****
+
+
+[ ] [importy] uproscic importy do pliku glownego (obecnie circular importy)
 
 [ ] [feedback] zobaczyć co intuicyjnie ludzie piszą - przerobić flow
 
@@ -48,7 +65,7 @@ TODO - Dziennik zadań (zacznij od góry):   ___________________________________
     - pomiary
     - rozpisać założenia
 
-[ ] [???] 
+[ ] [???] legal
 
 [ ] [feedback] spotkać się z Kubikiem
 

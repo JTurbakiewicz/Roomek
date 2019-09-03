@@ -46,8 +46,8 @@ def collect_information(message, user, bot):
                 if entity['entity'] == "datetime":
                     user.add_since(entity['value'])
 
+                # TODO jesli pytal o pieniadze to jest dobre, ale jesli np o liczbe pokoi to zle rozpozna number
                 if entity['entity'] == "amount_of_money" or entity['entity'] == "number":
-                    # TODO potencjalnie sie psuje jak inne liczby
                     user.set_price_limit(entity['value'])
 
                 if entity['entity'] == "person_type":
@@ -56,6 +56,9 @@ def collect_information(message, user, bot):
                 if entity['entity'] == "business_type":
                     user.set_business_type(entity['value'])
 
+                if entity['entity'] == "feature":
+                    user.add_feature(entity['value'])
+
                 # TODO Add more yes/no contexts.
                 if entity['entity'] == "boolean":
                     if user.context == "show_input_data":
@@ -63,7 +66,12 @@ def collect_information(message, user, bot):
                             user.set_confirmed_data(True)
                         else:
                             user.set_confirmed_data(False)
-                    elif user.context == "asked_for_features":
+                    elif user.context == "ask_more_locations":
+                        if entity['value'] == "yes":
+                            user.set_wants_more_locations(True)
+                        else:
+                            user.set_wants_more_locations(False)
+                    elif user.context == "ask_for_features":
                         if entity['value'] == "yes":
                             user.set_wants_more_features(True)
                         else:

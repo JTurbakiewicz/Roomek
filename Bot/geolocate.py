@@ -8,6 +8,7 @@ import urllib.request
 import requests
 from pprint import pprint
 
+
 def recognize_location(location="", lat=0, long=0, city=""):
 
     # TODO Reverse geocoding (mając lat i long zwróć adres) using https://nominatim.org/release-docs/develop/api/Search/

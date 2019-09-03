@@ -18,6 +18,8 @@ bot = Bot(tokens.fb_access)
 def handle_message(message, user):
     """ Recognize the content and respond accordingly. """
 
+    db.create_message(msg_obj=message)
+
     if message.is_echo:
         pass
     else:
@@ -35,6 +37,8 @@ def handle_message(message, user):
             handle_sticker(message, user, bot)
         elif message.type == "LocationAnswer":
             handle_location(message, user, bot)
+        elif message.type == "GifMessage":
+            handle_attachment(message, user, bot)
         elif message.type == "MessageWithAttachment":
             handle_attachment(message, user, bot)
         elif message.type == "BotTest":

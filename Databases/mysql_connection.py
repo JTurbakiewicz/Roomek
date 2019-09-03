@@ -5,8 +5,8 @@ import logging
 import os
 import tokens
 import sys
-# from Bot.user import User
-# from Bot.message import Message
+from Bot.user import User
+from Bot.message import Message
 
 # logging.basicConfig(level='DEBUG')
 """Funtion definition"""
@@ -256,7 +256,8 @@ def update_user(facebook_id, field_to_update, field_value, if_null_required = Fa
         """.format(field_to_update)
         if if_null_required:
             query = query + 'AND ' + field_to_update + ' IS NULL'
-        cursor.execute(query, (field_value,facebook_id))
+        print(query)
+        cursor.execute(query, (field_value, facebook_id))
         cnx.commit()
 
 
@@ -310,7 +311,6 @@ def get_user(facebook_id):
                 created_user.context = data['context']
                 created_user.interactions = data['interactions']
                 created_user.shown_input = data['shown_input']
-                created_user.asked_for_features = data['asked_for_features']
                 created_user.wants_more_features = data['wants_more_features']
                 created_user.wants_more_locations = data['wants_more_locations']
                 created_user.confirmed_data = data['confirmed_data']
@@ -386,6 +386,14 @@ def push_user(user_obj = None, update = False):
         if user_obj.shown_input:
             user_data.append(user_obj.shown_input)
             fields_to_add = fields_to_add + ',shown_input'
+
+        if user_obj.wants_more_features:
+            user_data.append(user_obj.wants_more_features)
+            fields_to_add = fields_to_add + ',wants_more_features'
+
+        if user_obj.wants_more_locations:
+            user_data.append(user_obj.wants_more_locations)
+            fields_to_add = fields_to_add + ',wants_more_locations'
 
         if user_obj.interactions:
             user_data.append(user_obj.interactions)
@@ -498,7 +506,7 @@ def create_message(msg_obj = None, update = False):
             query = """INSERT INTO conversations
                     ({})
                     VALUES ({})""".format(fields_to_add, placeholders)
-            print(query)
+
             cursor.execute(query, msg_data)
         cnx.commit()
 
@@ -707,7 +715,6 @@ db_tables['users'] = (
     "  `context` varchar(100),"  
     "  `interactions` int(1),"
     "  `shown_input` BOOLEAN,"
-    "  `asked_for_features` BOOLEAN,"
     "  `wants_more_features` BOOLEAN,"
     "  `wants_more_locations` BOOLEAN,"
     "  `confirmed_data` BOOLEAN,"
@@ -732,7 +739,7 @@ db_tables['conversations'] = (
     "  `sticker_name` varchar(999),"
     "  `latitude` FLOAT,"
     "  `longitude` FLOAT,"
-    "  `url` varchar(999),"
+    "  `url` BLOB,"
     "  `text` varchar(999),"
     "  `NLP_entities` varchar(999),"
     "  `NLP_language` varchar(999),"

@@ -34,7 +34,7 @@ class User:
         self.person_type = None
         self.price_limit = None
         self.since = None
-        self.features = []  # ["dla studenta", "nieprzechodni", "niepalacy"]
+        self.features = None  # "dla studenta", "nieprzechodni", "niepalacy"
         # address:
         self.country = None
         self.city = None
@@ -45,7 +45,6 @@ class User:
         self.context = "initialization"  # initialiation, greeting, ...
         self.interactions = 0
         self.shown_input = False
-        self.asked_for_features = False
         self.wants_more_features = True
         self.wants_more_locations = True
         self.confirmed_data = False
@@ -56,19 +55,20 @@ class User:
         try:
             self.first_name = info['first_name']
         except KeyError:
-            pass
+            logging.warning(f"User {facebook_id} has no name.")
         try:
             self.last_name = info['last_name']
         except KeyError:
-            pass
+            logging.warning(f"User {facebook_id} has no last name.")
         try:
             self.gender = info['gender']
         except KeyError:
-            pass
+            logging.warning(f"User {facebook_id} has no gender.")
         try:
             self.language = info['locale']  # TODO języka nie łapie
         except KeyError:
-            pass
+            logging.warning(f"User {facebook_id} has no language (locale).")
+
 
         if not db.user_exists(self.facebook_id):
             db.push_user(user_obj=self, update=False)
@@ -157,6 +157,7 @@ class User:
 
         if lat != 0 and long != 0:
             loc = recognize_location(lat=lat, long=long)
+        # TODO
         elif "entrum" in str(location):
             if hasattr(self, 'city'):
                 loc = recognize_location(location="centrum", city=self.city)
@@ -173,22 +174,25 @@ class User:
         # self.state = loc['state']
         # self.county = loc['county']
 
+        db.update_user(self.facebook_id, field_to_update="city", field_value=self.city)
         db.update_user(self.facebook_id, field_to_update="latitude", field_value=self.latitude)
         db.update_user(self.facebook_id, field_to_update="longitude", field_value=self.longitude)
-        db.update_user(self.facebook_id, field_to_update="city", field_value=self.city)
-        db.update_user(self.facebook_id, field_to_update="street", field_value=self.street)
+        if self.context != "ask_for_city":
+            db.update_user(self.facebook_id, field_to_update="street", field_value=self.street)
         db.update_user(self.facebook_id, field_to_update="country", field_value=self.country)
 
         logging.info(f"User({self.facebook_id[0:5]})'s location changed to: latitude={self.latitude}, longitude={self.longitude}, city={self.city}, street={self.street}, country={self.country}")
 
     def add_feature(self, feature):
         feature = replace_emojis(feature)
+        if not self.features:
+            self.features = ""
         if feature not in self.features:
-            self.features.append(str(feature))
+            self.features += "&" + str(feature)
             logging.info(f"[User info] added feature: {feature}. Now features are: {str(self.features)}")
             current = db.get_user(self.facebook_id).features
             appended = str(current)+"&"+str(feature)
-            db.update_user(self.facebook_id, field_to_update="feature", field_value=appended)
+            db.update_user(self.facebook_id, field_to_update="features", field_value=appended)
         else:
             logging.info(f"[User info] Feature: {feature} was already in the object.")
 
@@ -197,7 +201,13 @@ class User:
         logging.info(f"[User info] confirmed_data set to: {confirmed_data}")
         db.update_user(self.facebook_id, field_to_update="confirmed_data", field_value=self.confirmed_data)
 
+    # TODO to nie dziala! 007
     def set_wants_more_features(self, wants_more_features):
         self.wants_more_features = wants_more_features
         logging.info(f"[User info] wants_more_features set to: {wants_more_features}")
         db.update_user(self.facebook_id, field_to_update="wants_more_features", field_value=self.wants_more_features)
+
+    def set_wants_more_locations(self, wants_more_locations):
+        self.wants_more_locations = wants_more_locations
+        logging.info(f"[User info] wants_more_locations set to: {wants_more_locations}")
+        db.update_user(self.facebook_id, field_to_update="wants_more_locations", field_value=self.wants_more_locations)
