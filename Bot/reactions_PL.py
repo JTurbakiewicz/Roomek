@@ -127,7 +127,8 @@ def show_offers(message, user, bot):
         bot.fb_send_offers_carousel(message.facebook_id, best)
         sleep(4)
         bot.fb_fake_typing(message.facebook_id, 0.7)
-        bot.fb_send_text_message(message.facebook_id, ["Czy któraś oferta Ci się podoba?", "Masz jakiegoś faworyta?", "Która z powyższych najbardziej Ci odpowiada?"])
+        response = random.choice(["Czy któraś oferta Ci się podoba?", "Masz jakiegoś faworyta?", "Która z powyższych najbardziej Ci odpowiada?"])
+        bot.fb_send_quick_replies(message.facebook_id, response, ['1⃣', '2⃣', '3⃣', 'pokaż następne'])
     else:
         bot.fb_send_text_message(message.facebook_id, "Niestety nie znalazłem ofert spełniających Twoje kryteria :(")
 

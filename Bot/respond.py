@@ -43,11 +43,10 @@ def ask_for_information(message, user, bot):
     elif not user.features and user.wants_more_features:
         response.ask_for_features(message, user, bot)
 
-    elif user.wants_more_features is True:
+    elif user.wants_more_features:
         response.ask_for_more_features(message, user, bot)
 
     elif not user.wants_more_features and not user.confirmed_data:
-        print("nigdy tu nie bylem")
         response.show_input_data(message, user, bot)
 
     # TODO response.ask_what_wrong(message, user, bot)
