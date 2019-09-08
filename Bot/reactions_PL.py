@@ -19,7 +19,6 @@ def response_decorator(original_function):
         if fake_typing:
             delay = len(str(message.text))/50       # +0.2 set amount of delay
             bot.fb_fake_typing(message.facebook_id, duration=delay)
-        show_user_object(message, user, bot)
         # show_message_object(message, user, bot)
         user.set_context(original_function.__name__)
         user.increment()
@@ -241,11 +240,10 @@ def show_user_object(message, user, bot):
     except:
         logging.warning("NLP not found")
     reply += "\n*USER*\n"
-    # TODO pokaż obiekt user (mamy id)
     # this_user = db.getuser(message.facebook_id)
-    # for key, val in vars(this_user).items():
-    #     reply += "_" + str(key) + "_ = " + str(val) + "\n"
-    # bot.fb_send_text_message(str(message.facebook_id), reply)
+    for key, val in vars(user).items():
+        reply += "_" + str(key) + "_ = " + str(val) + "\n"
+    bot.fb_send_text_message(str(message.facebook_id), reply)
 
 
 def show_message_object(message, user, bot):

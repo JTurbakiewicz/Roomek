@@ -256,7 +256,6 @@ def update_user(facebook_id, field_to_update, field_value, if_null_required = Fa
         """.format(field_to_update)
         if if_null_required:
             query = query + 'AND ' + field_to_update + ' IS NULL'
-        print(query)
         cursor.execute(query, (field_value, facebook_id))
         cnx.commit()
 
@@ -604,6 +603,26 @@ def create_rating(rating):
                  """
         cursor.execute(query, values*2)
         cnx.commit()
+
+
+def drop_user(facebook_id = None):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+
+        try:
+            query = f"""Delete from users where facebook_id = {facebook_id}"""
+            cursor.execute(query)
+            cnx.commit()
+            logging.info(f"User {facebook_id} has just been removed from the database.")
+
+        except mysql.connector.Error as error:
+            logging.warning("Failed to delete record from table: {}".format(error))
+
+        # finally:
+        #     if (connection.is_connected()):
+        #         cursor.close()
+        #         connection.close()
+        #         print("MySQL connection is closed")
+
 
 """DATA"""
 

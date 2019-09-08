@@ -4,6 +4,7 @@
 
 import Bot.reactions_PL as response
 from Bot.cognition import collect_information
+from Databases import mysql_connection as db
 
 
 # TODO bug: adding place yes/no returns nothing
@@ -20,7 +21,8 @@ def respond(message, user, bot):
 
 def ask_for_information(message, user, bot):
 
-    print(str(not user.wants_more_features) + " and "+ str(not user.confirmed_data))
+    # TEMP
+    print(str(not user.wants_more_features) + " and " + str(not user.confirmed_data))
 
     if user.city is None:
         response.ask_for_city(message, user, bot)
@@ -45,7 +47,7 @@ def ask_for_information(message, user, bot):
         response.ask_for_more_features(message, user, bot)
 
     elif not user.wants_more_features and not user.confirmed_data:
-        print("fgdsngk")
+        print("nigdy tu nie bylem")
         response.show_input_data(message, user, bot)
 
     # TODO response.ask_what_wrong(message, user, bot)

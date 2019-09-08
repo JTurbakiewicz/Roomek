@@ -203,6 +203,7 @@ class User:
 
     # TODO to nie dziala! 007
     def set_wants_more_features(self, wants_more_features):
+        print("tu bylem")
         self.wants_more_features = wants_more_features
         logging.info(f"[User info] wants_more_features set to: {wants_more_features}")
         db.update_user(self.facebook_id, field_to_update="wants_more_features", field_value=self.wants_more_features)

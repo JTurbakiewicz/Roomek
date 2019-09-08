@@ -111,8 +111,8 @@ class Message:
                 else:
 
                     self.text = self.messaging['message']['text']
-                    if self.text.startswith('bottest'):
-                        self.type = "BotTest"
+                    if self.text.startswith('$okoń$'):
+                        self.type = "DevMode"
                     else:
                         self.type = "TextMessage"
                         self.text = self.messaging['message']['text']
@@ -198,6 +198,8 @@ class Message:
                 logging.info(f"USER({short_id}): <MessageWithAttachment>")
             elif self.type == "LocationAnswer":
                 logging.info(f"USER({short_id}): <Location: lat={self.latitude}, long={self.longitude}>")
+            elif self.type == "DevMode":
+                logging.info(f"DEVMODE({short_id}): '{self.text}'")
             elif self.type == "TextMessage":
                 logging.info(f"USER({short_id}): '{self.text}'")
             else:

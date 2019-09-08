@@ -75,6 +75,8 @@ def collect_information(message, user, bot):
                         if entity['value'] == "yes":
                             user.set_wants_more_features(True)
                         else:
+                            print(entity['value'])
+                            print("ODKSOKAODKSOADK")
                             user.set_wants_more_features(False)
 
 """

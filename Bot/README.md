@@ -13,9 +13,13 @@ How it works:   ________________________________________________________________
 
 TODO - Dziennik zadań (zacznij od góry):   _____________________________________________________________
 
+[X] [logic] added $okoń$dropme and $okoń$showme method etc.
+
+[A] [Cognition] nie rozumie jak piszemy "ma garaż" bo błąd nr 007
 
 
-[A] [Cognition] nie rozumie jak piszemy "ma garaż" bo błąd nr 007 (TODO)
+
+
 
 [ ] [parser] loca
 
@@ -37,7 +41,10 @@ TODO - Dziennik zadań (zacznij od góry):   ___________________________________
 
 
 
-[ ] [...] zastap SLEEP np. timestamp checkerem
+
+[ ] [...] zawez wyszukiwanie lokacji do kraju a potem miasta
+
+[ ] [...] jesli to problem to zastap SLEEP np. timestamp checkerem
 
 [A] [user/cognition] ma dawać dzielnice osobną funkcją
 
