@@ -59,7 +59,7 @@ class Message:
                     if self.messaging['message']['is_echo']:
                         self.is_echo = True
             except KeyError as err:
-                logging.warning(f"Messaging without message: {err}")
+                logging.warning(f"Messaging without message: {err}, {self.messaging['message']}")
 
             # get facebook_id, check if already in db and create if not:
             if self.is_echo:
