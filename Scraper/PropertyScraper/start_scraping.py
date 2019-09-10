@@ -85,14 +85,14 @@ ENVVAR = 'SCRAPY_SETTINGS_MODULE'
 
 s = get_project_settings()
 
-configure_logging()
+configure_logging(settings=s, install_root_handler=False)
 runner = CrawlerRunner(s)
 
 base_string = 'https://www.olx.pl/nieruchomosci'
 housing_types = ['mieszkania', 'stancje-pokoje']
 business_types = ['sprzedaz', 'wynajem']
 cities = ['warszawa', 'krakow', 'lodz', 'wroclaw', 'poznan', 'gdansk', 'szczecin', 'bydgoszcz', 'lublin', 'bialystok']
-# cities = ['warszawa']
+#cities = ['warszawa']
 urls_flats_OLX = []
 urls_rooms_OLX = []
 
