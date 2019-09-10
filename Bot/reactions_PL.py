@@ -39,7 +39,7 @@ def default_message(message, user, bot):
         "przepraszam?",
         "wybacz, nie rozumiem, czy mógłbyś powtórzyć innymi słowami?",
         "słucham?",
-        "powiedz proszę jak mógłbym Ci pomóc"])
+        "nie do końca rozumiem"])
     bot.fb_send_text_message(str(message.facebook_id), response)
 
 
@@ -53,7 +53,10 @@ def greeting(message, user, bot):
         f"{userword} {user.first_name}! Nazywam się Roomek i zajmuję się znajdywaniem najlepszych nieruchomości."
         ])
     bot.fb_send_text_message(str(message.facebook_id), response)
-    bot.fb_fake_typing(message.facebook_id, 0.5)
+    ask_how_help(message, user, bot)
+
+@response_decorator
+def ask_how_help(message, user, bot):
     bot.fb_send_quick_replies(message.facebook_id, "Jak mogę Ci dzisiaj pomóc?", ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', '💰 Sprzedam', '💰 Kupię'])
 
 @response_decorator
@@ -77,6 +80,19 @@ def ask_for_features(message, user, bot):
 
 
 @response_decorator
+def ask_if_restart(message, user, bot):
+    question = random.choice(["Czy na pewno chcesz rozpocząć wyszukiwanie na nowo?", "Ok, zacznijmy od nowa. Zadam Ci parę pytań, dobrze?"])
+    bot.fb_send_quick_replies(message.facebook_id, question, ['Tak 👍', '👎 Nie'])
+
+
+@response_decorator
+def restart(message, user, bot):
+    user.set_wants_restart(False)
+    bot.fb_send_text_message(str(message.facebook_id), "Ok, spróbujmy wyszukać od nowa.")
+    ask_how_help(message, user, bot)
+
+
+@response_decorator
 def ask_for_more_features(message, user, bot):
     question = random.choice(["Coś oprócz tego?", "Ok, jeszcze coś?", "Zanotowałem, chciałbyś coś dodać?"])
     bot.fb_send_quick_replies(message.facebook_id, question, ['Nie, wystarczy', 'od zaraz', 'przyjazne dla 🐶🐱', 'blisko do...', 'garaż', '🔨 wyremontowane', 'umeblowane', 'ma 🛀', 'dla 🚬', 'dla 🚭'])
@@ -85,7 +101,7 @@ def ask_for_more_features(message, user, bot):
 
 @response_decorator
 def ask_for_location(message, user, bot):
-    bot.fb_send_quick_replies(message.facebook_id, reply_message="Gdzie chciałbyś mieszkać?", replies=['🎯 blisko centrum', 'Mokotów', 'Wola'], location=True)
+    bot.fb_send_quick_replies(message.facebook_id, reply_message="Gdzie konkretnie chciałbyś mieszkać?", replies=['🎯 blisko centrum', 'Mokotów', 'Wola'], location=True)
     # TODO powinno sugerować dzielnice na bazie miasta, a nie default (nominatim get lower level nodes like suburb)
 
 
@@ -119,7 +135,6 @@ def ask_what_wrong(message, user, bot):
 
 @response_decorator
 def show_offers(message, user, bot):
-    # TODO: Kuba popraw best_offer lub baze ofert bo nic nie zwraca :(
     best = best_offer(user_obj=user, count=3)
 
     if len(best) != 0:
@@ -128,7 +143,7 @@ def show_offers(message, user, bot):
         sleep(4)
         bot.fb_fake_typing(message.facebook_id, 0.7)
         response = random.choice(["Czy któraś oferta Ci się podoba?", "Masz jakiegoś faworyta?", "Która z powyższych najbardziej Ci odpowiada?"])
-        bot.fb_send_quick_replies(message.facebook_id, response, ['1⃣', '2⃣', '3⃣', 'pokaż następne'])
+        bot.fb_send_quick_replies(message.facebook_id, response, ['1', '2', '3', 'pokaż następne oferty', 'zacznijmy od nowa'])
     else:
         bot.fb_send_text_message(message.facebook_id, "Niestety nie znalazłem ofert spełniających Twoje kryteria :(")
 

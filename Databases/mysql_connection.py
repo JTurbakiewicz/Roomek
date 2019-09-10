@@ -312,6 +312,7 @@ def get_user(facebook_id):
                 created_user.shown_input = data['shown_input']
                 created_user.wants_more_features = data['wants_more_features']
                 created_user.wants_more_locations = data['wants_more_locations']
+                created_user.asked_for_restart = data['asked_for_restart']
                 created_user.confirmed_data = data['confirmed_data']
                 created_user.add_more = data['add_more']
 
@@ -393,6 +394,10 @@ def push_user(user_obj = None, update = False):
         if user_obj.wants_more_locations:
             user_data.append(user_obj.wants_more_locations)
             fields_to_add = fields_to_add + ',wants_more_locations'
+
+        if user_obj.asked_for_restart:
+            user_data.append(user_obj.asked_for_restart)
+            fields_to_add = fields_to_add + ',asked_for_restart'
 
         if user_obj.interactions:
             user_data.append(user_obj.interactions)
@@ -736,6 +741,7 @@ db_tables['users'] = (
     "  `shown_input` BOOLEAN,"
     "  `wants_more_features` BOOLEAN,"
     "  `wants_more_locations` BOOLEAN,"
+    "  `asked_for_restart` BOOLEAN,"
     "  `confirmed_data` BOOLEAN,"
     "  `add_more` BOOLEAN,"
     "  `creation_time` datetime default current_timestamp,"

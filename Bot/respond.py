@@ -8,11 +8,18 @@ from Databases import mysql_connection as db
 
 
 # TODO bug: adding place yes/no returns nothing
-# TODO multiple parameters in one message
 def respond(message, user, bot):
 
     if message.NLP_intent == "greeting":
         response.greeting(message, user, bot)
+    elif not message.NLP_intent and not message.NLP_entities:
+        response.default_message(message, user, bot)
+        bot.fb_send_text_message(str(message.facebook_id), "o co ja miałem pytać...")
+        ask_for_information(message, user, bot)
+    elif message.NLP_intent == "restart":
+        response.ask_if_restart(message, user, bot)
+    elif user.wants_restart:
+        response.restart(message, user, bot)
     elif user.confirmed_data:
         response.show_offers(message, user, bot)
     else:
@@ -20,9 +27,6 @@ def respond(message, user, bot):
 
 
 def ask_for_information(message, user, bot):
-
-    # TEMP
-    print(str(not user.wants_more_features) + " and " + str(not user.confirmed_data))
 
     if user.city is None:
         response.ask_for_city(message, user, bot)
@@ -51,8 +55,12 @@ def ask_for_information(message, user, bot):
 
     # TODO response.ask_what_wrong(message, user, bot)
 
-    elif user.confirmed_data:
+    elif user.confirmed_data and not user.wants_restart:
         response.show_offers(message, user, bot)
+
+    elif user.wants_restart:
+        db.drop_user(user.facebook_id)
+        response.restart(message, user, bot)
 
     else:
         response.default_message(message, user, bot)

@@ -47,6 +47,8 @@ class User:
         self.shown_input = False
         self.wants_more_features = True
         self.wants_more_locations = True
+        self.asked_for_restart = False
+        self.wants_restart = False
         self.confirmed_data = False
         self.add_more = False
 
@@ -210,3 +212,14 @@ class User:
         self.wants_more_locations = wants_more_locations
         logging.info(f"[User info] wants_more_locations set to: {wants_more_locations}")
         db.update_user(self.facebook_id, field_to_update="wants_more_locations", field_value=self.wants_more_locations)
+
+    def set_asked_for_restart(self, asked_for_restart):
+        self.asked_for_restart = asked_for_restart
+        logging.info(f"[User info] asked_for_restart set to: {asked_for_restart}")
+        db.update_user(self.facebook_id, field_to_update="asked_for_restart", field_value=self.asked_for_restart)
+
+    def restart(self, restart):
+        if restart:
+            logging.info(f"[User info] User has been restarted.")
+            db.drop_user(self.facebook_id)
+            User(self.facebook_id)

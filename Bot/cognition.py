@@ -24,6 +24,9 @@ def collect_information(message, user, bot):
                 user.set_business_type("offering")
             elif message.NLP_intent == "looking for":
                 user.set_business_type("looking for")
+            elif message.NLP_intent == "restart":
+                user.set_asked_for_restart(True)
+                user.set_confirmed_data(False)
             else:
                 logging.warning(f"Didn't catch what user said! Intent: {message.NLP_intent}")
 
@@ -46,9 +49,10 @@ def collect_information(message, user, bot):
                 if entity['entity'] == "datetime":
                     user.add_since(entity['value'])
 
-                # TODO jesli pytal o pieniadze to jest dobre, ale jesli np o liczbe pokoi to zle rozpozna number
-                if entity['entity'] == "amount_of_money" or entity['entity'] == "number":
+                if entity['entity'] == "amount_of_money" or entity['entity'] == "number" and user.context == "ask_for_price_limit":
                     user.set_price_limit(entity['value'])
+                elif entity['entity'] == "number" and user.context == "show_offers":
+                    logging.warning(f"User liked the {entity['value']} offer but we don't use that info yet!")
 
                 if entity['entity'] == "person_type":
                     user.set_person_type(entity['value'])
@@ -76,6 +80,9 @@ def collect_information(message, user, bot):
                             user.set_wants_more_features(True)
                         else:
                             user.set_wants_more_features(False)
+                    elif user.context == "ask_if_restart":
+                        if entity['value'] == "yes":
+                            user.restart(True)
 
 
 """
