@@ -48,6 +48,8 @@ class OfferItem(dict, BaseItem):
     location_latitude = scrapy.Field()
     location_longitude = scrapy.Field()
 
+    scraped_ranking = scrapy.Field()
+
 class OfferFeaturesItem(dict, BaseItem):
     pass
 

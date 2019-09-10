@@ -666,6 +666,7 @@ db_tables['offers'] = (
     "  `preferred_locator` varchar(50),"
     "  `creation_time` datetime default current_timestamp,"
     "  `modification_time` datetime on update current_timestamp,"
+    "  `scraped_ranking` FLOAT,"
     "  PRIMARY KEY (`offer_url`)"
     ") ENGINE=InnoDB")
 
@@ -712,6 +713,7 @@ db_tables['offer_features'] = (
     "  `two_level_apartment` BOOLEAN,"
     "  `creation_time` datetime default current_timestamp,"
     "  `modification_time` datetime on update current_timestamp,"
+    "  `scraped_ranking` FLOAT,"
     "  PRIMARY KEY (`offer_url`)"
     ") ENGINE=InnoDB")
 

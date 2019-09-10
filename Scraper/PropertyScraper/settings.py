@@ -14,6 +14,9 @@ BOT_NAME = 'PropertyScraper'
 SPIDER_MODULES = ['PropertyScraper.spiders']
 NEWSPIDER_MODULE = 'PropertyScraper.spiders'
 
+LOG_ENABLED = False
+
+LOG_LEVEL = 'ERROR'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'PropertyScraper (+http://www.yourdomain.com)'
@@ -66,7 +69,8 @@ REDIRECT_ENABLED = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'PropertyScraper.pipelines.MySQL_OLXOffer_Pipeline': 300,
+    'PropertyScraper.pipelines.MySQL_OLXOffer_RatePipeline': 299,
+    'PropertyScraper.pipelines.MySQL_OLXOffer_SQLPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
