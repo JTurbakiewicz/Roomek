@@ -71,13 +71,12 @@ def collect_information(message, user, bot):
                             user.set_wants_more_locations(True)
                         else:
                             user.set_wants_more_locations(False)
-                    elif user.context == "ask_for_features":
+                    elif user.context == "ask_for_features" or user.context == "ask_for_more_features":
                         if entity['value'] == "yes":
                             user.set_wants_more_features(True)
                         else:
-                            print(entity['value'])
-                            print("ODKSOKAODKSOADK")
                             user.set_wants_more_features(False)
+
 
 """
         if not message.NLP_intent and not message.NLP_entities:   # ma nlp, ale intent=none i brak mu entities, więc freetext do wyłapania
