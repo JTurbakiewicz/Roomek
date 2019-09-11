@@ -149,6 +149,11 @@ class User:
         logging.info(f"[User info] city set to {city}")
         db.update_user(self.facebook_id, field_to_update="city", field_value=self.city)
 
+    # def set_district(self, district):
+    #     self.district = str(district)
+    #     logging.info(f"[User info] city set to {district}")
+    #     db.update_user(self.facebook_id, field_to_update="district", field_value=self.district)
+
     def set_country(self, country):
         self.country = str(country)
         logging.info(f"[User info] country set to {country}")

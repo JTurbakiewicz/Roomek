@@ -32,7 +32,7 @@ def recognize_location(location="", lat=0, long=0, city=""):
     loc = json.loads(req.text)
 
     if isinstance(loc, list):
-        logging.info(f"loc object: {loc}"")
+        logging.info(f"loc object: {loc}")
         # TODO co jeśli szukane nie jest pierwsze na liście?
         # for n in loc:
         #     print(n["display_name"])
