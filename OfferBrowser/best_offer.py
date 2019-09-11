@@ -40,14 +40,14 @@ def best_offer(user_obj = None, count = 1, return_amount = False):
         else:
             query = query + f' and price <= {user_obj.price_limit}'
 
-    if user_obj.district:
-        if type(user_obj.district) is list:
-            query = query + ' and ( '
-            for preference in user_obj.district:
-                query = query + f"district = '{preference}' or "
-            query = query[:-4] + ' )'
-        else:
-            query = query + f" and district = '{user_obj.district}'"
+    # if user_obj.district:
+    #     if type(user_obj.district) is list:
+    #         query = query + ' and ( '
+    #         for preference in user_obj.district:
+    #             query = query + f"district = '{preference}' or "
+    #         query = query[:-4] + ' )'
+    #     else:
+    #         query = query + f" and district = '{user_obj.district}'"
 
     if user_obj.gender:
         query = query + f" and (preferred_locator like '{user_obj.gender[0]}%' or preferred_locator is Null)"

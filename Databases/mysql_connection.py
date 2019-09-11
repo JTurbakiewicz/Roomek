@@ -432,87 +432,87 @@ def push_user(user_obj = None, update = False):
         cnx.commit()
 
 def create_message(msg_obj = None, update = False):
-
-    if msg_obj is None:
-        msg_obj = Message('default')
-
-    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-        fields_to_add = 'messaging'
-        msg_data = [str(msg_obj.messaging)]
-
-        if msg_obj.is_echo:
-            msg_data.append(msg_obj.is_echo)
-            fields_to_add = fields_to_add + ',is_echo'
-        if msg_obj.time:
-            msg_data.append(msg_obj.time)
-            fields_to_add = fields_to_add + ',time'
-        if msg_obj.timestamp:
-            msg_data.append(msg_obj.timestamp)
-            fields_to_add = fields_to_add + ',timestamp'
-        if msg_obj.facebook_id:
-            msg_data.append(str(msg_obj.facebook_id))
-            fields_to_add = fields_to_add + ',facebook_id'
-        if msg_obj.type:
-            msg_data.append(str(msg_obj.type))
-            fields_to_add = fields_to_add + ',type'
-        if msg_obj.mid:
-            msg_data.append(msg_obj.mid)
-            fields_to_add = fields_to_add + ',mid'
-        if msg_obj.NLP:
-            msg_data.append(msg_obj.NLP)
-            fields_to_add = fields_to_add + ',NLP'
-        if msg_obj.stickerID:
-            msg_data.append(str(msg_obj.stickerID))
-            fields_to_add = fields_to_add + ',stickerID'
-        if msg_obj.sticker_name:
-            msg_data.append(str(msg_obj.sticker_name))
-            fields_to_add = fields_to_add + ',sticker_name'
-        if msg_obj.latitude:
-            msg_data.append(msg_obj.latitude)
-            fields_to_add = fields_to_add + ',latitude'
-        if msg_obj.longitude:
-            msg_data.append(msg_obj.longitude)
-            fields_to_add = fields_to_add + ',longitude'
-        if msg_obj.url:
-            msg_data.append(str(msg_obj.url))
-            fields_to_add = fields_to_add + ',url'
-        if msg_obj.text:
-            msg_data.append(str(msg_obj.text))
-            fields_to_add = fields_to_add + ',text'
-        if msg_obj.NLP_entities:
-            msg_data.append(str(msg_obj.NLP_entities))
-            fields_to_add = fields_to_add + ',NLP_entities'
-        if msg_obj.NLP_language:
-            msg_data.append(str(msg_obj.NLP_language))
-            fields_to_add = fields_to_add + ',NLP_language'
-        if msg_obj.NLP_intent:
-            msg_data.append(str(msg_obj.NLP_intent))
-            fields_to_add = fields_to_add + ',NLP_intent'
-
-        placeholders = '%s,' * len(fields_to_add.split(','))
-        placeholders = placeholders[:-1]
-
-        if update:
-            duplicate_condition = ''
-            for field in fields_to_add.split(','):
-                duplicate_condition = duplicate_condition + field + '=%s,'
-            duplicate_condition = duplicate_condition[:-1]
-
-            query = f"""
-                        INSERT INTO conversations
-                        ({fields_to_add})
-                        VALUES ({placeholders})
-                        ON DUPLICATE KEY UPDATE {duplicate_condition}
-                     """
-            cursor.execute(query, msg_data*2)
-        else:
-
-            query = """INSERT INTO conversations
-                    ({})
-                    VALUES ({})""".format(fields_to_add, placeholders)
-
-            cursor.execute(query, msg_data)
-        cnx.commit()
+    pass #FIX UTF CODING OF STICKERS
+    # if msg_obj is None:
+    #     msg_obj = Message('default')
+    #
+    # with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+    #     fields_to_add = 'messaging'
+    #     msg_data = [str(msg_obj.messaging)]
+    #
+    #     if msg_obj.is_echo:
+    #         msg_data.append(msg_obj.is_echo)
+    #         fields_to_add = fields_to_add + ',is_echo'
+    #     if msg_obj.time:
+    #         msg_data.append(msg_obj.time)
+    #         fields_to_add = fields_to_add + ',time'
+    #     if msg_obj.timestamp:
+    #         msg_data.append(msg_obj.timestamp)
+    #         fields_to_add = fields_to_add + ',timestamp'
+    #     if msg_obj.facebook_id:
+    #         msg_data.append(str(msg_obj.facebook_id))
+    #         fields_to_add = fields_to_add + ',facebook_id'
+    #     if msg_obj.type:
+    #         msg_data.append(str(msg_obj.type))
+    #         fields_to_add = fields_to_add + ',type'
+    #     if msg_obj.mid:
+    #         msg_data.append(msg_obj.mid)
+    #         fields_to_add = fields_to_add + ',mid'
+    #     if msg_obj.NLP:
+    #         msg_data.append(msg_obj.NLP)
+    #         fields_to_add = fields_to_add + ',NLP'
+    #     if msg_obj.stickerID:
+    #         msg_data.append(str(msg_obj.stickerID))
+    #         fields_to_add = fields_to_add + ',stickerID'
+    #     if msg_obj.sticker_name:
+    #         msg_data.append(str(msg_obj.sticker_name))
+    #         fields_to_add = fields_to_add + ',sticker_name'
+    #     if msg_obj.latitude:
+    #         msg_data.append(msg_obj.latitude)
+    #         fields_to_add = fields_to_add + ',latitude'
+    #     if msg_obj.longitude:
+    #         msg_data.append(msg_obj.longitude)
+    #         fields_to_add = fields_to_add + ',longitude'
+    #     if msg_obj.url:
+    #         msg_data.append(str(msg_obj.url))
+    #         fields_to_add = fields_to_add + ',url'
+    #     if msg_obj.text:
+    #         msg_data.append(str(msg_obj.text))
+    #         fields_to_add = fields_to_add + ',text'
+    #     if msg_obj.NLP_entities:
+    #         msg_data.append(str(msg_obj.NLP_entities))
+    #         fields_to_add = fields_to_add + ',NLP_entities'
+    #     if msg_obj.NLP_language:
+    #         msg_data.append(str(msg_obj.NLP_language))
+    #         fields_to_add = fields_to_add + ',NLP_language'
+    #     if msg_obj.NLP_intent:
+    #         msg_data.append(str(msg_obj.NLP_intent))
+    #         fields_to_add = fields_to_add + ',NLP_intent'
+    #
+    #     placeholders = '%s,' * len(fields_to_add.split(','))
+    #     placeholders = placeholders[:-1]
+    #
+    #     if update:
+    #         duplicate_condition = ''
+    #         for field in fields_to_add.split(','):
+    #             duplicate_condition = duplicate_condition + field + '=%s,'
+    #         duplicate_condition = duplicate_condition[:-1]
+    #
+    #         query = f"""
+    #                     INSERT INTO conversations
+    #                     ({fields_to_add})
+    #                     VALUES ({placeholders})
+    #                     ON DUPLICATE KEY UPDATE {duplicate_condition}
+    #                  """
+    #         cursor.execute(query, msg_data*2)
+    #     else:
+    #
+    #         query = """INSERT INTO conversations
+    #                 ({})
+    #                 VALUES ({})""".format(fields_to_add, placeholders)
+    #
+    #         cursor.execute(query, msg_data)
+    #     cnx.commit()
 
 
 def get_messages(facebook_id):

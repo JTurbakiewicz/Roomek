@@ -109,13 +109,13 @@ class User:
         db.update_user(self.facebook_id, field_to_update="context", field_value=self.context)
 
     def set_business_type(self, business_type):
-        business_type = translate(business_type, "Q") # TODO Skasuj mnie jak Kuba poprawi w bazie.
+        #business_type = translate(business_type, "Q") # TODO Skasuj mnie jak Kuba poprawi w bazie.
         self.business_type = str(business_type)
         logging.info(f"[User info] business_type set to {business_type}")
         db.update_user(self.facebook_id, field_to_update="business_type", field_value=self.business_type)
 
     def set_housing_type(self, housing_type):
-        housing_type = translate(housing_type, "Q")  # TODO Skasuj mnie jak Kuba poprawi w bazie.
+        #housing_type = translate(housing_type, "Q")  # TODO Skasuj mnie jak Kuba poprawi w bazie.
         self.housing_type = str(housing_type)
         logging.info(f"[User info] housing_type set to {housing_type}")
         db.update_user(self.facebook_id, field_to_update="housing_type", field_value=self.housing_type)
