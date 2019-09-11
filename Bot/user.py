@@ -149,6 +149,7 @@ class User:
         logging.info(f"[User info] city set to {city}")
         db.update_user(self.facebook_id, field_to_update="city", field_value=self.city)
 
+    # TODO District
     # def set_district(self, district):
     #     self.district = str(district)
     #     logging.info(f"[User info] city set to {district}")
@@ -227,4 +228,4 @@ class User:
         if restart:
             logging.info(f"[User info] User has been restarted.")
             db.drop_user(self.facebook_id)
-            User(self.facebook_id)
+            self = User(facebook_id=self.facebook_id)

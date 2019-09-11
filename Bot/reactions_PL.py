@@ -61,7 +61,7 @@ def ask_how_help(message, user, bot):
 
 @response_decorator
 def ask_for_housing_type(message, user, bot):
-    bot.fb_send_quick_replies(message.facebook_id, "Jakiego typu lokal Cię interesuje?", ['🚪 🛌 🛏 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący'])
+    bot.fb_send_quick_replies(message.facebook_id, "Jakiego typu lokal Cię interesuje?", ['🛌 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący'])
 
 @response_decorator
 def ask_if_new_housing_type(message, user, bot, new_value):
