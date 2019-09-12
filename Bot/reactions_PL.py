@@ -7,7 +7,7 @@ import random
 import logging
 from Bot.cognition import *
 from settings import *
-from OfferBrowser.best_offer import best_offer
+from OfferBrowser import best_offer
 from OfferParser.translator import translate
 from time import sleep
 
@@ -223,7 +223,8 @@ def url(message, user, bot):
 
 # @response_decorator
 def sticker_response(message, user, bot):
-    sticker_name = recognize_sticker(message.stickerID)
+    sticker_name = 'thumb' #TODO
+    #sticker_name = recognize_sticker(message.stickerID)
     if sticker_name == 'thumb' or sticker_name == 'thumb+' or sticker_name == 'thumb++':
         yes(message, user, bot)
     else:
@@ -267,3 +268,4 @@ def show_message_object(message, user, bot):
     for key, val in vars(message).items():
         reply += str(key) + " = " + str(val) + "\n"
     bot.fb_send_text_message(str(message.facebook_id), reply)
+
