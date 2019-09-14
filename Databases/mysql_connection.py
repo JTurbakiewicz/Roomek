@@ -2,14 +2,13 @@ import re
 import mysql.connector
 from mysql.connector import errorcode
 import logging
-import os
 import tokens
 import sys
-# from Bot.user import User
-# from Bot.message import Message
+from Bot.user import User
+from Bot.message import Message
 from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, offer_features_scheme, conversations_scheme, ratings_scheme
 
-# logging.basicConfig(level='DEBUG')
+#logging.basicConfig(level='DEBUG')
 """Funtion definition"""
 
 class DB_Connection():
@@ -104,6 +103,130 @@ def create_offer(item):
                 cursor.execute(add_query, values)
         except mysql.connector.IntegrityError as err:
                 logging.error("Error: {}".format(err))
+        cnx.commit()
+
+def create_table_scheme(table_name, table_scheme, primary_key='facebook_id'):
+    sql_query = db_scheme["beggining"]["text"].format(table_name=table_name)
+    for field_name, field_values in table_scheme.items():
+        addition = f" `{field_name}` {field_values['db']},"
+        sql_query = ''.join((sql_query, addition))
+
+    sql_query = sql_query + " `creation_time` datetime default current_timestamp, `modification_time` datetime on update current_timestamp, "
+    sql_query = sql_query + '' + db_scheme["end"]["text"].format(primary_key=primary_key)
+    return sql_query
+
+def create_message(msg_obj = None, update = False):
+    pass #TODO -> fix UTF with stickers
+    # if msg_obj is None:
+    #     msg_obj = Message('default')
+    #
+    # with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+    #     fields_to_add = ''
+    #     msg_data = []
+    #
+    #     for field_name in conversations_scheme.keys():
+    #         try:
+    #             if isinstance(getattr(msg_obj, field_name), list) or isinstance(getattr(msg_obj, field_name), dict):
+    #                 msg_data.append(str(getattr(msg_obj, field_name)))
+    #             else:
+    #                 msg_data.append(getattr(msg_obj, field_name))
+    #             fields_to_add = fields_to_add + f',{field_name}'
+    #         except AttributeError:
+    #             logging.info(f"Message had no attribute {field_name} while saving.")
+    #
+    #     fields_to_add = fields_to_add[1:]
+    #     placeholders = '%s,' * len(fields_to_add.split(','))
+    #     placeholders = placeholders[:-1]
+    #
+    #     if update:
+    #         duplicate_condition = ''
+    #         for field in fields_to_add.split(','):
+    #             duplicate_condition = duplicate_condition + field + '=%s,'
+    #         duplicate_condition = duplicate_condition[:-1]
+    #         query = f"""
+    #                     INSERT INTO conversations
+    #                     ({fields_to_add})
+    #                     VALUES ({placeholders})
+    #                     ON DUPLICATE KEY UPDATE {duplicate_condition}
+    #                  """
+    #         cursor.execute(query, msg_data*2)
+    #     else:
+    #         query = """INSERT INTO conversations
+    #                 ({})
+    #                 VALUES ({})""".format(fields_to_add, placeholders)
+    #         cursor.execute(query, msg_data)
+    #     cnx.commit()
+
+def create_record(table_name, field_name, field_value, offer_url):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        query = """
+            INSERT INTO {0}
+            (offer_url, {1})
+            VALUES (%s, %s)
+            ON DUPLICATE KEY UPDATE {1}=%s
+         """.format(table_name, field_name)
+        cursor.execute(query, (offer_url, field_value, field_value))
+        cnx.commit()
+
+def create_rating(rating):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        fields = list(rating.keys())
+        values = list(rating.values())
+
+        fields_to_insert = ','.join(fields)
+        placeholders = ','.join(['%s']*len(values))
+
+        duplicate_condition = ''
+        for field in fields:
+            duplicate_condition = duplicate_condition + field + '=%s,'
+        duplicate_condition = duplicate_condition[:-1]
+
+        query = f"""
+                    INSERT INTO ratings
+                    ({fields_to_insert})
+                    VALUES ({placeholders})
+                    ON DUPLICATE KEY UPDATE {duplicate_condition}
+                 """
+        cursor.execute(query, values*2)
+        cnx.commit()
+
+def push_user(user_obj = None, update = False):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        fields_to_add = ''
+        user_data = []
+        for field_name in user_scheme.keys():
+            try:
+                if isinstance(getattr(user_obj, field_name), list) or isinstance(getattr(user_obj, field_name), dict):
+                    user_data.append(str(getattr(user_obj, field_name)))
+                else:
+                    user_data.append(getattr(user_obj, field_name))
+                fields_to_add = fields_to_add + f',{field_name}'
+            except AttributeError:
+                logging.info(f"User {user_obj['facebook_id']} had no attribute {field_name} while saving.")
+
+        fields_to_add = fields_to_add[1:]
+        placeholders = '%s,' * len(fields_to_add.split(','))
+        placeholders = placeholders[:-1]
+
+        if update:
+            duplicate_condition = ''
+            for field in fields_to_add.split(','):
+                duplicate_condition = duplicate_condition + field + '=%s,'
+            duplicate_condition = duplicate_condition[:-1]
+
+            query = f"""
+                        INSERT INTO users
+                        ({fields_to_add})
+                        VALUES ({placeholders})
+                        ON DUPLICATE KEY UPDATE {duplicate_condition}
+                     """
+            cursor.execute(query, user_data*2)
+        else:
+
+            query = """INSERT INTO users
+                    ({})
+                    VALUES ({})""".format(fields_to_add,placeholders)
+            cursor.execute(query, user_data)
         cnx.commit()
 
 def get_all(table_name = 'offers', fields_to_get = '*'):
@@ -236,6 +359,44 @@ def get_custom(sql_query):
         cursor.execute(query)
         return cursor.fetchall()
 
+def get_user(facebook_id):
+
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        query =  """SELECT *
+                 FROM users
+                 WHERE facebook_id = %s
+                 """ % ("'"+facebook_id+"'") #TODO change
+
+        cursor.execute(query)
+        data = cursor.fetchone()
+
+        if data:
+            if len(data) != 0:
+                created_user = User(data['facebook_id'])
+                for field_name in user_scheme.keys():
+                    setattr(created_user, field_name, data[field_name])
+                return created_user
+            else:
+                return False
+        else:
+            return False
+
+def get_messages(facebook_id):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        query =  """SELECT *
+                 FROM conversations
+                 WHERE facebook_id = %s
+                 """ % (facebook_id)
+        cursor.execute(query)
+        data = cursor.fetchall()
+        created_messages = []
+        created_message = Message(json_data={'entry':'default'})
+        for message in data:
+            for field_name, field_value in message.items():
+                setattr(created_message, field_name, message[field_name])
+            created_messages.append(created_message)
+        return created_messages
+
 def update_field(table_name, field_name, field_value, where_field, where_value, if_null_required = False):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """
@@ -260,7 +421,6 @@ def update_user(facebook_id, field_to_update, field_value, if_null_required = Fa
         cursor.execute(query, (field_value, facebook_id))
         cnx.commit()
 
-
 def user_exists(facebook_id):
 
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
@@ -277,355 +437,8 @@ def user_exists(facebook_id):
         else:
             return False
 
-
-def get_user(facebook_id):
-
-    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-        query =  """SELECT *
-                 FROM users
-                 WHERE facebook_id = %s
-                 """ % ("'"+facebook_id+"'") #TODO change
-
-        cursor.execute(query)
-        data = cursor.fetchone()
-
-        if data:
-            if len(data) != 0:
-                created_user = User(data['facebook_id'])
-
-                created_user.first_name = data['first_name']
-                created_user.last_name = data['last_name']
-                created_user.gender = data['gender']
-                created_user.language = data['language']
-                created_user.business_type = data['business_type']
-                created_user.housing_type = data['housing_type']
-                created_user.price_limit = data['price_limit']
-                created_user.features = data['features']
-
-                created_user.country = data['country']
-                created_user.city = data['city']
-                created_user.street = data['street']
-                created_user.latitude = data['latitude']
-                created_user.longitude = data['longitude']
-
-                created_user.context = data['context']
-                created_user.interactions = data['interactions']
-                created_user.shown_input = data['shown_input']
-                created_user.wants_more_features = data['wants_more_features']
-                created_user.wants_more_locations = data['wants_more_locations']
-                created_user.asked_for_restart = data['asked_for_restart']
-                created_user.confirmed_data = data['confirmed_data']
-                created_user.add_more = data['add_more']
-
-                return created_user
-            else:
-                return False
-        else:
-            return False
-
-
-def push_user(user_obj = None, update = False):
-    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-        fields_to_add = 'facebook_id'
-        user_data = [user_obj.facebook_id]
-
-        if user_obj.first_name:
-            user_data.append(user_obj.first_name)
-            fields_to_add = fields_to_add + ',first_name'
-
-        if user_obj.last_name:
-            user_data.append(user_obj.last_name)
-            fields_to_add = fields_to_add + ',last_name'
-
-        if user_obj.gender:
-            user_data.append(user_obj.gender)
-            fields_to_add = fields_to_add + ',gender'
-
-        if user_obj.business_type:
-            user_data.append(user_obj.business_type)
-            fields_to_add = fields_to_add + ',business_type'
-
-        if user_obj.price_limit:
-            user_data.append(user_obj.price_limit)
-            fields_to_add = fields_to_add + ',price_limit'
-
-        if user_obj.latitude:
-            user_data.append(user_obj.latitude)
-            fields_to_add = fields_to_add + ',location_latitude'
-
-        if user_obj.longitude:
-            user_data.append(user_obj.longitude)
-            fields_to_add = fields_to_add + ',location_longitude'
-
-        if user_obj.city:
-            user_data.append(user_obj.city)
-            fields_to_add = fields_to_add + ',city'
-
-        if user_obj.country:
-            user_data.append(user_obj.country)
-            fields_to_add = fields_to_add + ',country'
-
-        if user_obj.housing_type:
-            user_data.append(user_obj.housing_type)
-            fields_to_add = fields_to_add + ',housing_type'
-
-        if user_obj.features:
-            if isinstance(user_obj.features, list):
-                user_data.append(",".join(user_obj.features))
-            else:
-                user_data.append(user_obj.features)
-            fields_to_add = fields_to_add + ',features'
-
-        if user_obj.confirmed_data:
-            user_data.append(user_obj.confirmed_data)
-            fields_to_add = fields_to_add + ',confirmed_data'
-
-        if user_obj.add_more:
-            user_data.append(user_obj.add_more)
-            fields_to_add = fields_to_add + ',add_more'
-
-        if user_obj.shown_input:
-            user_data.append(user_obj.shown_input)
-            fields_to_add = fields_to_add + ',shown_input'
-
-        if user_obj.wants_more_features:
-            user_data.append(user_obj.wants_more_features)
-            fields_to_add = fields_to_add + ',wants_more_features'
-
-        if user_obj.wants_more_locations:
-            user_data.append(user_obj.wants_more_locations)
-            fields_to_add = fields_to_add + ',wants_more_locations'
-
-        if user_obj.asked_for_restart:
-            user_data.append(user_obj.asked_for_restart)
-            fields_to_add = fields_to_add + ',asked_for_restart'
-
-        if user_obj.interactions:
-            user_data.append(user_obj.interactions)
-            fields_to_add = fields_to_add + ',interactions'
-
-        if user_obj.language:
-            user_data.append(user_obj.language)
-            fields_to_add = fields_to_add + ',language'
-
-        placeholders = '%s,' * len(fields_to_add.split(','))
-        placeholders = placeholders[:-1]
-
-        if update:
-            duplicate_condition = ''
-            for field in fields_to_add.split(','):
-                duplicate_condition = duplicate_condition + field + '=%s,'
-            duplicate_condition = duplicate_condition[:-1]
-
-            query = f"""
-                        INSERT INTO users
-                        ({fields_to_add})
-                        VALUES ({placeholders})
-                        ON DUPLICATE KEY UPDATE {duplicate_condition}
-                     """
-            cursor.execute(query, user_data*2)
-        else:
-
-            query = """INSERT INTO users
-                    ({})
-                    VALUES ({})""".format(fields_to_add,placeholders)
-            cursor.execute(query, user_data)
-        cnx.commit()
-
-
-def create_table_scheme(table_name, table_scheme, primary_key='facebook_id'):
-    sql_query = db_scheme["beggining"]["text"].format(table_name=table_name)
-    for field_name, field_values in table_scheme.items():
-        addition = f" `{field_name}` {field_values['db']},"
-        sql_query = ''.join((sql_query, addition))
-
-    sql_query = sql_query + " `creation_time` datetime default current_timestamp, `modification_time` datetime on update current_timestamp, "
-    sql_query = sql_query + '' + db_scheme["end"]["text"].format(primary_key=primary_key)
-    # print(sql_query)
-    return sql_query
-
-def create_message(msg_obj = None, update = False):
-    pass #FIX UTF CODING OF STICKERS
-    # if msg_obj is None:
-    #     msg_obj = Message('default')
-    #
-    # with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-    #     fields_to_add = 'messaging'
-    #     msg_data = [str(msg_obj.messaging)]
-    #
-    #     if msg_obj.is_echo:
-    #         msg_data.append(msg_obj.is_echo)
-    #         fields_to_add = fields_to_add + ',is_echo'
-    #     if msg_obj.time:
-    #         msg_data.append(msg_obj.time)
-    #         fields_to_add = fields_to_add + ',time'
-    #     if msg_obj.timestamp:
-    #         msg_data.append(msg_obj.timestamp)
-    #         fields_to_add = fields_to_add + ',timestamp'
-    #     if msg_obj.facebook_id:
-    #         msg_data.append(str(msg_obj.facebook_id))
-    #         fields_to_add = fields_to_add + ',facebook_id'
-    #     if msg_obj.type:
-    #         msg_data.append(str(msg_obj.type))
-    #         fields_to_add = fields_to_add + ',type'
-    #     if msg_obj.mid:
-    #         msg_data.append(msg_obj.mid)
-    #         fields_to_add = fields_to_add + ',mid'
-    #     if msg_obj.NLP:
-    #         msg_data.append(msg_obj.NLP)
-    #         fields_to_add = fields_to_add + ',NLP'
-    #     if msg_obj.stickerID:
-    #         msg_data.append(str(msg_obj.stickerID))
-    #         fields_to_add = fields_to_add + ',stickerID'
-    #     if msg_obj.sticker_name:
-    #         msg_data.append(str(msg_obj.sticker_name))
-    #         fields_to_add = fields_to_add + ',sticker_name'
-    #     if msg_obj.latitude:
-    #         msg_data.append(msg_obj.latitude)
-    #         fields_to_add = fields_to_add + ',latitude'
-    #     if msg_obj.longitude:
-    #         msg_data.append(msg_obj.longitude)
-    #         fields_to_add = fields_to_add + ',longitude'
-    #     if msg_obj.url:
-    #         msg_data.append(str(msg_obj.url))
-    #         fields_to_add = fields_to_add + ',url'
-    #     if msg_obj.text:
-    #         msg_data.append(str(msg_obj.text))
-    #         fields_to_add = fields_to_add + ',text'
-    #     if msg_obj.NLP_entities:
-    #         msg_data.append(str(msg_obj.NLP_entities))
-    #         fields_to_add = fields_to_add + ',NLP_entities'
-    #     if msg_obj.NLP_language:
-    #         msg_data.append(str(msg_obj.NLP_language))
-    #         fields_to_add = fields_to_add + ',NLP_language'
-    #     if msg_obj.NLP_intent:
-    #         msg_data.append(str(msg_obj.NLP_intent))
-    #         fields_to_add = fields_to_add + ',NLP_intent'
-    #
-    #     placeholders = '%s,' * len(fields_to_add.split(','))
-    #     placeholders = placeholders[:-1]
-    #
-    #     if update:
-    #         duplicate_condition = ''
-    #         for field in fields_to_add.split(','):
-    #             duplicate_condition = duplicate_condition + field + '=%s,'
-    #         duplicate_condition = duplicate_condition[:-1]
-    #
-    #         query = f"""
-    #                     INSERT INTO conversations
-    #                     ({fields_to_add})
-    #                     VALUES ({placeholders})
-    #                     ON DUPLICATE KEY UPDATE {duplicate_condition}
-    #                  """
-    #         cursor.execute(query, msg_data*2)
-    #     else:
-    #
-    #         query = """INSERT INTO conversations
-    #                 ({})
-    #                 VALUES ({})""".format(fields_to_add, placeholders)
-    #
-    #         cursor.execute(query, msg_data)
-    #     cnx.commit()
-
-
-def get_messages(facebook_id):
-    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-        query =  """SELECT *
-                 FROM conversations
-                 WHERE facebook_id = %s
-                 """ % (facebook_id)
-        cursor.execute(query)
-        data = cursor.fetchall()
-
-        fake_json = {'entry': [{
-            'id': '1368143226655403',
-            'messaging': [{
-                'message': {
-                    'mid': 'GZ1aEkkMhti8WBa22tk5lXWJoZXN9QKZWH8NjK5DYEFKf7dFmM-QZEUThzNoJk73q2QSR5AD_aEDnRjNS6XHbw',
-                    'nlp': {
-                        'entities': {
-                            'bye': [{
-                                '_entity': 'bye',
-                                'confidence': 0.29891659254789,
-                                'value': 'true'}],
-                            'thanks': [{
-                                '_entity': 'thanks',
-                                'confidence': 0.056984366913182,
-                                'value': 'true'}]}},
-                    'seq': 671186,
-                    'text': 'hello'},
-                'recipient': {'id': '1368143226655403'},
-                'sender': {'id': '2231584683532589'},
-                'timestamp': 1550245454526}],
-            'time': 1550245455532}],
-            'object': 'page'}   #TODO -> delete json in msg init
-
-        created_messages = []
-
-        for message in data:
-            created_message = Message(fake_json)
-            created_message.is_echo = message['is_echo']
-            created_message.messaging = message['messaging']
-            created_message.time = message['time']
-            created_message.timestamp = message['timestamp']
-            created_message.user = message['facebook_id']
-            created_message.type = message['type']
-            created_message.mid = message['mid']
-            created_message.NLP = message['NLP']
-            created_message.stickerID = message['stickerID']
-            created_message.sticker_name = message['sticker_name']
-            created_message.latitude = message['latitude']
-            created_message.longitude = message['longitude']
-            created_message.url = message['url']
-            created_message.text = message['text']
-            created_message.NLP_entities = message['NLP_entities']
-            created_message.NLP_language = message['NLP_language']
-            created_message.NLP_intent = message['NLP_intent']
-
-
-            created_messages.append(created_message)
-
-        return created_messages
-
-def create_record(table_name, field_name, field_value, offer_url):
-    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-        query = """
-            INSERT INTO {0}
-            (offer_url, {1})
-            VALUES (%s, %s)
-            ON DUPLICATE KEY UPDATE {1}=%s
-         """.format(table_name, field_name)
-        # if if_null_required:
-        #     query = query + 'AND ' + field_name + ' IS NULL'
-        cursor.execute(query, (offer_url, field_value, field_value))
-        cnx.commit()
-
-def create_rating(rating):
-    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-        fields = list(rating.keys())
-        values = list(rating.values())
-
-        fields_to_insert = ','.join(fields)
-        placeholders = ','.join(['%s']*len(values))
-
-        duplicate_condition = ''
-        for field in fields:
-            duplicate_condition = duplicate_condition + field + '=%s,'
-        duplicate_condition = duplicate_condition[:-1]
-
-        query = f"""
-                    INSERT INTO ratings
-                    ({fields_to_insert})
-                    VALUES ({placeholders})
-                    ON DUPLICATE KEY UPDATE {duplicate_condition}
-                 """
-        cursor.execute(query, values*2)
-        cnx.commit()
-
-
 def drop_user(facebook_id = None):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-
         try:
             query = f"""Delete from users where facebook_id = {facebook_id}"""
             cursor.execute(query)
@@ -634,13 +447,6 @@ def drop_user(facebook_id = None):
 
         except mysql.connector.Error as error:
             logging.warning("Failed to delete record from table: {}".format(error))
-
-        # finally:
-        #     if (connection.is_connected()):
-        #         cursor.close()
-        #         connection.close()
-        #         print("MySQL connection is closed")
-
 
 """DATA"""
 
@@ -656,6 +462,4 @@ db_tables['ratings'] = create_table_scheme(table_name='ratings', table_scheme=ra
 """SETUP"""
 
 db_config = tokens.sql_config
-
 set_up_db(db_config)
-
