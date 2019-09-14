@@ -5,8 +5,9 @@ import logging
 import os
 import tokens
 import sys
-from Bot.user import User
-from Bot.message import Message
+# from Bot.user import User
+# from Bot.message import Message
+from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, offer_features_scheme, conversations_scheme, ratings_scheme
 
 # logging.basicConfig(level='DEBUG')
 """Funtion definition"""
@@ -431,6 +432,18 @@ def push_user(user_obj = None, update = False):
             cursor.execute(query, user_data)
         cnx.commit()
 
+
+def create_table_scheme(table_name, table_scheme, primary_key='facebook_id'):
+    sql_query = db_scheme["beggining"]["text"].format(table_name=table_name)
+    for field_name, field_values in table_scheme.items():
+        addition = f" `{field_name}` {field_values['db']},"
+        sql_query = ''.join((sql_query, addition))
+
+    sql_query = sql_query + " `creation_time` datetime default current_timestamp, `modification_time` datetime on update current_timestamp, "
+    sql_query = sql_query + '' + db_scheme["end"]["text"].format(primary_key=primary_key)
+    # print(sql_query)
+    return sql_query
+
 def create_message(msg_obj = None, update = False):
     pass #FIX UTF CODING OF STICKERS
     # if msg_obj is None:
@@ -633,212 +646,12 @@ def drop_user(facebook_id = None):
 
 DB_NAME = 'RoomekBot$offers'
 db_tables = {}
-db_tables['offers'] = (
-    "CREATE TABLE `offers` ("
-    "  `offer_url` varchar(700) NOT NULL,"
-    "  `city` varchar(50) NOT NULL,"
-    "  `housing_type` varchar(50) NOT NULL,"
-    "  `business_type` varchar(50)," 
-    "  `offer_name` varchar(200),"
-    "  `offer_thumbnail_url` varchar(400),"    
-    "  `price` int(1),"
-    "  `street` varchar(50),"
-    "  `district` varchar(50),"
-    "  `date_of_the_offer` DATETIME ,"
-    "  `offer_id` int(1),"
-    "  `offer_text` LONGTEXT,"
-    "  `offer_from` varchar(25),"
-    "  `apartment_level` smallint(1),"
-    "  `furniture` BOOLEAN,"
-    "  `type_of_building` varchar(25),"
-    "  `area` smallint(1),"
-    "  `amount_of_rooms` int(1),"
-    "  `additional_rent` int(1),"
-    "  `price_per_m2` int(1),"
-    "  `type_of_market` varchar(25),"
-    "  `security_deposit` SMALLINT	(1),"
-    "  `building_material` varchar(25),"
-    "  `windows` varchar(25),"
-    "  `heating` varchar(50),"
-    "  `building_year` SMALLINT	(1),"
-    "  `fit_out` varchar(50),"
-    "  `ready_from` DATETIME,"
-    "  `type_of_ownership` varchar(50),"
-    "  `rental_for_students` varchar(25),"
-    "  `location_latitude` FLOAT,"
-    "  `location_longitude` FLOAT,"
-    "  `type_of_room` varchar(50),"
-    "  `preferred_locator` varchar(50),"
-    "  `creation_time` datetime default current_timestamp,"
-    "  `modification_time` datetime on update current_timestamp,"
-    "  `scraped_ranking` FLOAT,"
-    "  PRIMARY KEY (`offer_url`)"
-    ") ENGINE=InnoDB")
-
-db_tables['utility'] = (
-    "CREATE TABLE `utility` ("
-    "  `offer_url` varchar(700) NOT NULL,"
-    "  `offer_name` varchar(200),"
-    "  `offer_text` LONGTEXT,"
-    "  `street` varchar(50),"
-    "  `creation_time` datetime default current_timestamp,"
-    "  `modification_time` datetime on update current_timestamp,"
-    "  PRIMARY KEY (`offer_url`)"
-    ") ENGINE=InnoDB")
-
-db_tables['offer_features'] = (
-    "CREATE TABLE `offer_features` ("
-    "  `offer_url` varchar(700) NOT NULL,"
-    "  `internet` BOOLEAN,"
-    "  `cable_tv` BOOLEAN,"
-    "  `closed_terrain` BOOLEAN,"
-    "  `monitoring_or_security` BOOLEAN,"
-    "  `entry_phone` BOOLEAN,"
-    "  `antibulglar_doors_windows` BOOLEAN,"
-    "  `alarm_system` BOOLEAN,"
-    "  `antibulglar_blinds` BOOLEAN,"
-    "  `dishwasher` BOOLEAN,"
-    "  `cooker` BOOLEAN,"
-    "  `fridge` BOOLEAN,"
-    "  `oven` BOOLEAN,"
-    "  `washing_machine` BOOLEAN,"
-    "  `tv` BOOLEAN,"
-    "  `elevator` BOOLEAN,"
-    "  `phone` BOOLEAN,"
-    "  `AC` BOOLEAN,"
-    "  `garden` BOOLEAN,"
-    "  `utility_room` BOOLEAN,"
-    "  `parking_space` BOOLEAN,"
-    "  `terrace` BOOLEAN,"
-    "  `balcony` BOOLEAN,"
-    "  `non_smokers_only` BOOLEAN,"
-    "  `separate_kitchen` BOOLEAN,"
-    "  `basement` BOOLEAN,"
-    "  `virtual_walk` BOOLEAN,"
-    "  `two_level_apartment` BOOLEAN,"
-    "  `creation_time` datetime default current_timestamp,"
-    "  `modification_time` datetime on update current_timestamp,"
-    "  `scraped_ranking` FLOAT,"
-    "  PRIMARY KEY (`offer_url`)"
-    ") ENGINE=InnoDB")
-
-db_tables['users'] = (
-    "CREATE TABLE `users` ("
-    "  `facebook_id` char(100) NOT NULL,"
-    "  `first_name` varchar(100),"
-    "  `last_name` varchar(100),"
-    "  `gender` enum('Female','Male'),"
-    "  `language` varchar(100),"
-    "  `business_type` varchar(100),"
-    "  `housing_type` varchar(100),"
-    "  `price_limit` int(1),"
-    "  `features` varchar(1000),"
-    "  `country` varchar(100),"  
-    "  `city` varchar(100),"  
-    "  `street` varchar(100),"  
-    "  `latitude` FLOAT,"
-    "  `longitude` FLOAT,"
-    "  `context` varchar(100),"  
-    "  `interactions` int(1),"
-    "  `shown_input` BOOLEAN,"
-    "  `wants_more_features` BOOLEAN,"
-    "  `wants_more_locations` BOOLEAN,"
-    "  `asked_for_restart` BOOLEAN,"
-    "  `confirmed_data` BOOLEAN,"
-    "  `add_more` BOOLEAN,"
-    "  `creation_time` datetime default current_timestamp,"
-    "  `modification_time` datetime on update current_timestamp,"
-    "  PRIMARY KEY (`facebook_id`)"
-    ") ENGINE=InnoDB")
-
-db_tables['conversations'] = (
-    "CREATE TABLE `conversations` ("
-    "  `conversation_no` int(1) NOT NULL AUTO_INCREMENT,"
-    "  `is_echo` BOOLEAN,"
-    "  `messaging` varchar(5000),"   
-    "  `time` date,"
-    "  `timestamp` date," 
-    "  `facebook_id` char(100),"
-    "  `type` char(100),"
-    "  `mid` varchar(1000),"
-    "  `NLP` BOOLEAN,"
-    "  `stickerID` varchar(999),"
-    "  `sticker_name` varchar(999),"
-    "  `latitude` FLOAT,"
-    "  `longitude` FLOAT,"
-    "  `url` BLOB,"
-    "  `text` varchar(999),"
-    "  `NLP_entities` varchar(999),"
-    "  `NLP_language` varchar(999),"
-    "  `NLP_intent` varchar(999),"
-    "  PRIMARY KEY (`conversation_no`)"
-    ") ENGINE=InnoDB")
-
-db_tables['ratings'] = (
-    "CREATE TABLE `ratings` ("
-    "  `offer_url` varchar(700) NOT NULL,"
-    "  `static_rating` float(6,2),"
-    "  `offer_name` float(4,3),"
-    "  `offer_thumbnail_url` float(4,3),"    
-    "  `price` float(4,3),"
-    "  `street` float(4,3),"
-    "  `district` float(4,3),"
-    "  `date_of_the_offer` float(4,3),"
-    "  `offer_id` float(4,3),"
-    "  `offer_text` float(4,3),"
-    "  `offer_from` float(4,3),"
-    "  `apartment_level` float(4,3),"
-    "  `furniture` float(4,3),"
-    "  `type_of_building` float(4,3),"
-    "  `area` float(4,3),"
-    "  `amount_of_rooms` float(4,3),"
-    "  `additional_rent` float(4,3),"
-    "  `price_per_m2` float(4,3),"
-    "  `type_of_market` float(4,3),"
-    "  `security_deposit` float(4,3),"
-    "  `building_material` float(4,3),"
-    "  `windows` float(4,3),"
-    "  `heating` float(4,3),"
-    "  `building_year` float(4,3),"
-    "  `fit_out` float(4,3),"
-    "  `ready_from` float(4,3),"
-    "  `type_of_ownership` float(4,3),"
-    "  `rental_for_students` float(4,3),"
-    "  `location_latitude` float(4,3),"
-    "  `location_longitude` float(4,3),"
-    "  `type_of_room` float(4,3),"
-    "  `preferred_locator` float(4,3),"
-    "  `internet` BOOLEAN,"
-    "  `cable_tv` BOOLEAN,"
-    "  `closed_terrain` BOOLEAN,"
-    "  `monitoring_or_security` BOOLEAN,"
-    "  `entry_phone` BOOLEAN,"
-    "  `antibulglar_doors_windows` BOOLEAN,"
-    "  `alarm_system` BOOLEAN,"
-    "  `antibulglar_blinds` BOOLEAN,"
-    "  `dishwasher` BOOLEAN,"
-    "  `cooker` BOOLEAN,"
-    "  `fridge` BOOLEAN,"
-    "  `oven` BOOLEAN,"
-    "  `washing_machine` BOOLEAN,"
-    "  `tv` BOOLEAN,"
-    "  `elevator` BOOLEAN,"
-    "  `phone` BOOLEAN,"
-    "  `AC` BOOLEAN,"
-    "  `garden` BOOLEAN,"
-    "  `utility_room` BOOLEAN,"
-    "  `parking_space` BOOLEAN,"
-    "  `terrace` BOOLEAN,"
-    "  `balcony` BOOLEAN,"
-    "  `non_smokers_only` BOOLEAN,"
-    "  `separate_kitchen` BOOLEAN,"
-    "  `basement` BOOLEAN,"
-    "  `virtual_walk` BOOLEAN,"
-    "  `two_level_apartment` BOOLEAN,"
-    "  `creation_time` datetime default current_timestamp,"
-    "  `modification_time` datetime on update current_timestamp,"
-    "  PRIMARY KEY (`offer_url`)"
-    ") ENGINE=InnoDB")
+db_tables['offers'] = create_table_scheme(table_name='offers', table_scheme=offer_scheme, primary_key ='offer_url')
+db_tables['utility'] = create_table_scheme(table_name='utility', table_scheme=db_utility_scheme, primary_key ='offer_url')
+db_tables['offer_features'] = create_table_scheme(table_name='offer_features', table_scheme=offer_features_scheme, primary_key ='offer_url')
+db_tables['users'] = create_table_scheme(table_name='users', table_scheme=user_scheme)
+db_tables['conversations'] = create_table_scheme(table_name='conversations', table_scheme=conversations_scheme, primary_key ='conversation_no')
+db_tables['ratings'] = create_table_scheme(table_name='ratings', table_scheme=ratings_scheme, primary_key ='offer_url')
 
 """SETUP"""
 
