@@ -19,8 +19,6 @@ def closest_scrapy_cfg(path='.', prevpath=None):
         return ''
     path = os.path.abspath(path)
     cfgfile = os.path.join(path, 'scrapy.cfg')
-    #print(path)
-    print(cfgfile)
     if os.path.exists(cfgfile):
         return cfgfile
         #return r"C:\Users\Artur\Desktop\CODE\roBOT\Scraper\scrapy.cfg"  #TODO
@@ -106,7 +104,7 @@ for type in housing_types:
 
 @defer.inlineCallbacks
 def crawl():
-    yield runner.crawl(olx_room_spider.OlxRoomSpider, urls_to_scrape=urls_rooms_OLX)
+    #yield runner.crawl(olx_room_spider.OlxRoomSpider, urls_to_scrape=urls_rooms_OLX)
     yield runner.crawl(olx_spider_main.OlxSpiderMain, urls_to_scrape = urls_flats_OLX)
     reactor.stop()
 

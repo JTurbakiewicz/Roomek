@@ -2,7 +2,11 @@ from scrapy.loader import ItemLoader
 from scrapy.loader.processors import MapCompose, Join
 import re
 import datetime
+import sys
 from OfferParser.translator import translate
+from schemas import offer_scheme
+
+
 
 def remove_html_tags(input):
     string_wo_br = re.sub(r'<br>', ' ', input)
@@ -101,10 +105,8 @@ def ready_from_Otodom(input):
     year, month, day = input.split('-')
     yield datetime.datetime(int(year), int(month), int(day))
 
-
 def get_inside_tags(input):
     string_wo_br = re.sub(r'<br>', ' ', input)
-    pattern = re.compile(r'(>.*<)')
     yield re.sub(r'<.*?>', '', string_wo_br)
 
 def district(input):
@@ -162,29 +164,36 @@ def location_longitude_otodom(input):
         print('failed' + str(input))
         print (e)
 
+def create_loader_dict(scheme_to_use):
+    this_module = sys.modules[__name__]
+    list_to_create_dict = []
+    for field_name, field_values in scheme_to_use.items():
+        field_name_in = field_name + '_in'
+        functions_to_use = []
+        try:
+            functions_to_use_names = field_values['item_loaders']
+        except:
+            functions_to_use_names = ''
+        for functions_to_use_name in functions_to_use_names:
+            function_to_use = getattr(this_module, functions_to_use_name)
+            functions_to_use.append(function_to_use)
+        if len(functions_to_use) == 0:
+            mapcompose_function = getattr(this_module, 'MapCompose')()
+        elif len(functions_to_use) == 1:
+            mapcompose_function = getattr(this_module, 'MapCompose')(functions_to_use[0])
+        elif len(functions_to_use) == 2:
+            mapcompose_function = getattr(this_module, 'MapCompose')(functions_to_use[0], functions_to_use[1])
+        elif len(functions_to_use) == 3:
+            mapcompose_function = getattr(this_module, 'MapCompose')(functions_to_use[0], functions_to_use[1], functions_to_use[2])
+        elif len(functions_to_use) == 4:
+            mapcompose_function = getattr(this_module, 'MapCompose')(functions_to_use[0], functions_to_use[1], functions_to_use[2], functions_to_use[3], )
+        elif len(functions_to_use) == 5:
+            mapcompose_function = getattr(this_module, 'MapCompose')(functions_to_use[0], functions_to_use[1], functions_to_use[2], functions_to_use[3], functions_to_use[4])
 
-class OlxOfferLoader(ItemLoader):
-    city_in = MapCompose()
-    housing_type_in = MapCompose(translate)
-    business_type_in = MapCompose(translate)
-    offer_url_in = MapCompose(response_to_string)
-    offer_thumbnail_url_in = MapCompose(find_image_url)
-    offer_name_in = MapCompose(remove_html_tags, remove_unnecessary_spaces)
-    price_in = MapCompose(just_numbers,integer_the_price)
-    street_in = MapCompose(street_it)
-    district_in = MapCompose(district)
-    date_of_the_offer_in = MapCompose(remove_html_tags,remove_unnecessary_spaces, datetime_it_OLX)
-    offer_id_in = MapCompose(just_numbers)
-    offer_text_in = MapCompose(remove_unnecessary_spaces, remove_html_tags, swap_unnecessary_spaces)
-    offer_from_in = MapCompose(remove_html_tags,translate)
-    apartment_level_in = MapCompose(remove_html_tags,word_to_numbers,just_numbers,integer_the_price)
-    furniture_in = MapCompose(remove_html_tags, furniture)
-    type_of_building_in = MapCompose(remove_html_tags,translate)
-    area_in = MapCompose(remove_html_tags,just_numbers,integer_the_price)
-    amount_of_rooms_in = MapCompose(remove_html_tags,word_to_numbers,just_numbers,integer_the_price)
-    additional_rent_in = MapCompose(remove_html_tags,just_numbers,integer_the_price)
-    price_per_m2_in = MapCompose(remove_html_tags,just_numbers,integer_the_price)
-    type_of_market_in = MapCompose(remove_html_tags, translate)
+        list_to_create_dict.append((field_name_in,mapcompose_function))
+    return dict(list_to_create_dict)
+
+OlxOfferLoader = type('OlxOfferLoader', (ItemLoader,), create_loader_dict(offer_scheme))
 
 class OtodomOfferLoader(OlxOfferLoader):
     district_in = MapCompose(district_otodom)
