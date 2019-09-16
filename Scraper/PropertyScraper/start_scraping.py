@@ -2,7 +2,7 @@ import os
 if '/home/RoomekBot' in os.path.abspath(''):
     from Scraper.PropertyScraper.spiders import olx_spider_main, olx_room_spider
 else:
-   from Scraper.PropertyScraper.spiders import olx_spider_main, olx_room_spider
+   from Scraper.PropertyScraper.spiders import olx_spider_main, olx_room_spider, otodom_spider_main
 from twisted.internet import reactor, defer
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
@@ -106,6 +106,7 @@ for type in housing_types:
 def crawl():
     #yield runner.crawl(olx_room_spider.OlxRoomSpider, urls_to_scrape=urls_rooms_OLX)
     yield runner.crawl(olx_spider_main.OlxSpiderMain, urls_to_scrape = urls_flats_OLX)
+    #yield runner.crawl(otodom_spider_main.OtodomSpiderMain, urls_to_scrape = urls_flats_OLX)
     reactor.stop()
 
 crawl()
