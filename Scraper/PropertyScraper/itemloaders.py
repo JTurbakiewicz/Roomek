@@ -62,7 +62,7 @@ def delist_string(input):
 def street_it(input):
     yield re.sub(r'ul. ', '', str(input)).title()
 
-def datetime_it_OLX(input):
+def datetime_it_olx(input):
     """Returns in a datetime prepared format."""
     months_dict = {
         'stycznia': '1',
@@ -86,7 +86,7 @@ def datetime_it_OLX(input):
     l_dt = [split_string[-1], split_string[-2], split_string[-3], split_string[1].split(':')[0], split_string[1].split(':')[1]]
     yield datetime.datetime(int(l_dt[0]),int(l_dt[1]),int(l_dt[2]),int(l_dt[3]),int(l_dt[4]))
 
-def datetime_it_Otodom(input):
+def datetime_it_otodom(input):
     """Returns in a datetime prepared format."""
     pattern = re.compile(r'"dateModified":".*?"')
     try:
@@ -98,9 +98,9 @@ def datetime_it_Otodom(input):
         hour, minute, second = hour.split(':')
         yield datetime.datetime(int(year), int(month), int(day), int(hour), int(minute), int(second))
     except:
-        print('failed' + str(input))
+        pass
 
-def ready_from_Otodom(input):
+def ready_from_otodom(input):
     """Returns in a datetime prepared format."""
     year, month, day = input.split('-')
     yield datetime.datetime(int(year), int(month), int(day))
@@ -130,18 +130,6 @@ def furniture(input):
         return None
 
 def location_latitude_otodom(input):
-    print(input)
-    pattern = re.compile(r'"geo":{"@type":"GeoCoordinates","latitude":.*?,"')
-    try:
-        latidude_unprocessed = pattern.findall(str(input))
-        unprocessed_latitude = max(latidude_unprocessed,key=len)
-        print(unprocessed_latitude)
-        yield float(re.sub(r'[^0123456789.]', '', unprocessed_latitude))
-
-    except:
-        print('failed' + str(input))
-
-def location_latitude_otodom(input):
     pattern = re.compile(r'"geo":{"@type":"GeoCoordinates","latitude":.*?,"')
     try:
         latidude_unprocessed = pattern.findall(str(input))
@@ -150,7 +138,6 @@ def location_latitude_otodom(input):
 
     except Exception as e:
         print(e)
-        print('failed' + str(input))
 
 def location_longitude_otodom(input):
     pattern = re.compile(r'"longitude":.*?},')
@@ -161,7 +148,6 @@ def location_longitude_otodom(input):
         yield float(re.sub(r'[^0123456789.]', '', unprocessed_longitude))
 
     except Exception as e:
-        print('failed' + str(input))
         print (e)
 
 def create_loader_dict(scheme_to_use):
@@ -189,6 +175,8 @@ def create_loader_dict(scheme_to_use):
             mapcompose_function = getattr(this_module, 'MapCompose')(functions_to_use[0], functions_to_use[1], functions_to_use[2], functions_to_use[3], )
         elif len(functions_to_use) == 5:
             mapcompose_function = getattr(this_module, 'MapCompose')(functions_to_use[0], functions_to_use[1], functions_to_use[2], functions_to_use[3], functions_to_use[4])
+        else:
+            print('FIX')
 
         list_to_create_dict.append((field_name_in,mapcompose_function))
     return dict(list_to_create_dict)
@@ -197,14 +185,14 @@ OlxOfferLoader = type('OlxOfferLoader', (ItemLoader,), create_loader_dict(offer_
 
 class OtodomOfferLoader(OlxOfferLoader):
     district_in = MapCompose(district_otodom)
-    date_of_the_offer_in = MapCompose(datetime_it_Otodom)
+    date_of_the_offer_in = MapCompose(datetime_it_otodom)
     security_deposit_in = MapCompose(just_numbers,integer_the_price)
     building_material_in = MapCompose(translate)
     windows_in = MapCompose(translate)
     heating_in = MapCompose(translate)
     building_year_in = MapCompose(just_numbers,integer_the_price)
     fit_out_in = MapCompose(translate)
-    ready_from_in = MapCompose(ready_from_Otodom)
+    ready_from_in = MapCompose(ready_from_otodom)
     type_of_ownership_in = MapCompose(translate)
     rental_for_students_in = MapCompose(translate)
     location_latitude_in = MapCompose(location_latitude_otodom)

@@ -31,7 +31,7 @@ class OlxSpiderMain(scrapy.Spider):
     name = "olx_spider_main"
     urls = []
 
-    def __init__(self, category=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(OlxSpiderMain, self).__init__(*args, **kwargs)
         try:
             self.urls = kwargs['urls_to_scrape']
@@ -69,6 +69,7 @@ class OlxSpiderMain(scrapy.Spider):
             if link.url.split('#')[0] not in already_scraped_urls and link.url.split('#')[0] not in links_to_olx_offers:
                 links_to_olx_offers.add(link.url)
                 if link is not None:
+                    request = scrapy.Request(link.url, callback=self.parse_olx_offer)
                     yield prepare_metadata(request, response)
 
     def parse_olx_offer(self, response):
