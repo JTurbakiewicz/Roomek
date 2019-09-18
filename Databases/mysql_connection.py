@@ -6,10 +6,12 @@ import tokens
 import sys
 from Bot.user import User
 from Bot.message import Message
-from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, offer_features_scheme, conversations_scheme, ratings_scheme
+from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, offer_features_scheme, \
+    conversations_scheme, ratings_scheme
 
-#logging.basicConfig(level='DEBUG')
+# logging.basicConfig(level='DEBUG')
 """Funtion definition"""
+
 
 class DB_Connection():
 
@@ -25,6 +27,7 @@ class DB_Connection():
 
     def __exit__(self, *args):
         self.cnx.close()
+
 
 def set_up_db(db_config):
     try:
@@ -67,6 +70,7 @@ def set_up_db(db_config):
             logging.info("OK")
     cnx.close()
 
+
 def create_offer(item):
     """ Creates an offer DB record.
 
@@ -83,8 +87,8 @@ def create_offer(item):
                 fields_to_insert_into_offers = re.sub("""[[']|]""", '', fields_to_insert_into_offers)
                 s_to_insert_into_offers = ('%s,' * len(item.keys()))[:-1]
                 add_query = ("INSERT INTO offers "
-                                "(%s) "
-                                "VALUES (%s)" % (fields_to_insert_into_offers,s_to_insert_into_offers))
+                             "(%s) "
+                             "VALUES (%s)" % (fields_to_insert_into_offers, s_to_insert_into_offers))
                 values = []
                 for val in item.values():
                     values.append(val[0])
@@ -95,15 +99,16 @@ def create_offer(item):
                 fields_to_insert_into_offer_features = re.sub("""[[']|]""", '', fields_to_insert_into_offer_features)
                 s_to_insert_into_offer_features = ('%s,' * len(item.keys()))[:-1]
                 add_query = ("INSERT INTO offer_features "
-                                   "(%s) "
-                                   "VALUES (%s)" % (fields_to_insert_into_offer_features, s_to_insert_into_offer_features))
+                             "(%s) "
+                             "VALUES (%s)" % (fields_to_insert_into_offer_features, s_to_insert_into_offer_features))
                 values = []
                 for val in item.values():
                     values.append(val[0])
                 cursor.execute(add_query, values)
         except mysql.connector.IntegrityError as err:
-                logging.error("Error: {}".format(err))
+            logging.error("Error: {}".format(err))
         cnx.commit()
+
 
 def create_table_scheme(table_name, table_scheme, primary_key='facebook_id'):
     sql_query = db_scheme["beggining"]["text"].format(table_name=table_name)
@@ -115,8 +120,9 @@ def create_table_scheme(table_name, table_scheme, primary_key='facebook_id'):
     sql_query = sql_query + '' + db_scheme["end"]["text"].format(primary_key=primary_key)
     return sql_query
 
-def create_message(msg_obj = None, update = False):
-    pass #TODO -> fix UTF with stickers
+
+def create_message(msg_obj=None, update=False):
+    pass  # TODO -> fix UTF with stickers
     # if msg_obj is None:
     #     msg_obj = Message('default')
     #
@@ -157,6 +163,7 @@ def create_message(msg_obj = None, update = False):
     #         cursor.execute(query, msg_data)
     #     cnx.commit()
 
+
 def create_record(table_name, field_name, field_value, offer_url):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """
@@ -168,13 +175,14 @@ def create_record(table_name, field_name, field_value, offer_url):
         cursor.execute(query, (offer_url, field_value, field_value))
         cnx.commit()
 
+
 def create_rating(rating):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         fields = list(rating.keys())
         values = list(rating.values())
 
         fields_to_insert = ','.join(fields)
-        placeholders = ','.join(['%s']*len(values))
+        placeholders = ','.join(['%s'] * len(values))
 
         duplicate_condition = ''
         for field in fields:
@@ -187,10 +195,11 @@ def create_rating(rating):
                     VALUES ({placeholders})
                     ON DUPLICATE KEY UPDATE {duplicate_condition}
                  """
-        cursor.execute(query, values*2)
+        cursor.execute(query, values * 2)
         cnx.commit()
 
-def push_user(user_obj = None, update = False):
+
+def push_user(user_obj=None, update=False):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         fields_to_add = ''
         user_data = []
@@ -220,16 +229,17 @@ def push_user(user_obj = None, update = False):
                         VALUES ({placeholders})
                         ON DUPLICATE KEY UPDATE {duplicate_condition}
                      """
-            cursor.execute(query, user_data*2)
+            cursor.execute(query, user_data * 2)
         else:
 
             query = """INSERT INTO users
                     ({})
-                    VALUES ({})""".format(fields_to_add,placeholders)
+                    VALUES ({})""".format(fields_to_add, placeholders)
             cursor.execute(query, user_data)
         cnx.commit()
 
-def get_all(table_name = 'offers', fields_to_get = '*'):
+
+def get_all(table_name='offers', fields_to_get='*'):
     """ Gets all off rows from DB.
 
     A function that wraps MySQL query into a python function. It lets you to easly return
@@ -247,14 +257,15 @@ def get_all(table_name = 'offers', fields_to_get = '*'):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         fields_to_get_str = str(fields_to_get)
         fields_to_get_clean = re.sub("""[[']|]""", '', fields_to_get_str)
-        query =  """SELECT %s
+        query = """SELECT %s
                  FROM %s
                  """ % (fields_to_get_clean, table_name)
         cursor.execute(query)
         result = cursor.fetchall()
         return result
 
-def get(fields_to_get = '*', amount_of_items = 5, fields_to_compare = [], value_to_compare_to = [], comparator = []):
+
+def get(fields_to_get='*', amount_of_items=5, fields_to_compare=None, value_to_compare_to=None, comparator=None):
     """ Gets rows from DB that meet the specific criteria.
 
     A function that wraps MySQL query into a python function. It lets you to easly return
@@ -299,6 +310,14 @@ def get(fields_to_get = '*', amount_of_items = 5, fields_to_compare = [], value_
     Returns:
         A list of dictionaries, that cover all of the fields required by the input.
     """
+
+    if fields_to_compare is None:
+        fields_to_compare = []
+    if value_to_compare_to is None:
+        value_to_compare_to = []
+    if comparator is None:
+        comparator = []
+
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         fields_to_get_str = str(fields_to_get)
         fields_to_get_clean = re.sub("""[[']|]""", '', fields_to_get_str)
@@ -319,9 +338,11 @@ def get(fields_to_get = '*', amount_of_items = 5, fields_to_compare = [], value_
             comparative_string = ''.join([comparative_string, 'where'])
             for field in range(len(fields_to_compare)):
                 for value in range(len(value_to_compare_to[field])):
-                    comparative_string = ' '.join([comparative_string, fields_to_compare[field], comparator[field][value]])
-                    comparative_string = ''.join([comparative_string,"""'""",str(value_to_compare_to[field][value]),"""'"""])
-                    if value != len(value_to_compare_to[field])-1:
+                    comparative_string = ' '.join(
+                        [comparative_string, fields_to_compare[field], comparator[field][value]])
+                    comparative_string = ''.join(
+                        [comparative_string, """'""", str(value_to_compare_to[field][value]), """'"""])
+                    if value != len(value_to_compare_to[field]) - 1:
                         comparative_string = ' '.join([comparative_string, 'or'])
                 if field != len(value_to_compare_to[field]):
                     comparative_string = ' '.join([comparative_string, 'and'])
@@ -336,7 +357,8 @@ def get(fields_to_get = '*', amount_of_items = 5, fields_to_compare = [], value_
         cursor.execute(query)
         return cursor.fetchmany(amount_of_items)
 
-def get_like(like_field, like_phrase, fields_to_get = '*'):
+
+def get_like(like_field, like_phrase, fields_to_get='*'):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         fields_to_get_str = str(fields_to_get)
         fields_to_get_clean = re.sub("""[[']|]""", '', fields_to_get_str)
@@ -353,19 +375,20 @@ def get_like(like_field, like_phrase, fields_to_get = '*'):
         cursor.execute(query)
         return cursor.fetchall()
 
+
 def get_custom(sql_query):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = sql_query
         cursor.execute(query)
         return cursor.fetchall()
 
-def get_user(facebook_id):
 
+def get_user(facebook_id):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-        query =  """SELECT *
+        query = """SELECT *
                  FROM users
                  WHERE facebook_id = %s
-                 """ % ("'"+facebook_id+"'") #TODO change
+                 """ % ("'" + facebook_id + "'")  # TODO change
 
         cursor.execute(query)
         data = cursor.fetchone()
@@ -381,23 +404,25 @@ def get_user(facebook_id):
         else:
             return False
 
+
 def get_messages(facebook_id):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-        query =  """SELECT *
+        query = """SELECT *
                  FROM conversations
                  WHERE facebook_id = %s
                  """ % (facebook_id)
         cursor.execute(query)
         data = cursor.fetchall()
         created_messages = []
-        created_message = Message(json_data={'entry':'default'})
+        created_message = Message(json_data={'entry': 'default'})
         for message in data:
             for field_name, field_value in message.items():
                 setattr(created_message, field_name, message[field_name])
             created_messages.append(created_message)
         return created_messages
 
-def update_field(table_name, field_name, field_value, where_field, where_value, if_null_required = False):
+
+def update_field(table_name, field_name, field_value, where_field, where_value, if_null_required=False):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """
            UPDATE {}
@@ -406,10 +431,11 @@ def update_field(table_name, field_name, field_value, where_field, where_value, 
         """.format(table_name, field_name, where_field)
         if if_null_required:
             query = query + 'AND ' + field_name + ' IS NULL'
-        cursor.execute(query, (field_value,where_value))
+        cursor.execute(query, (field_value, where_value))
         cnx.commit()
 
-def update_user(facebook_id, field_to_update, field_value, if_null_required = False):
+
+def update_user(facebook_id, field_to_update, field_value, if_null_required=False):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """
            UPDATE users
@@ -421,13 +447,13 @@ def update_user(facebook_id, field_to_update, field_value, if_null_required = Fa
         cursor.execute(query, (field_value, facebook_id))
         cnx.commit()
 
-def user_exists(facebook_id):
 
+def user_exists(facebook_id):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-        query =  """SELECT *
+        query = """SELECT *
                  FROM users
                  WHERE facebook_id = %s
-                 """ % ("'"+facebook_id+"'") #TODO change
+                 """ % ("'" + facebook_id + "'")  # TODO change
 
         cursor.execute(query)
         data = cursor.fetchone()
@@ -437,7 +463,8 @@ def user_exists(facebook_id):
         else:
             return False
 
-def drop_user(facebook_id = None):
+
+def drop_user(facebook_id=None):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         try:
             query = f"""Delete from users where facebook_id = {facebook_id}"""
@@ -448,16 +475,19 @@ def drop_user(facebook_id = None):
         except mysql.connector.Error as error:
             logging.warning("Failed to delete record from table: {}".format(error))
 
+
 """DATA"""
 
 DB_NAME = 'RoomekBot$offers'
-db_tables = {}
-db_tables['offers'] = create_table_scheme(table_name='offers', table_scheme=offer_scheme, primary_key ='offer_url')
-db_tables['utility'] = create_table_scheme(table_name='utility', table_scheme=db_utility_scheme, primary_key ='offer_url')
-db_tables['offer_features'] = create_table_scheme(table_name='offer_features', table_scheme=offer_features_scheme, primary_key ='offer_url')
-db_tables['users'] = create_table_scheme(table_name='users', table_scheme=user_scheme)
-db_tables['conversations'] = create_table_scheme(table_name='conversations', table_scheme=conversations_scheme, primary_key ='conversation_no')
-db_tables['ratings'] = create_table_scheme(table_name='ratings', table_scheme=ratings_scheme, primary_key ='offer_url')
+db_tables = {'offers': create_table_scheme(table_name='offers', table_scheme=offer_scheme, primary_key='offer_url'),
+             'utility': create_table_scheme(table_name='utility', table_scheme=db_utility_scheme,
+                                            primary_key='offer_url'),
+             'offer_features': create_table_scheme(table_name='offer_features', table_scheme=offer_features_scheme,
+                                                   primary_key='offer_url'),
+             'users': create_table_scheme(table_name='users', table_scheme=user_scheme),
+             'conversations': create_table_scheme(table_name='conversations', table_scheme=conversations_scheme,
+                                                  primary_key='conversation_no'),
+             'ratings': create_table_scheme(table_name='ratings', table_scheme=ratings_scheme, primary_key='offer_url')}
 
 """SETUP"""
 

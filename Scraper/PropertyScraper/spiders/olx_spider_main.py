@@ -5,19 +5,22 @@ from scrapy.linkextractors import LinkExtractor
 import Databases.mysql_connection as db
 from schemas import offer_scheme
 
+
 def prepare_metadata(request, response):
     request.meta['housing_type'] = response.meta['housing_type']
     request.meta['city'] = response.meta['city']
     request.meta['business_type'] = response.meta['business_type']
     return request
 
-already_scraped_urls_dicts = db.get_all(table_name = 'offers', fields_to_get = 'offer_url')
+
+already_scraped_urls_dicts = db.get_all(table_name='offers', fields_to_get='offer_url')
 already_scraped_urls = [url['offer_url'] for url in already_scraped_urls_dicts]
 
 OLX_extractor_subpage = LinkExtractor(allow=('olx.pl/oferta/'), deny=(';promoted'), unique=True)
 OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=23|page=33'), unique=True,
-                                    restrict_xpaths=(['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
-                                                      '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a']))
+                                                  restrict_xpaths=(
+                                                      ['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
+                                                       '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a']))
 # OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=2|page=3|page=4|page=5'), unique=True,
 #                                     restrict_xpaths=(['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
 #                                                       '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a',
@@ -26,6 +29,7 @@ OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=23|page=33'), un
 
 links_to_main_page = set()
 links_to_olx_offers = set()
+
 
 class OlxSpiderMain(scrapy.Spider):
     name = "olx_spider_main"
@@ -86,13 +90,15 @@ class OlxSpiderMain(scrapy.Spider):
             if dict_value != '':
                 OfferItem_loader.add_xpath(field_name, field_value['scraping_path_olx'])
 
-        for column in range (1,5):
-            for row in range (1,3):
-                field = response.xpath(f'//*[@id="offerdescription"]/div[3]/table/tr[{column}]/td[{row}]/table/tr/th/text()').extract_first()
+        for column in range(1, 5):
+            for row in range(1, 3):
+                field = response.xpath(
+                    f'//*[@id="offerdescription"]/div[3]/table/tr[{column}]/td[{row}]/table/tr/th/text()').extract_first()
                 if field is not None:
                     for field_name, field_value in offer_scheme.items():
                         if field in field_value['misc']:
-                            OfferItem_loader.add_xpath(field_name, f'//*[@id="offerdescription"]/div[3]/table/tr[{column}]/td[{row}]/table/tr/td/strong')
+                            OfferItem_loader.add_xpath(field_name,
+                                                       f'//*[@id="offerdescription"]/div[3]/table/tr[{column}]/td[{row}]/table/tr/td/strong')
 
         yield OfferItem_loader.load_item()
         yield OfferFeaturesItem_loader.load_item()

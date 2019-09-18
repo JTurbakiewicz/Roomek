@@ -1,7 +1,7 @@
 from Databases import mysql_connection as sql
 
-def best_offer(user_obj = None, count = 1, return_amount = False):
 
+def best_offer(user_obj=None, count=1, return_amount=False):
     query = 'select * from offers where True'
 
     if user_obj.city:
@@ -61,4 +61,3 @@ def best_offer(user_obj = None, count = 1, return_amount = False):
         return offers[0:count]
     elif return_amount is True:
         return len(offers)
-

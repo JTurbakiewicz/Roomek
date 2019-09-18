@@ -1,8 +1,9 @@
 import os
+
 if '/home/RoomekBot' in os.path.abspath(''):
     from Scraper.PropertyScraper.spiders import olx_spider_main, olx_room_spider
 else:
-   from Scraper.PropertyScraper.spiders import olx_spider_main, olx_room_spider, otodom_spider_main
+    from Scraper.PropertyScraper.spiders import olx_spider_main, olx_room_spider, otodom_spider_main
 from twisted.internet import reactor, defer
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
@@ -10,6 +11,7 @@ from scrapy.settings import Settings
 import sys
 from six.moves.configparser import ConfigParser
 from tokens import scraping_python_path
+
 
 def closest_scrapy_cfg(path='.', prevpath=None):
     """Return the path to the closest scrapy.cfg file by traversing the current
@@ -21,13 +23,14 @@ def closest_scrapy_cfg(path='.', prevpath=None):
     cfgfile = os.path.join(path, 'scrapy.cfg')
     if os.path.exists(cfgfile):
         return cfgfile
-        #return r"C:\Users\Artur\Desktop\CODE\roBOT\Scraper\scrapy.cfg"  #TODO
+        # return r"C:\Users\Artur\Desktop\CODE\roBOT\Scraper\scrapy.cfg"  #TODO
     return closest_scrapy_cfg(os.path.dirname(path), path)
-    #return r"C:\Users\Artur\Desktop\CODE\roBOT\Scraper\scrapy.cfg" #TODO
+    # return r"C:\Users\Artur\Desktop\CODE\roBOT\Scraper\scrapy.cfg" #TODO
+
 
 def get_sources(use_closest=True):
     xdg_config_home = os.environ.get('XDG_CONFIG_HOME') or \
-        os.path.expanduser('~/.config')
+                      os.path.expanduser('~/.config')
     sources = ['/etc/scrapy.cfg', r'c:\scrapy\scrapy.cfg',
                xdg_config_home + '/scrapy.cfg',
                os.path.expanduser('~/.scrapy.cfg')]
@@ -35,12 +38,14 @@ def get_sources(use_closest=True):
         sources.append(closest_scrapy_cfg(scraping_python_path))
     return sources
 
+
 def get_config(use_closest=True):
     """Get Scrapy config file as a SafeConfigParser"""
     sources = get_sources(use_closest)
     cfg = ConfigParser()
     cfg.read(sources)
     return cfg
+
 
 def init_env(project='default', set_syspath=True):
     """Initialize environment to use command-line tool from inside a project
@@ -56,8 +61,8 @@ def init_env(project='default', set_syspath=True):
         if set_syspath and projdir not in sys.path:
             sys.path.append(projdir)
 
-def get_project_settings():
 
+def get_project_settings():
     project = os.environ.get('SCRAPY_PROJECT', 'default')
     init_env(project)
 
@@ -79,6 +84,7 @@ def get_project_settings():
 
     return settings
 
+
 ENVVAR = 'SCRAPY_SETTINGS_MODULE'
 
 s = get_project_settings()
@@ -90,7 +96,7 @@ base_string = 'https://www.olx.pl/nieruchomosci'
 housing_types = ['mieszkania', 'stancje-pokoje']
 business_types = ['sprzedaz', 'wynajem']
 cities = ['warszawa', 'krakow', 'lodz', 'wroclaw', 'poznan', 'gdansk', 'szczecin', 'bydgoszcz', 'lublin', 'bialystok']
-#cities = ['warszawa']
+# cities = ['warszawa']
 urls_flats_OLX = []
 urls_rooms_OLX = []
 
@@ -98,16 +104,18 @@ for type in housing_types:
     for city in cities:
         if type == 'mieszkania':
             for purpose in business_types:
-                urls_flats_OLX.append('/'.join([base_string,type,purpose,city,'']))
+                urls_flats_OLX.append('/'.join([base_string, type, purpose, city, '']))
         elif type == 'stancje-pokoje':
             urls_rooms_OLX.append('/'.join([base_string, type, city, '']))
+
 
 @defer.inlineCallbacks
 def crawl():
     yield runner.crawl(olx_room_spider.OlxRoomSpider, urls_to_scrape=urls_rooms_OLX)
-    yield runner.crawl(olx_spider_main.OlxSpiderMain, urls_to_scrape = urls_flats_OLX)
-    yield runner.crawl(otodom_spider_main.OtodomSpiderMain, urls_to_scrape = urls_flats_OLX)
+    yield runner.crawl(olx_spider_main.OlxSpiderMain, urls_to_scrape=urls_flats_OLX)
+    yield runner.crawl(otodom_spider_main.OtodomSpiderMain, urls_to_scrape=urls_flats_OLX)
     reactor.stop()
+
 
 crawl()
 reactor.run()  # the script will block here until the last crawl call is finished

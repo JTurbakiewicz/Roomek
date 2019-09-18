@@ -1,4 +1,4 @@
-#testgit
+# testgit
 import requests
 import os
 import json
@@ -6,12 +6,13 @@ import logging
 
 WIT_API_HOST = os.getenv('WIT_URL', 'https://api.wit.ai')
 WIT_API_VERSION = os.getenv('WIT_API_VERSION', '20160516')
-access_token = 'MCHBF5WE3RCWWW2BEZCXRGVPXFKY43EE'  #TESTING APP TOKEN -> TO CHANGE
+access_token = 'MCHBF5WE3RCWWW2BEZCXRGVPXFKY43EE'  # TESTING APP TOKEN -> TO CHANGE
 headers = {
     'Authorization': 'Bearer ' + access_token,
     'Accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
     'Content-Type': 'application/json',
 }
+
 
 # logging.basicConfig(level='DEBUG')
 
@@ -22,17 +23,18 @@ def response_status(rsp):
         logging.debug('Too many requests created at the same time')
     elif rsp.status_code > 200:
         logging.debug('Wit responded with status: ' + str(rsp.status_code) +
-                       ' (' + rsp.reason + ')')
+                      ' (' + rsp.reason + ')')
     else:
         logging.debug(rsp.content)
         return rsp
 
-def send_message(message, context = None, msg_id = None, thread_id = None, n = None, verbose = None):
+
+def send_message(message, context=None, msg_id=None, thread_id=None, n=None, verbose=None):
     meth = 'GET'
     path = '/message'
     full_url = WIT_API_HOST + path
     params = {}
-    params['q'] =  message
+    params['q'] = message
     if context:
         params['context'] = context
     if msg_id:
@@ -44,16 +46,17 @@ def send_message(message, context = None, msg_id = None, thread_id = None, n = N
     if verbose:
         params['verbose'] = verbose
 
-    logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers)+ ' | ' + str(params))
+    logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers) + ' | ' + str(params))
 
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
-        params = params
+        headers=headers,
+        params=params
     )
 
     return response_status(rsp)
+
 
 def get_available_entities():
     meth = 'GET'
@@ -65,12 +68,13 @@ def get_available_entities():
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
+        headers=headers,
     )
 
     return response_status(rsp)
 
-def create_new_entity(entity_name, entity_description = None):
+
+def create_new_entity(entity_name, entity_description=None):
     meth = 'POST'
     path = '/entities'
     full_url = WIT_API_HOST + path
@@ -79,16 +83,17 @@ def create_new_entity(entity_name, entity_description = None):
     if entity_description:
         data["doc"] = entity_description
 
-    logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers)+ ' | ' + str(data))
+    logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers) + ' | ' + str(data))
 
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
-        data = json.dumps(data)
+        headers=headers,
+        data=json.dumps(data)
     )
 
     return response_status(rsp)
+
 
 def retrive_entity_values(entity_name):
     meth = 'GET'
@@ -100,12 +105,13 @@ def retrive_entity_values(entity_name):
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
+        headers=headers,
     )
 
     return response_status(rsp)
 
-def update_entity(entity_name, entity_description = None, lookups = None, values = None):
+
+def update_entity(entity_name, entity_description=None, lookups=None, values=None):
     meth = 'PUT'
     path = '/entities/' + entity_name
     full_url = WIT_API_HOST + path
@@ -115,7 +121,7 @@ def update_entity(entity_name, entity_description = None, lookups = None, values
         data["doc"] = entity_description
     if lookups:
         data["lookups"] = lookups
-    if values:  #You can update values for keyword entities. For traits or free-text entities, use POST /samples
+    if values:  # You can update values for keyword entities. For traits or free-text entities, use POST /samples
         data["values"] = values
 
     logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers) + ' | ' + str(data))
@@ -123,11 +129,12 @@ def update_entity(entity_name, entity_description = None, lookups = None, values
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
+        headers=headers,
         data=json.dumps(data)
     )
 
     return response_status(rsp)
+
 
 def delete_entity(entity_name):
     meth = 'DELETE'
@@ -139,10 +146,11 @@ def delete_entity(entity_name):
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
+        headers=headers,
     )
 
     return response_status(rsp)
+
 
 def delete_role(entity_name, role_name):
     meth = 'DELETE'
@@ -154,12 +162,13 @@ def delete_role(entity_name, role_name):
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
+        headers=headers,
     )
 
     return response_status(rsp)
 
-def add_entity_value(entity_name, value, expressions = None, metadata = None):
+
+def add_entity_value(entity_name, value, expressions=None, metadata=None):
     """This only applies to keyword entities. For trait or free-text entities, use POST /samples"""
     meth = 'POST'
     path = '/entities/' + entity_name + '/values'
@@ -168,7 +177,7 @@ def add_entity_value(entity_name, value, expressions = None, metadata = None):
     data = {}
     data["value"] = str(value)
     if expressions:
-        data["expressions"] = expressions #expression is a keyword synonym
+        data["expressions"] = expressions  # expression is a keyword synonym
     if metadata:
         data["metadata"] = metadata
 
@@ -177,11 +186,12 @@ def add_entity_value(entity_name, value, expressions = None, metadata = None):
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
+        headers=headers,
         data=json.dumps(data)
     )
 
     return response_status(rsp)
+
 
 def delete_entity_value(entity_name, value):
     """This only applies to keyword entities. For trait or free-text entities, use POST /samples"""
@@ -194,12 +204,13 @@ def delete_entity_value(entity_name, value):
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
+        headers=headers,
     )
 
     return response_status(rsp)
 
-def create_expression(entity_name, value, expression = None):
+
+def create_expression(entity_name, value, expression=None):
     """This only applies to keyword entities. For trait or free-text entities, use POST /samples
     Expression is a synonym to a keyword"""
     meth = 'POST'
@@ -213,11 +224,12 @@ def create_expression(entity_name, value, expression = None):
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
+        headers=headers,
         data=json.dumps(data)
     )
 
     return response_status(rsp)
+
 
 def delete_expression(entity_name, value, expression):
     meth = 'DELETE'
@@ -229,19 +241,20 @@ def delete_expression(entity_name, value, expression):
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
+        headers=headers,
     )
 
     return response_status(rsp)
 
-def get_samples(limit = 1, offset = None, entity_ids = None, entity_values = None, negative = None):
+
+def get_samples(limit=1, offset=None, entity_ids=None, entity_values=None, negative=None):
     meth = 'GET'
     path = '/samples?limit=' + str(limit)
     if offset:
         path = path + '&offset=' + str(offset)
     if entity_ids:
         path = path + '&entity_ids=' + ','.join(entity_ids)
-    if entity_values: #works only if entity_ids specified
+    if entity_values:  # works only if entity_ids specified
         path = path + '&entity_values=' + ','.join(entity_values)
     if negative:
         path = path + '&negative=true'
@@ -252,12 +265,13 @@ def get_samples(limit = 1, offset = None, entity_ids = None, entity_values = Non
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
+        headers=headers,
     )
 
     return response_status(rsp)
 
-def train(messages, entities, entity_values, start_chars = None, end_chars = None, subentities = None):
+
+def train(messages, entities, entity_values, start_chars=None, end_chars=None, subentities=None):
     meth = 'POST'
     path = '/samples'
     full_url = WIT_API_HOST + path
@@ -269,7 +283,7 @@ def train(messages, entities, entity_values, start_chars = None, end_chars = Non
     if not isinstance(entity_values, (list,)):
         entity_values = [entity_values]
 
-    if len (entities) < len (messages):
+    if len(entities) < len(messages):
         missing_entities = []
         for entity in range(len(entities), len(messages)):
             missing_entities.append(entities[-1])
@@ -299,16 +313,17 @@ def train(messages, entities, entity_values, start_chars = None, end_chars = Non
         }
         json_list.append(data)
 
-    logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers)+ ' | ' + str(data))
+    logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers) + ' | ' + str(data))
 
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
-        data = json.dumps(json_list)
+        headers=headers,
+        data=json.dumps(json_list)
     )
 
     return response_status(rsp)
+
 
 def delete_samples(messages):
     meth = 'DELETE'
@@ -318,20 +333,22 @@ def delete_samples(messages):
         messages = [messages]
     messages_array = []
     for message in messages:
-        messages_array.append({"text" : message})
+        messages_array.append({"text": message})
 
-    logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers)+ ' | ' + str(messages_array))
+    logging.debug(
+        'Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers) + ' | ' + str(messages_array))
 
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
-        data = json.dumps(messages_array)
+        headers=headers,
+        data=json.dumps(messages_array)
     )
 
     return response_status(rsp)
 
-def get_all_apps(limit = 1, offset = None):
+
+def get_all_apps(limit=1, offset=None):
     meth = 'GET'
     path = '/apps?limit=' + str(limit)
     if offset:
@@ -343,10 +360,11 @@ def get_all_apps(limit = 1, offset = None):
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
+        headers=headers,
     )
 
     return response_status(rsp)
+
 
 def get_app_info(app_id):
     meth = 'GET'
@@ -358,12 +376,13 @@ def get_app_info(app_id):
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
+        headers=headers,
     )
 
     return response_status(rsp)
 
-def create_new_app(app_name, app_lang, app_privacy, app_description = None):
+
+def create_new_app(app_name, app_lang, app_privacy, app_description=None):
     meth = 'POST'
     path = '/apps'
     full_url = WIT_API_HOST + path
@@ -374,18 +393,19 @@ def create_new_app(app_name, app_lang, app_privacy, app_description = None):
     if app_description:
         data["desc"] = app_description
 
-    logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers)+ ' | ' + str(data))
+    logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers) + ' | ' + str(data))
 
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
-        data = json.dumps(data)
+        headers=headers,
+        data=json.dumps(data)
     )
 
     return response_status(rsp)
 
-def update_app(app_id, app_name=None, app_lang=None, app_privacy=None, app_timezone=None, app_description = None):
+
+def update_app(app_id, app_name=None, app_lang=None, app_privacy=None, app_timezone=None, app_description=None):
     meth = 'PUT'
     path = '/apps/' + app_id
     full_url = WIT_API_HOST + path
@@ -401,16 +421,17 @@ def update_app(app_id, app_name=None, app_lang=None, app_privacy=None, app_timez
     if app_description:
         data["desc"] = app_description
 
-    logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers)+ ' | ' + str(data))
+    logging.debug('Request content: ' + ' | ' + meth + ' | ' + full_url + ' | ' + str(headers) + ' | ' + str(data))
 
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
-        data = json.dumps(data)
+        headers=headers,
+        data=json.dumps(data)
     )
 
     return response_status(rsp)
+
 
 def delete_app(app_id):
     meth = 'DELETE'
@@ -422,10 +443,11 @@ def delete_app(app_id):
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
+        headers=headers,
     )
 
     return response_status(rsp)
+
 
 def get_app_zip():
     meth = 'GET'
@@ -437,7 +459,7 @@ def get_app_zip():
     rsp = requests.request(
         meth,
         full_url,
-        headers = headers,
+        headers=headers,
     )
 
     return response_status(rsp)

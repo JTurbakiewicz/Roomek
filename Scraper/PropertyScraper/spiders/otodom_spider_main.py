@@ -21,8 +21,8 @@ already_scraped_urls = [url['offer_url'] for url in already_scraped_urls_dicts]
 OLX_extractor_otodom = LinkExtractor(allow=('otodom'), deny=(';promoted'), unique=True)
 OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=23|page=33'), unique=True,
                                                   restrict_xpaths=(
-                                                  ['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
-                                                   '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a']))
+                                                      ['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
+                                                       '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a']))
 # OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=2|page=3|page=4|page=5'), unique=True,
 #                                     restrict_xpaths=(['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
 #                                                       '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a',
