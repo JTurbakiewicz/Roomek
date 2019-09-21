@@ -1,3 +1,4 @@
+
 user_scheme = {
     "facebook_id": {"init": None, "db": "char(100) NOT NULL"},
     "first_name": {"init": None, "db": "varchar(100)"},
@@ -20,7 +21,7 @@ user_scheme = {
     "latitude": {"init": 0, "db": "FLOAT"},
     "longitude": {"init": 0, "db": "FLOAT"},
     # dialogue parameters:
-    "context": {"init": None, "db": "varchar(100)"},
+    "context": {"init": 'initialization', "db": "varchar(100)"},
     "interactions": {"init": 0, "db": "int(1)"},
     "shown_input": {"init": False, "db": "BOOLEAN"},
     "wants_more_features": {"init": True, "db": "BOOLEAN"},
@@ -31,10 +32,23 @@ user_scheme = {
     "add_more": {"init": False, "db": "BOOLEAN"}
 }
 
+
+user_questions = {
+    "how_help": {"question": "Jak mogę Ci dzisiaj pomóc?", "responses": ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', '💰 Sprzedam', '💰 Kupię']},
+    "housing_type": {"question": "Jakiego typu lokal Cię interesuje?", "responses": ['🛌 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący']},
+    "location": {"question": "Gdzie konkretnie chciałbyś mieszkać?", "responses": ['🎯 blisko centrum', 'Mokotów', 'Wola']},
+    "price_limit": {"question": "Ile jesteś w stanie płacić? (wraz z ew. czynszem i opłatami)", "responses": ['<800zł', '<1000zł', '<1500zł', '<2000zł','💸 dowolna kwota']},
+    "city": {"question": "Które miasto Cię interesuje?", "responses": ['Warszawa', 'Kraków', 'Łódź', 'Wrocław', 'Poznań', 'Gdańsk', 'Szczecin', 'Bydgoszcz',
+                           'Białystok']},
+    "features": {"question": ["Czy masz jakieś szczególne preferencje?", "na czymś jeszcze Ci zależy?"], "responses": ['Nie, pokaż oferty', 'od zaraz', 'przyjazne dla 🐶🐱', 'blisko do...', 'ma garaż', '🔨 wyremontowane', 'umeblowane', 'ma 🛀', 'dla 🚬', 'dla 🚭']}
+}
+
+
 db_scheme = {
     "beggining": {"text": "CREATE TABLE `{table_name}` ("},
     "end": {"text": "PRIMARY KEY (`{primary_key}`)) ENGINE=InnoDB"}
 }
+
 
 # misc -> coś pozornie bez kategorii, ale pozwalające jednoznacznie zdeklarować, którego pola dotyczy
 offer_scheme = {

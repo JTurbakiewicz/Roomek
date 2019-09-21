@@ -7,9 +7,10 @@ import random
 import logging
 from Bot.cognition import *
 from settings import *
-from OfferBrowser import best_offer
+from OfferBrowser.best_offer import best_offer
 from OfferParser.translator import translate
 from time import sleep
+from schemas import user_questions
 
 
 def response_decorator(original_function):
@@ -20,7 +21,11 @@ def response_decorator(original_function):
             delay = len(str(message.text))/50       # +0.2 set amount of delay
             bot.fb_fake_typing(message.facebook_id, duration=delay)
         # show_message_object(message, user, bot)
-        user.set_context(original_function.__name__)
+        # TODO naprawić to, bo tak nie działa :(
+        if param in original_function.:
+            user.set_param("context", param)
+        else:
+            user.set_param("context", original_function.__name__)
         user.increment()
 
         # The original function:
@@ -55,28 +60,25 @@ def greeting(message, user, bot):
     bot.fb_send_text_message(str(message.facebook_id), response)
     ask_how_help(message, user, bot)
 
-@response_decorator
-def ask_how_help(message, user, bot):
-    bot.fb_send_quick_replies(message.facebook_id, "Jak mogę Ci dzisiaj pomóc?", ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', '💰 Sprzedam', '💰 Kupię'])
 
 @response_decorator
-def ask_for_housing_type(message, user, bot):
-    bot.fb_send_quick_replies(message.facebook_id, "Jakiego typu lokal Cię interesuje?", ['🛌 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący'])
+def ask_for(message, user, bot, param):
+    question = random.choice(user_questions[param]['question'])
+    options = user_questions[param]['responses']
+    bot.fb_send_quick_replies(message.facebook_id, question, options)
+
+# TODO Replace
+# ask_for_housing_type
+# ask_how_help
+# ask_for_city
+# ask_for_features
+# ask_for_location
+# TODO ask_for_location miało dawniej location=True żeby dawać lokalizację z mapy orazpowinno sugerować dzielnice
+# ask_for_price_limit
 
 @response_decorator
 def ask_if_new_housing_type(message, user, bot, new_value):
     bot.fb_send_quick_replies(message.facebook_id, f"Czy chcesz zmienić typ z {user.housing_type} na {new_value}?", ['Tak', 'Nie'])
-
-
-@response_decorator
-def ask_for_city(message, user, bot):
-    bot.fb_send_quick_replies(message.facebook_id, "Które miasto Cię interesuje?", ['Warszawa', 'Kraków', 'Łódź', 'Wrocław', 'Poznań', 'Gdańsk', 'Szczecin', 'Bydgoszcz', 'Białystok'])
-
-
-@response_decorator
-def ask_for_features(message, user, bot):
-    question = random.choice(["Czy masz jakieś szczególne preferencje?", "na czymś jeszcze Ci zależy?"])
-    bot.fb_send_quick_replies(message.facebook_id, question, ['Nie, pokaż oferty', 'od zaraz', 'przyjazne dla 🐶🐱', 'blisko do...', 'ma garaż', '🔨 wyremontowane', 'umeblowane', 'ma 🛀', 'dla 🚬', 'dla 🚭'])
 
 
 @response_decorator
@@ -87,7 +89,7 @@ def ask_if_restart(message, user, bot):
 
 @response_decorator
 def restart(message, user, bot):
-    user.set_wants_restart(False)
+    user.set_param("wants_restart", False)
     bot.fb_send_text_message(str(message.facebook_id), "Ok, spróbujmy wyszukać od nowa.")
     ask_how_help(message, user, bot)
 
@@ -100,20 +102,10 @@ def ask_for_more_features(message, user, bot):
 
 
 @response_decorator
-def ask_for_location(message, user, bot):
-    bot.fb_send_quick_replies(message.facebook_id, reply_message="Gdzie konkretnie chciałbyś mieszkać?", replies=['🎯 blisko centrum', 'Mokotów', 'Wola'], location=True)
-    # TODO powinno sugerować dzielnice na bazie miasta, a nie default (nominatim get lower level nodes like suburb)
-
-
-@response_decorator
 def ask_more_locations(message, user, bot):
     question = random.choice(["Czy chciałbyś dodać jeszcze jakieś miejsce?","Zanotowałem, coś oprócz tego?"])
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=['Nie', '🎯 blisko centrum', 'Mokotów', 'Wola'], location=True)
     # TODO tez powinno sugerować dzielnice i wiedzieć co już padło
-
-@response_decorator
-def ask_for_price_limit(message, user, bot):
-    bot.fb_send_quick_replies(message.facebook_id, "Ile jesteś w stanie płacić? (wraz z ew. czynszem i opłatami)", ['<800zł', '<1000zł', '<1500zł', '<2000zł','💸 dowolna kwota'])
 
 
 @response_decorator
@@ -148,33 +140,33 @@ def show_offers(message, user, bot):
         bot.fb_send_text_message(message.facebook_id, "Niestety nie znalazłem ofert spełniających Twoje kryteria :(")
 
 
-@response_decorator
-def yes(message, user, bot):
-    response = random.choice([
-        "ok",
-        "super",
-        "jasne",
-        "zanotowałem",
-        "(y)"
-    ])
-    bot.fb_send_text_message(message.facebook_id, response)
-
-
-@response_decorator
-def no(message, user, bot):
-    response = random.choice([
-        ":(",
-        "nieeee",
-        "dlaczego nie?",
-        "trudno"
-    ])
-    bot.fb_send_text_message(str(message.facebook_id), response)
-
-
-@response_decorator
-def maybe(message, user, bot):
-    response = f"'{message.text.capitalize()}'? Potrzebuejesz chwilę, żeby się zastanowić?"
-    bot.fb_send_text_message(str(message.facebook_id), response)
+# @response_decorator
+# def yes(message, user, bot):
+#     response = random.choice([
+#         "ok",
+#         "super",
+#         "jasne",
+#         "zanotowałem",
+#         "(y)"
+#     ])
+#     bot.fb_send_text_message(message.facebook_id, response)
+#
+#
+# @response_decorator
+# def no(message, user, bot):
+#     response = random.choice([
+#         ":(",
+#         "nieeee",
+#         "dlaczego nie?",
+#         "trudno"
+#     ])
+#     bot.fb_send_text_message(str(message.facebook_id), response)
+#
+#
+# @response_decorator
+# def maybe(message, user, bot):
+#     response = f"'{message.text.capitalize()}'? Potrzebuejesz chwilę, żeby się zastanowić?"
+#     bot.fb_send_text_message(str(message.facebook_id), response)
 
 
 @response_decorator
@@ -189,27 +181,27 @@ def unable_to_answer(message, user, bot):
     bot.fb_send_text_message(str(message.facebook_id), response)
 
 
-@response_decorator
-def curse(message, user, bot):
-    response = random.choice([
-        "proszę, nie używaj takich słów",
-        "spokojnie",
-        "czy masz zamiar mnie obrazić?",
-        "przykro mi"
-    ])
-    bot.fb_send_text_message(str(message.facebook_id), response)
-
-
-# TODO!
-@response_decorator
-def thanks(message, user, bot):
-    response = random.choice([
-        "Nie ma sprawy!",
-        "Cała przyjemność po mojej stronie!",
-        "Nie ma za co",
-        "od tego jestem :)"
-    ])
-    bot.fb_send_text_message(str(message.facebook_id), response)
+# @response_decorator
+# def curse(message, user, bot):
+#     response = random.choice([
+#         "proszę, nie używaj takich słów",
+#         "spokojnie",
+#         "czy masz zamiar mnie obrazić?",
+#         "przykro mi"
+#     ])
+#     bot.fb_send_text_message(str(message.facebook_id), response)
+#
+#
+# # TODO!
+# @response_decorator
+# def thanks(message, user, bot):
+#     response = random.choice([
+#         "Nie ma sprawy!",
+#         "Cała przyjemność po mojej stronie!",
+#         "Nie ma za co",
+#         "od tego jestem :)"
+#     ])
+#     bot.fb_send_text_message(str(message.facebook_id), response)
 
 
 @response_decorator

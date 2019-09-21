@@ -36,6 +36,7 @@ def recognize_location(location="", lat=0, long=0, city=""):
         # TODO co jeśli szukane nie jest pierwsze na liście?
         # for n in loc:
         #     print(n["display_name"])
+        # TODO co jesli loc jest pusty?
         loc = loc[0]
 
     loca = {

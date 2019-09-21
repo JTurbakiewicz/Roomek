@@ -39,13 +39,13 @@ def ask_for_information(message, user, bot):
         response.ask_more_locations(message, user, bot)
 
     elif user.housing_type is None:
-        response.ask_for_housing_type(message, user, bot)
+        response.ask_for(message, user, bot, "housing_type")
 
     elif user.price_limit is None:
-        response.ask_for_price_limit(message, user, bot)
+        response.ask_for(message, user, bot, "price_limit")
 
     elif not user.features and user.wants_more_features:
-        response.ask_for_features(message, user, bot)
+        response.ask_for(message, user, bot, "features")
 
     elif user.wants_more_features:
         response.ask_for_more_features(message, user, bot)

@@ -21,12 +21,13 @@ def collect_information(message, user, bot):
             if message.NLP_intent == "greeting":
                 pass
             elif message.NLP_intent == "offering":
-                user.set_business_type("offering")
+                user.set_param("business_type", "offering")
+            # TODO
             # elif message.NLP_intent == "looking for":
-            #     user.set_business_type("looking for")
+            #     user.set_param("business_type", "looking for")
             elif message.NLP_intent == "restart":
-                user.set_asked_for_restart(True)
-                user.set_confirmed_data(False)
+                user.set_param("asked_for_restart", True)
+                user.set_param("confirmed_data", False)
             else:
                 logging.warning(f"Didn't catch what user said! Intent: {message.NLP_intent}")
 
@@ -34,7 +35,7 @@ def collect_information(message, user, bot):
             for entity in message.NLP_entities:
                 if entity['entity'] == "housing_type":
                     if user.housing_type is None:
-                        user.set_housing_type(entity['value'])
+                        user.set_param("housing_type", entity['value'])
                     # TODO add translation and replacement values
                     # else:
                     #     new = translate(entity[1], "Q")
@@ -47,18 +48,19 @@ def collect_information(message, user, bot):
                     user.add_location(location=entity['value'])
 
                 if entity['entity'] == "datetime":
-                    user.add_since(entity['value'])
+                    # TODO user.add_since(entity['value'])
+                    pass
 
                 if entity['entity'] == "amount_of_money" or entity['entity'] == "number" and user.context == "ask_for_price_limit":
-                    user.set_price_limit(entity['value'])
+                    user.set_param("price_limit", entity['value'])
                 elif entity['entity'] == "number" and user.context == "show_offers":
                     logging.warning(f"User liked the {entity['value']} offer but we don't use that info yet!")
 
                 if entity['entity'] == "person_type":
-                    user.set_person_type(entity['value'])
+                    user.set_param("person_type", entity['value'])
 
                 if entity['entity'] == "business_type":
-                    user.set_business_type(entity['value'])
+                    user.set_param("business_type", entity['value'])
 
                 if entity['entity'] == "feature":
                     user.add_feature(entity['value'])
@@ -67,19 +69,19 @@ def collect_information(message, user, bot):
                 if entity['entity'] == "boolean":
                     if user.context == "show_input_data":
                         if entity['value'] == "yes":
-                            user.set_confirmed_data(True)
+                            user.set_param("confirmed_data", True)
                         else:
-                            user.set_confirmed_data(False)
+                            user.set_param("confirmed_data", False)
                     elif user.context == "ask_more_locations":
                         if entity['value'] == "yes":
-                            user.set_wants_more_locations(True)
+                            user.set_param("wants_more_locations", True)
                         else:
-                            user.set_wants_more_locations(False)
+                            user.set_param("wants_more_locations", False)
                     elif user.context == "ask_for_features" or user.context == "ask_for_more_features":
                         if entity['value'] == "yes":
-                            user.set_wants_more_features(True)
+                            user.set_param("wants_more_features", True)
                         else:
-                            user.set_wants_more_features(False)
+                            user.set_param("wants_more_features", False)
                     elif user.context == "ask_if_restart":
                         if entity['value'] == "yes":
                             user.restart(True)
@@ -89,7 +91,7 @@ def collect_information(message, user, bot):
         if not message.NLP_intent and not message.NLP_entities:   # ma nlp, ale intent=none i brak mu entities, więc freetext do wyłapania
             if user.city is None:
                 try:
-                    user.set_city(recognize_location(message.text).city)
+                    user.set_param("city", recognize_location(message.text).city)
                 except:
                     pass
 
@@ -103,10 +105,10 @@ def collect_information(message, user, bot):
                     pass
 
             elif user.housing_type is None:
-                user.set_housing_type(message.text)
+                user.set_param("housing_type", message.text)
 
             elif user.price_limit is None:
-                user.set_price_limit(message.text)
+                user.set_param("price_limit", message.text)
 
             elif user.wants_more_features:
 
