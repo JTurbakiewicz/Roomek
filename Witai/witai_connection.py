@@ -6,15 +6,14 @@ import logging
 
 WIT_API_HOST = os.getenv('WIT_URL', 'https://api.wit.ai')
 WIT_API_VERSION = os.getenv('WIT_API_VERSION', '20160516')
-access_token = 'MCHBF5WE3RCWWW2BEZCXRGVPXFKY43EE'  # TESTING APP TOKEN -> TO CHANGE
+access_token = 'JHKPL6ZICCXWLLNDUW7FJM5BSMMI7SPM'  # TESTING APP TOKEN -> TO CHANGE
 headers = {
     'Authorization': 'Bearer ' + access_token,
     'Accept': 'application/vnd.wit.' + WIT_API_VERSION + '+json',
     'Content-Type': 'application/json',
 }
 
-
-# logging.basicConfig(level='DEBUG')
+logging.basicConfig(level='DEBUG')
 
 def response_status(rsp):
     if rsp.status_code == 409:
