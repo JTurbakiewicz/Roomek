@@ -11,7 +11,7 @@ from Bot.geolocate import recognize_location
 from OfferParser.translator import translate
 from Databases import mysql_connection as db
 from Bot.facebook_webhooks import get_user_info
-
+from schemas import user_scheme
 
 class User:
     """ All user info that we also store in db """
@@ -34,7 +34,7 @@ class User:
         self.person_type = None
         self.price_limit = None
         self.since = None
-        self.features = None  # "dla studenta", "nieprzechodni", "niepalacy"
+        self.features = None
         # address:
         self.country = None
         self.city = None
@@ -42,7 +42,7 @@ class User:
         self.latitude = 0
         self.longitude = 0
         # dialogue parameters:
-        self.context = "initialization"  # initialiation, greeting, ...
+        self.context = "initialization"
         self.interactions = 0
         self.shown_input = False
         self.wants_more_features = True
