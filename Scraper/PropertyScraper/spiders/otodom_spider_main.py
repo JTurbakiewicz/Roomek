@@ -135,7 +135,7 @@ class OtodomSpiderMain(scrapy.Spider):
             if line == 'meble':
                 OfferItem_loader.add_value('furniture', 'Tak')
             elif line == 'wynajmę również studentom':
-                OfferItem_loader.add_value('rental_for_students', 'Tak')
+                OfferItem_loader.add_value('rental_for_students', True)
             elif line in offer_features:
                 OfferFeaturesItem_loader.add_value(offer_features[line], True)
             else:

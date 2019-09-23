@@ -220,7 +220,6 @@ class OtodomOfferLoader(OlxOfferLoader):
     fit_out_in = MapCompose(translate)
     ready_from_in = MapCompose(ready_from_otodom)
     type_of_ownership_in = MapCompose(translate)
-    rental_for_students_in = MapCompose(translate)
     location_latitude_in = MapCompose(location_latitude_otodom)
     location_longitude_in = MapCompose(location_longitude_otodom)
 
