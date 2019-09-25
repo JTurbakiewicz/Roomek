@@ -14,9 +14,9 @@ BOT_NAME = 'PropertyScraper'
 SPIDER_MODULES = ['PropertyScraper.spiders']
 NEWSPIDER_MODULE = 'PropertyScraper.spiders'
 
-LOG_ENABLED = False
+LOG_LEVEL = 40
 
-LOG_LEVEL = 'ERROR'
+CUSTOM_LOGGING = True
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'PropertyScraper (+http://www.yourdomain.com)'
@@ -70,7 +70,7 @@ REDIRECT_ENABLED = False
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'PropertyScraper.pipelines.MySQL_Offer_RatePipeline': 299,
-    'PropertyScraper.pipelines.Parse_OfferName_Pipeline': 300,
+    'PropertyScraper.pipelines.Parse_Offer_Pipeline': 300,
     'PropertyScraper.pipelines.MySQL_Offer_SQLPipeline': 301,
 }
 

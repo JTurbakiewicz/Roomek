@@ -1,5 +1,5 @@
 from scrapy.loader import ItemLoader
-from scrapy.loader.processors import MapCompose, Join
+from scrapy.loader.processors import MapCompose
 import re
 import datetime
 import sys

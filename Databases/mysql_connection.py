@@ -6,8 +6,7 @@ import tokens
 import sys
 from Bot.user import User
 from Bot.message import Message
-from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, offer_features_scheme, \
-    conversations_scheme, ratings_scheme
+from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, conversations_scheme, ratings_scheme
 
 # logging.basicConfig(level='DEBUG')
 """Funtion definition"""
@@ -89,18 +88,6 @@ def create_offer(item):
                 add_query = ("INSERT INTO offers "
                              "(%s) "
                              "VALUES (%s)" % (fields_to_insert_into_offers, s_to_insert_into_offers))
-                values = []
-                for val in item.values():
-                    values.append(val[0])
-                cursor.execute(add_query, values)
-
-            elif type(item).__name__ == 'OfferFeaturesItem':
-                fields_to_insert_into_offer_features = str(list(item.keys()))
-                fields_to_insert_into_offer_features = re.sub("""[[']|]""", '', fields_to_insert_into_offer_features)
-                s_to_insert_into_offer_features = ('%s,' * len(item.keys()))[:-1]
-                add_query = ("INSERT INTO offer_features "
-                             "(%s) "
-                             "VALUES (%s)" % (fields_to_insert_into_offer_features, s_to_insert_into_offer_features))
                 values = []
                 for val in item.values():
                     values.append(val[0])
@@ -482,8 +469,6 @@ DB_NAME = 'RoomekBot$offers'
 db_tables = {'offers': create_table_scheme(table_name='offers', table_scheme=offer_scheme, primary_key='offer_url'),
              'utility': create_table_scheme(table_name='utility', table_scheme=db_utility_scheme,
                                             primary_key='offer_url'),
-             'offer_features': create_table_scheme(table_name='offer_features', table_scheme=offer_features_scheme,
-                                                   primary_key='offer_url'),
              'users': create_table_scheme(table_name='users', table_scheme=user_scheme),
              'conversations': create_table_scheme(table_name='conversations', table_scheme=conversations_scheme,
                                                   primary_key='conversation_no'),

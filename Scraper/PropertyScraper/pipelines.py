@@ -1,12 +1,12 @@
 from RatingEngine.scraped_ranker import initial_rating
 import Databases.mysql_connection as db
-from OfferParser.regex_parser import parse_name
+from OfferParser.regex_parser import parse_offer
 
 
-class Parse_OfferName_Pipeline(object):
+class Parse_Offer_Pipeline(object):
     def process_item(self, item, spider):
         try:
-            item = parse_name(item)
+            item = parse_offer(item)
         except KeyError:
             pass
         return item

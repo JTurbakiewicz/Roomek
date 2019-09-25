@@ -1,7 +1,7 @@
 import scrapy
 import re
 from Scraper.PropertyScraper.itemloaders import OtodomOfferLoader
-from Scraper.PropertyScraper.items import OfferItem, OfferFeaturesItem
+from Scraper.PropertyScraper.items import OfferItem
 from Scraper.PropertyScraper.util import offer_features
 from scrapy.linkextractors import LinkExtractor
 import Databases.mysql_connection as db
@@ -82,8 +82,6 @@ class OtodomSpiderMain(scrapy.Spider):
 
     def parse_otodom_offer(self, response):
         OfferItem_loader = OtodomOfferLoader(item=OfferItem(), response=response)
-        OfferFeaturesItem_loader = OtodomOfferLoader(item=OfferFeaturesItem(), response=response)
-        OfferFeaturesItem_loader.add_value('offer_url', response)
         OfferItem_loader.add_value('city', response.meta['city'])
         OfferItem_loader.add_value('housing_type', response.meta['housing_type'])
         OfferItem_loader.add_value('business_type', response.meta['business_type'])
@@ -136,10 +134,8 @@ class OtodomSpiderMain(scrapy.Spider):
                 OfferItem_loader.add_value('furniture', 'Tak')
             elif line == 'wynajmę również studentom':
                 OfferItem_loader.add_value('rental_for_students', True)
-            elif line in offer_features:
-                OfferFeaturesItem_loader.add_value(offer_features[line], True)
+
             else:
                 print('DODAC ' + line)
 
         yield OfferItem_loader.load_item()
-        yield OfferFeaturesItem_loader.load_item()
