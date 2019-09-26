@@ -37,6 +37,9 @@ def find_dict_key_regex(text):
                     print(regex)
                 if pattern.search(text) is not None:
                     parsing_result = ParsingResult(field_name=field_name, field_value=field_value)
+                    if field_name == 'area' and field_value == 'm2':
+                        parsing_result = ParsingResult(field_name=field_name,
+                                                       field_value=str(pattern.search(text).group(1)))
                     list_of_results.append(parsing_result)
     if len(list_of_results) == 0:
         return None
