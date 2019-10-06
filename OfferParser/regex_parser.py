@@ -2,8 +2,10 @@ import re
 from schemas import regex_scheme as rs
 from collections import namedtuple
 from streets_list import streets_10000 as streets
+import unicodedata
 
 ParsingResult = namedtuple('ParsingResult', ["field_name", "field_value"])
+
 
 
 def parse_offer(item):
@@ -44,27 +46,32 @@ def find_dict_key_regex(text):
                     elif field_name == 'street' and field_value == 'street':
                         parsing_result = ParsingResult(field_name=field_name,
                                                        field_value=str(pattern.search(text).group(2)))
+                        print(parsing_result)
                         street_found = False
                         for street in streets:
-                            street = street.lower()
-                            if parsing_result.field_value.lower().startswith(street):
+
+                            street = unicodedata.normalize('NFKD', street.lower()).replace(u'ł', 'l').encode('ascii',
+                                                                                                             'ignore').decode(
+                                "utf-8")
+                            parsing_result_stem = unicodedata.normalize('NFKD', parsing_result.field_value).replace(
+                                u'ł', 'l').encode('ascii', 'ignore').decode("utf-8")
+                            if parsing_result_stem.lower().startswith(street):
                                 parsing_result = ParsingResult(field_name=field_name,
                                                                field_value=street.capitalize())
                                 street_found = True
                                 break
-                            elif parsing_result.field_value.lower().startswith(street[:-1] + 'ej'):
+                            elif parsing_result_stem.lower().startswith(street[:-1] + 'ej'):
                                 parsing_result = ParsingResult(field_name=field_name,
                                                                field_value=street.capitalize())
                                 street_found = True
                                 break
-                            elif parsing_result.field_value.lower().startswith(street[:-1] + 'iej'):
+                            elif parsing_result_stem.lower().startswith(street[:-1] + 'iej'):
                                 parsing_result = ParsingResult(field_name=field_name,
                                                                field_value=street.capitalize())
                                 street_found = True
                         if not street_found:
                             parsing_result = ParsingResult(field_name=field_name,
                                                            field_value=None)
-                        print(parsing_result)
                     list_of_results.append(parsing_result)
     if len(list_of_results) == 0:
         return None

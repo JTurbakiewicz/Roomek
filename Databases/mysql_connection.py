@@ -6,7 +6,8 @@ import tokens
 import sys
 from Bot.user import User
 from Bot.message import Message
-from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, conversations_scheme, ratings_scheme
+from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, conversations_scheme, ratings_scheme, \
+    query_scheme
 
 # logging.basicConfig(level='DEBUG')
 """Funtion definition"""
@@ -160,6 +161,18 @@ def create_record(table_name, field_name, field_value, offer_url):
             ON DUPLICATE KEY UPDATE {1}=%s
          """.format(table_name, field_name)
         cursor.execute(query, (offer_url, field_value, field_value))
+        cnx.commit()
+
+
+def update_query(query_no, facebook_id, field_name, field_value):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        query = f"""
+            INSERT INTO queries
+            (query_no, facebook_id, {field_name})
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE {field_name}=%s
+         """
+        cursor.execute(query, (query_no, facebook_id, field_value, field_value))
         cnx.commit()
 
 
@@ -472,7 +485,8 @@ db_tables = {'offers': create_table_scheme(table_name='offers', table_scheme=off
              'users': create_table_scheme(table_name='users', table_scheme=user_scheme),
              'conversations': create_table_scheme(table_name='conversations', table_scheme=conversations_scheme,
                                                   primary_key='conversation_no'),
-             'ratings': create_table_scheme(table_name='ratings', table_scheme=ratings_scheme, primary_key='offer_url')}
+             'ratings': create_table_scheme(table_name='ratings', table_scheme=ratings_scheme, primary_key='offer_url'),
+             'queries': create_table_scheme(table_name='queries', table_scheme=query_scheme, primary_key='query_no')}
 
 """SETUP"""
 
