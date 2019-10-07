@@ -256,4 +256,3 @@ for e in json.loads(dzieci_poznania.text)["hierarchy"]["administrative"]:
 # print("\n9) Miejsca równorzędne (siblings):")
 # siblings = requests.get(url="http://api.geonames.org/siblings"+format+"?"+"geonameId="+str(geoId)+"&username="+username)
 # print(siblings.json())
-
