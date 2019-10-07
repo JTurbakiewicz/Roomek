@@ -8,6 +8,7 @@ from Bot.user import User
 from Bot.message import Message
 from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, conversations_scheme, ratings_scheme, \
     query_scheme
+from settings import reset_db_at_start
 
 # logging.basicConfig(level='DEBUG')
 """Funtion definition"""
@@ -473,6 +474,15 @@ def drop_user(facebook_id=None):
             logging.warning("Failed to delete record from table: {}".format(error))
 
 
+def execute_custom(query, *args, **kwargs):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        try:
+            cursor.execute(query)
+            cnx.commit()
+        except mysql.connector.Error as error:
+            logging.warning("Failed to execute custom command: {}".format(error))
+
+
 """DATA"""
 
 DB_NAME = 'RoomekBot$offers'
@@ -486,6 +496,7 @@ db_tables = {'offers': create_table_scheme(table_name='offers', table_scheme=off
              'queries': create_table_scheme(table_name='queries', table_scheme=query_scheme, primary_key='query_no')}
 
 """SETUP"""
-
 db_config = tokens.sql_config
 set_up_db(db_config)
+if reset_db_at_start:
+    execute_custom("DROP TABLE users")

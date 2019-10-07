@@ -13,6 +13,7 @@ from six.moves.configparser import ConfigParser
 from tokens import scraping_python_path
 from Scraper.PropertyScraper.settings import LOG_LEVEL, CUSTOM_LOGGING
 from settings import cities_scope
+import unidecode
 
 
 def closest_scrapy_cfg(path='.', prevpath=None):
@@ -105,6 +106,8 @@ housing_types = ['mieszkania', 'stancje-pokoje']
 business_types = ['sprzedaz', 'wynajem']
 urls_flats_OLX = []
 urls_rooms_OLX = []
+cities_scope = [unidecode.unidecode(x) for x in cities_scope]
+print(cities_scope)
 
 for type in housing_types:
     for city in cities_scope:

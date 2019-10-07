@@ -11,10 +11,8 @@ user_scheme = {
     "business_type": {"init": None, "db": "varchar(100)"},
     "housing_type": {"init": None, "db": "varchar(100)"},
     "person_type": {"init": None, "db": "varchar(100)"},
-    # Artur, co to person_type? Zaloze chwilowo jako string i dodaje
     "price_limit": {"init": None, "db": "int(1)"},
     "since": {"init": None, "db": "datetime default current_timestamp"},
-    # Artur, co to since? -> zakladam, ze nowe i dodaje
     "features": {"init": None, "db": "varchar(1000)"},
     # address:
     "country": {"init": None, "db": "varchar(100)"},
@@ -29,7 +27,7 @@ user_scheme = {
     "wants_more_features": {"init": True, "db": "BOOLEAN"},
     "wants_more_locations": {"init": True, "db": "BOOLEAN"},
     "asked_for_restart": {"init": False, "db": "BOOLEAN"},
-    "wants_restart": {"init": False, "db": "BOOLEAN"},  # Artur, zakłądam, ze nowe -> dodaje
+    "wants_restart": {"init": False, "db": "BOOLEAN"},
     "confirmed_data": {"init": False, "db": "BOOLEAN"},
     "add_more": {"init": False, "db": "BOOLEAN"}
 }

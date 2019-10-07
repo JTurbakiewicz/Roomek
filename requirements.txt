@@ -11,6 +11,7 @@ mysql.connector
 scrapy
 scrapy-fake-useragent
 twisted
+Unidecode
 
 tokens.py in root
 

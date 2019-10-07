@@ -46,7 +46,6 @@ def find_dict_key_regex(text):
                     elif field_name == 'street' and field_value == 'street':
                         parsing_result = ParsingResult(field_name=field_name,
                                                        field_value=str(pattern.search(text).group(2)))
-                        print(parsing_result)
                         street_found = False
                         for street in streets:
 

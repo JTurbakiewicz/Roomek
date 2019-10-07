@@ -6,5 +6,5 @@ fake_typing = False
 MINIMUM_CONFIDENCE = 0.88
 # ---------------------------------------------------------------------------------------------------
 
-cities_scope = ['warszawa', 'krakow', 'lodz', 'wroclaw', 'poznan', 'gdansk', 'szczecin', 'bydgoszcz', 'lublin',
+cities_scope = ['warszawa', 'krakow', 'łódź', 'wroclaw', 'poznan', 'gdansk', 'szczecin', 'bydgoszcz', 'lublin',
                 'bialystok']
