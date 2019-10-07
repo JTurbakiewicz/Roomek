@@ -7,29 +7,17 @@ user_scheme = {
     "last_name": {"init": None, "db": "varchar(100)"},
     "gender": {"init": None, "db": "enum('Female','Male')"},
     "language": {"init": None, "db": "varchar(100)"},
-    # " query parameters:, "db": "string"},
-    "business_type": {"init": None, "db": "varchar(100)"},
-    "housing_type": {"init": None, "db": "varchar(100)"},
-    "person_type": {"init": None, "db": "varchar(100)"},
-    "price_limit": {"init": None, "db": "int(1)"},
-    "since": {"init": None, "db": "datetime default current_timestamp"},
-    "features": {"init": None, "db": "varchar(1000)"},
-    # address:
-    "country": {"init": None, "db": "varchar(100)"},
-    "city": {"init": None, "db": "varchar(100)"},
-    "street": {"init": None, "db": "varchar(100)"},
-    "latitude": {"init": 0, "db": "FLOAT"},
-    "longitude": {"init": 0, "db": "FLOAT"},
+
     # dialogue parameters:
     "context": {"init": 'initialization', "db": "varchar(100)"},
-    "interactions": {"init": 0, "db": "int(1)"},
     "shown_input": {"init": False, "db": "BOOLEAN"},
     "wants_more_features": {"init": True, "db": "BOOLEAN"},
     "wants_more_locations": {"init": True, "db": "BOOLEAN"},
     "asked_for_restart": {"init": False, "db": "BOOLEAN"},
     "wants_restart": {"init": False, "db": "BOOLEAN"},
     "confirmed_data": {"init": False, "db": "BOOLEAN"},
-    "add_more": {"init": False, "db": "BOOLEAN"}
+    "add_more": {"init": False, "db": "BOOLEAN"},
+    "queries_no": {"init": False, "db": "BOOLEAN"}
 }
 
 user_questions = {

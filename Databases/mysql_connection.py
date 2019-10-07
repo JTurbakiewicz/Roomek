@@ -165,7 +165,7 @@ def create_record(table_name, field_name, field_value, offer_url):
         cnx.commit()
 
 
-def update_query(query_no, facebook_id, field_name, field_value):
+def update_query(facebook_id, field_name, field_value, query_no=1):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = f"""
             INSERT INTO queries
@@ -498,6 +498,5 @@ db_tables = {'offers': create_table_scheme(table_name='offers', table_scheme=off
 """SETUP"""
 db_config = tokens.sql_config
 set_up_db(db_config)
-if reset_db_at_start:
-    execute_custom("DROP TABLE users")
-    create_table_scheme(table_name='users', table_scheme=user_scheme)
+execute_custom("DROP TABLE users")
+set_up_db(db_config)
