@@ -54,7 +54,7 @@ class User(UserTemplate):
                 f"Couldn't set the price limit using: '{price_limit}', so it remains at {self.price_limit}.")
 
     # TODO narazie nadpisuje, a powinno dodawać bo przecież może chcieć Mokotów Wolę i Pragę
-    def add_location(self, location="", lat=0, long=0):
+    def add_location(self, location="", lat=0, long=0, city_known = False):
 
         if lat != 0 and long != 0:
             loc = recognize_location(lat=lat, long=long)
@@ -80,17 +80,6 @@ class User(UserTemplate):
         feature = replace_emojis(feature)
 
         db.update_query(facebook_id=self.facebook_id, field_name=feature, field_value=value)
-
-        # if not self.features:
-        #     self.features = ""
-        # if feature not in self.features:
-        #     self.features += "&" + str(feature)
-        #     logging.info(f"[User info] added feature: {feature}. Now features are: {str(self.features)}")
-        #     current = db.get_user(self.facebook_id).features
-        #     appended = str(current) + "&" + str(feature)
-        #     db.update_user(self.facebook_id, field_to_update="features", field_value=appended)
-        # else:
-        #     logging.info(f"[User info] Feature: {feature} was already in the object.")
 
     def restart(self, restart):
         if restart:

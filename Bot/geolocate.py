@@ -118,13 +118,30 @@ def recognize_location(location="", lat=0, long=0, city=""):
 # loc = geolocator.geocode(location, exactly_one=True, timeout=3, country=None, country_bias=None)
 
 
+# TODO to dziala, wersja z Nominatim:
+# https://nominatim.openstreetmap.org/details.php?osmtype=W&place_id=198731171&format=json&hierarchy=1&pretty=1&addressdetails=1&keywords=1&linkedplaces=1&group_hierarchy=1&polygon_geojson=0
+
+place_id = 198731171
+
+dzieci_poznania = requests.get(url=f"https://nominatim.openstreetmap.org/details.php?osmtype=W&place_id={place_id}&format=json&hierarchy=1&pretty=1&addressdetails=1&keywords=1&linkedplaces=1&group_hierarchy=1&polygon_geojson=0")
+for e in json.loads(dzieci_poznania.text)["hierarchy"]["administrative"]:
+    pprint(e)
+    # if e["admin_level"] == 9:
+    #     place_id = e["place_id"]
+    #     dzielnica = requests.get(url=f"https://nominatim.openstreetmap.org/details.php?osmtype=W&place_id={place_id}&format=json&hierarchy=1&pretty=1&addressdetails=1&keywords=1&linkedplaces=1&group_hierarchy=1&polygon_geojson=0")
+    #     print(str(json.loads(dzielnica.text)["importance"]) + str(json.loads(dzielnica.text)["localname"]))
+    #
+
+
+
+
 # TODO get subregions (dzielnice żeby zasugerować) http://www.geonames.org/export/place-hierarchy.html#children
-def child_locations(location=""):
-    loc = recognize_location(location=location)
-    geoId = loc['place_id']
-    user = "ar3i"
-    req = requests.get(url="http://api.geonames.org/children?format=JSON&username="+user+"&geonameId="+str(geoId))
-    return req  #json.loads(req.text)
+# def child_locations(location=""):
+#     loc = recognize_location(location=location)
+#     geoId = loc['place_id']
+#     user = "ar3i"
+#     req = requests.get(url="http://api.geonames.org/children?format=JSON&username="+user+"&geonameId="+str(geoId))
+#     return req  #json.loads(req.text)
 
 # dzielnice Warszawy
 # print(child_locations(location="Warszawa"))
