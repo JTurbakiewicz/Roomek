@@ -4,6 +4,7 @@
 
 # from Bot.bot_responses_PL import *
 import logging
+from Databases import mysql_connection as db
 from settings import MINIMUM_CONFIDENCE
 import Bot.reactions_PL as response
 from OfferParser.translator import translate
@@ -33,22 +34,10 @@ def collect_information(message, user, bot):
         if message.NLP_entities:
             for entity in message.NLP_entities:
                 if entity['entity'] == "housing_type":
-                    if user.housing_type is None:
-                        user.set_param("housing_type", entity['value'])
-                    # TODO add translation and replacement values
-                    # else:
-                    #     new = translate(entity[1], "Q")
-                    #     if user.housing_type != new:
-                    #         response.ask_if_new_housing_type(message, user, bot, new)
-                    #     else:
-                    #         logging.info("Housing_type already has this value.")
+                    db.update_query(facebook_id=user.facebook_id, field_name="housing_type", field_value=entity['value'])
 
                 if entity['entity'] == "location":
                     user.add_location(location=entity['value'])
-
-                if entity['entity'] == "datetime":
-                    # TODO user.add_since(entity['value'])
-                    pass
 
                 if entity['entity'] == "amount_of_money" or entity['entity'] == "number" and user.context != "show_offers":
                     user.set_param("price_limit", entity['value'])

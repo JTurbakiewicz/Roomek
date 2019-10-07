@@ -30,7 +30,7 @@ def respond(message, user, bot):
 
 def ask_for_information(message, user, bot):
 
-    if user.city is None:
+    if db.user_query(user.facebook_id, "city") is None:
         response.ask_for(message, user, bot, param="city")
 
     # TODO not the best approach
@@ -40,13 +40,13 @@ def ask_for_information(message, user, bot):
     elif user.wants_more_locations:
         response.ask_more_locations(message, user, bot)
 
-    elif user.housing_type is None:
+    elif db.user_query(user.facebook_id, "housing_type") is None:
         response.ask_for(message, user, bot, param="housing_type")
 
-    elif user.price_limit is None:
+    elif db.user_query(user.facebook_id, "price_limit") is None:
         response.ask_for(message, user, bot, param="price_limit")
 
-    elif not user.features and user.wants_more_features:
+    elif not db.user_query(user.facebook_id, "features") and user.wants_more_features:
         response.ask_for(message, user, bot, param="features")
 
     elif user.wants_more_features:

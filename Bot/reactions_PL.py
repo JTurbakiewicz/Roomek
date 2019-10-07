@@ -105,11 +105,31 @@ def ask_more_locations(message, user, bot):
 def show_input_data(message, user, bot):
     user.shown_input = True
     housing_type = translate(user.housing_type, "D")
-    response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {user.city} w okolicy {user.street} ({user.latitude},{user.longitude})"
+    if user.street:
+        location = user.street
+    elif user.distrcit:
+        location = user.district
+    else:
+        location = f"miejsca o współrzędnych: {user.latitude}, {user.longitude}"
+
+    response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {user.city} w okolicy {location}"
     bot.fb_send_text_message(str(message.facebook_id), response1)
-    response2 = f"które ma {str(user.features)} i kosztuje do {user.price_limit}zł."
-    bot.fb_send_text_message(str(message.facebook_id), response2)
+
+    if db.get_all_queries(user.facebook_id):
+        response2 = "które ma "
+        for feature in db.get_all_queries(user.facebook_id):
+            if feature[1] == 1:
+                response2 += ", ma " + str(feature[0])
+            if feature[1] == 0:
+                response2 += ", nie ma " + str(feature[0])
+            else:
+                response2 += ", którego " + str(feature[0]) + " to " + str(feature[1])
+        bot.fb_send_text_message(str(message.facebook_id), response2)
+
+    response3 = f"i kosztuje do {user.price_limit}zł."
+    bot.fb_send_text_message(str(message.facebook_id), response3)
     # TODO add more params
+
     bot.fb_send_quick_replies(message.facebook_id, "Czy wszystko się zgadza?", ['Tak 👍', '👎 Nie'])
 
 
