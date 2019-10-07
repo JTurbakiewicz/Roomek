@@ -448,6 +448,7 @@ def update_user(facebook_id, field_to_update, field_value, if_null_required=Fals
             query = query + 'AND ' + field_to_update + ' IS NULL'
         cursor.execute(query, (field_value, facebook_id))
         cnx.commit()
+        logging.info(f"[User info] {field_to_update} set to {field_value}")
 
 
 def user_exists(facebook_id):

@@ -40,6 +40,9 @@ class User(UserTemplate):
     def set_param(self, name, value):
         if name == "price_limit":
             self.set_price_limit(value)
+        elif name in user_scheme.keys():
+            setattr(self, name, value)
+            db.update_user(self.facebook_id, field_to_update=name, field_value=value)
         else:
             db.update_query(facebook_id=self.facebook_id, field_name=name, field_value=value)
 
