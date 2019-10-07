@@ -18,7 +18,7 @@ def response_decorator(original_function):
 
         # Do something BEFORE the original function:
         if fake_typing:
-            delay = len(str(message.text))/50       # +0.2 set amount of delay
+            delay = len(str(message.text)) / 50  # +0.2 set amount of delay
             bot.fb_fake_typing(message.facebook_id, duration=delay)
         # show_message_object(message, user, bot)
         # TODO naprawić to, bo tak nie działa :(
@@ -26,7 +26,7 @@ def response_decorator(original_function):
         if kwargs:
             for key, value in kwargs.items():
                 if key == "param":
-                    user.set_param("context", "ask_for_"+str(value))
+                    user.set_param("context", "ask_for_" + str(value))
                 else:
                     user.set_param("context", original_function.__name__)
         else:
@@ -71,12 +71,15 @@ def greeting(message, user, bot):
 
 @response_decorator
 def ask_if_new_housing_type(message, user, bot, new_value):
-    bot.fb_send_quick_replies(message.facebook_id, f"Czy chcesz zmienić typ z {user.housing_type} na {new_value}?", ['Tak', 'Nie'])
+    bot.fb_send_quick_replies(message.facebook_id,
+                              f"Czy chcesz zmienić typ z {db.user_query(facebook_id=message.facebook_id)} na {new_value}?",
+                              ['Tak', 'Nie'])
 
 
 @response_decorator
 def ask_if_restart(message, user, bot):
-    question = random.choice(["Czy na pewno chcesz rozpocząć wyszukiwanie na nowo?", "Ok, zacznijmy od nowa. Zadam Ci parę pytań, dobrze?"])
+    question = random.choice(
+        ["Czy na pewno chcesz rozpocząć wyszukiwanie na nowo?", "Ok, zacznijmy od nowa. Zadam Ci parę pytań, dobrze?"])
     bot.fb_send_quick_replies(message.facebook_id, question, ['Tak 👍', '👎 Nie'])
 
 
@@ -90,29 +93,32 @@ def restart(message, user, bot):
 @response_decorator
 def ask_for_more_features(message, user, bot):
     question = random.choice(["Coś oprócz tego?", "Ok, jeszcze coś?", "Zanotowałem, chciałbyś coś dodać?"])
-    bot.fb_send_quick_replies(message.facebook_id, question, ['Nie, wystarczy', 'od zaraz', 'przyjazne dla 🐶🐱', 'blisko do...', 'garaż', '🔨 wyremontowane', 'umeblowane', 'ma 🛀', 'dla 🚬', 'dla 🚭'])
+    bot.fb_send_quick_replies(message.facebook_id, question,
+                              ['Nie, wystarczy', 'od zaraz', 'przyjazne dla 🐶🐱', 'blisko do...', 'garaż',
+                               '🔨 wyremontowane', 'umeblowane', 'ma 🛀', 'dla 🚬', 'dla 🚭'])
     # TODO powinno wiedzieć jakie już padły
 
 
 @response_decorator
 def ask_more_locations(message, user, bot):
-    question = random.choice(["Czy chciałbyś dodać jeszcze jakieś miejsce?","Zanotowałem, coś oprócz tego?"])
-    bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=['Nie', '🎯 blisko centrum', 'Mokotów', 'Wola'], location=True)
+    question = random.choice(["Czy chciałbyś dodać jeszcze jakieś miejsce?", "Zanotowałem, coś oprócz tego?"])
+    bot.fb_send_quick_replies(message.facebook_id, reply_message=question,
+                              replies=['Nie', '🎯 blisko centrum', 'Mokotów', 'Wola'], location=True)
     # TODO tez powinno sugerować dzielnice i wiedzieć co już padło
 
 
 @response_decorator
 def show_input_data(message, user, bot):
     user.shown_input = True
-    housing_type = translate(user.housing_type, "D")
-    if user.street:
-        location = user.street
-    elif user.distrcit:
-        location = user.district
+    housing_type = translate(db.user_query(user.facebook_id, field_name='housing_type'), "D")
+    if db.user_query(user.facebook_id, field_name='street'):
+        location = db.user_query(user.facebook_id, field_name='street')
+    elif db.user_query(user.facebook_id, field_name='district'):
+        location = db.user_query(user.facebook_id, field_name='district')
     else:
-        location = f"miejsca o współrzędnych: {user.latitude}, {user.longitude}"
+        location = f"miejsca o współrzędnych: {db.user_query(user.facebook_id, field_name='latitude')}, {db.user_query(user.facebook_id, field_name='longitude')}"
 
-    response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {user.city} w okolicy {location}"
+    response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {db.user_query(user.facebook_id, field_name='city')} w okolicy {location}"
     bot.fb_send_text_message(str(message.facebook_id), response1)
 
     if db.get_all_queries(user.facebook_id):
@@ -126,7 +132,7 @@ def show_input_data(message, user, bot):
                 response2 += ", którego " + str(feature[0]) + " to " + str(feature[1])
         bot.fb_send_text_message(str(message.facebook_id), response2)
 
-    response3 = f"i kosztuje do {user.price_limit}zł."
+    response3 = f"i kosztuje do {db.user_query(user.facebook_id, field_name='price')}zł."
     bot.fb_send_text_message(str(message.facebook_id), response3)
     # TODO add more params
 
@@ -135,7 +141,8 @@ def show_input_data(message, user, bot):
 
 @response_decorator
 def ask_what_wrong(message, user, bot):
-    bot.fb_send_quick_replies(message.facebook_id, "Coś pomyliłem?", ['nie, jest ok', 'zła okolica', 'złe parametry', 'zła cena'])
+    bot.fb_send_quick_replies(message.facebook_id, "Coś pomyliłem?",
+                              ['nie, jest ok', 'zła okolica', 'złe parametry', 'zła cena'])
 
 
 @response_decorator
@@ -143,12 +150,16 @@ def show_offers(message, user, bot):
     best = best_offer(user_obj=user, count=3)
 
     if len(best) != 0:
-        bot.fb_send_text_message(message.facebook_id, ["Zobacz co dla Ciebie znalazłem:", "Takich ofert jest dużo, ale wybrałem kilka ciekawych", "Co powiesz o tych:", "Może któraś z tych ofert:"])
+        bot.fb_send_text_message(message.facebook_id, ["Zobacz co dla Ciebie znalazłem:",
+                                                       "Takich ofert jest dużo, ale wybrałem kilka ciekawych",
+                                                       "Co powiesz o tych:", "Może któraś z tych ofert:"])
         bot.fb_send_offers_carousel(message.facebook_id, best)
         sleep(4)
         bot.fb_fake_typing(message.facebook_id, 0.7)
-        response = random.choice(["Czy któraś oferta Ci się podoba?", "Masz jakiegoś faworyta?", "Która z powyższych najbardziej Ci odpowiada?"])
-        bot.fb_send_quick_replies(message.facebook_id, response, ['1', '2', '3', 'pokaż następne oferty', 'zacznijmy od nowa'])
+        response = random.choice(["Czy któraś oferta Ci się podoba?", "Masz jakiegoś faworyta?",
+                                  "Która z powyższych najbardziej Ci odpowiada?"])
+        bot.fb_send_quick_replies(message.facebook_id, response,
+                                  ['1', '2', '3', 'pokaż następne oferty', 'zacznijmy od nowa'])
     else:
         bot.fb_send_text_message(message.facebook_id, "Niestety nie znalazłem ofert spełniających Twoje kryteria :(")
 
@@ -176,8 +187,8 @@ def url(message, user, bot):
 
 # @response_decorator
 def sticker_response(message, user, bot):
-    sticker_name = 'thumb' #TODO
-    #sticker_name = recognize_sticker(message.stickerID)
+    sticker_name = 'thumb'  # TODO
+    # sticker_name = recognize_sticker(message.stickerID)
     if sticker_name == 'thumb' or sticker_name == 'thumb+' or sticker_name == 'thumb++':
         yes(message, user, bot)
     else:
@@ -195,12 +206,11 @@ def sticker_response(message, user, bot):
             'fox': "what does the fox say?!",
             'kungfurry': "Kung fury! 👊👊👊",
             'sloth': "moooogggęęę woooollllniiiieeeejjj"
-         }.get(sticker_name, ["Fajna naklejka :)", "Czy to jest opowiedź na moje pytanie?"])
+        }.get(sticker_name, ["Fajna naklejka :)", "Czy to jest opowiedź na moje pytanie?"])
         bot.fb_send_text_message(str(message.facebook_id), response)
 
 
 def show_user_object(message, user, bot):
-
     reply = "*MESSAGE*\n"
     reply += "_recipientID =_ " + str(message.facebook_id) + "\n"
     try:
@@ -221,4 +231,3 @@ def show_message_object(message, user, bot):
     for key, val in vars(message).items():
         reply += str(key) + " = " + str(val) + "\n"
     bot.fb_send_text_message(str(message.facebook_id), reply)
-

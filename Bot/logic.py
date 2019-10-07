@@ -78,10 +78,10 @@ def handle_attachment(message, user, bot):
 
 def handle_location(message, user, bot):
     """ React when the user replies with location."""
-    if user.context == "ask_for_location":
-        user.add_location(message.latitude, message.longitude)
-    elif user.context == "ask_for_city":
-        user.add_city(message.latitude, message.longitude)
+    if user.context == "ask_for_city":
+        user.add_location(message.latitude, message.longitude, city_known=False)
+    elif user.context == "ask_for_location":
+        user.add_location(message.latitude, message.longitude, city_known=True)
     respond(message, user, bot)
 
 
