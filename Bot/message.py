@@ -142,11 +142,14 @@ class Message:
                                 print(e)
                                 if float(nlp[e][0]['confidence']) >= MINIMUM_CONFIDENCE:
                                     if e != 'datetime':
-                                        self.NLP_entities.append({
-                                            'entity': nlp[e][0]['_entity'],
-                                            'value': nlp[e][0]['value'],
-                                            'confidence': nlp[e][0]['confidence'],
-                                            'body': nlp[e][0]['_body']})
+                                        try:
+                                            self.NLP_entities.append({
+                                                'entity': nlp[e][0]['_entity'],
+                                                'value': nlp[e][0]['value'],
+                                                'confidence': nlp[e][0]['confidence'],
+                                                'body': nlp[e][0]['_body']})
+                                        except KeyError:
+                                            logging.warning(nlp[e][0])
                                         if '_role' in nlp[e][0]:
                                             self.NLP_entities[-1]['role'] = nlp[e][0]['_role']
                                     else:   # process date and time entities:

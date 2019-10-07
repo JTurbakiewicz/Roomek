@@ -22,9 +22,8 @@ def collect_information(message, user, bot):
                 pass
             elif message.NLP_intent == "offering":
                 user.set_param("business_type", "offering")
-            # TODO
-            # elif message.NLP_intent == "looking for":
-            #     user.set_param("business_type", "looking for")
+            elif message.NLP_intent == "looking for":
+                user.set_param("business_type", "looking for")
             elif message.NLP_intent == "restart":
                 user.set_param("asked_for_restart", True)
                 user.set_param("confirmed_data", False)
