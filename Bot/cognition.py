@@ -50,7 +50,7 @@ def collect_information(message, user, bot):
                     # TODO user.add_since(entity['value'])
                     pass
 
-                if entity['entity'] == "amount_of_money" or entity['entity'] == "number" and user.context == "ask_for_price_limit":
+                if entity['entity'] == "amount_of_money" or entity['entity'] == "number" and user.context != "show_offers":
                     user.set_param("price_limit", entity['value'])
                 elif entity['entity'] == "number" and user.context == "show_offers":
                     logging.warning(f"User liked the {entity['value']} offer but we don't use that info yet!")

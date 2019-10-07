@@ -23,11 +23,14 @@ def response_decorator(original_function):
         # show_message_object(message, user, bot)
         # TODO naprawić to, bo tak nie działa :(
 
-        for key, value in kwargs.items():
-            if key == "param":
-                user.set_param("context", value)
-            else:
-                user.set_param("context", original_function.__name__)
+        if kwargs:
+            for key, value in kwargs.items():
+                if key == "param":
+                    user.set_param("context", "ask_for_"+str(value))
+                else:
+                    user.set_param("context", original_function.__name__)
+        else:
+            user.set_param("context", original_function.__name__)
 
         # The original function:
         original_function(message, user, bot, **kwargs)
@@ -47,10 +50,12 @@ def default_message(message, user, bot):
 @response_decorator
 def ask_for(message, user, bot, param):
     question = random.choice(user_questions[param]['question'])
-    options = user_questions[param]['responses']
-    bot.fb_send_quick_replies(message.facebook_id, question, options)
-
-# TODO ask_for_location miało dawniej location=True żeby dawać lokalizację z mapy oraz powinno sugerować dzielnice
+    responses = user_questions[param]['responses']
+    if "map_location" in responses:
+        responses.remove("map_location")
+        bot.fb_send_quick_replies(message.facebook_id, question, responses, location=True)
+    else:
+        bot.fb_send_quick_replies(message.facebook_id, question, responses, location=False)
 
 
 @response_decorator

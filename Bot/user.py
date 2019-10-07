@@ -33,10 +33,6 @@ class User(UserTemplate):
         if not db.user_exists(self.facebook_id):
             db.push_user(user_obj=self, update=False)
 
-    def increment(self):
-        # TODO fix bug:     self.interactions += 1
-        pass
-
     def set_param(self, name, value):
         if name == "price_limit":
             self.set_price_limit(value)
@@ -71,8 +67,8 @@ class User(UserTemplate):
         else:
             loc = recognize_location(location=str(location))
 
-        db.update_query(facebook_id=self.facebook_id, field_name='latitude', field_value=float(loc['lat'])
-        db.update_query(facebook_id=self.facebook_id, field_name='longitude', field_value=float(loc['lon'])
+        db.update_query(facebook_id=self.facebook_id, field_name='latitude', field_value=float(loc['lat']))
+        db.update_query(facebook_id=self.facebook_id, field_name='longitude', field_value=float(loc['lon']))
         db.update_query(facebook_id=self.facebook_id, field_name='country', field_value=loc['country'])
         db.update_query(facebook_id=self.facebook_id, field_name='city', field_value=loc['city'])
         db.update_query(facebook_id=self.facebook_id, field_name='district', field_value='TODO')

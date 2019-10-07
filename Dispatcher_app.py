@@ -36,13 +36,17 @@ def receive_message():
         token_sent = request.args.get("hub.verify_token")
         return verify_fb_token(request, token_sent)
     else:                                  # if type is not 'GET' it must be 'POST' - we have a message
+        print("dummy1")
         json_message = request.get_json()  # read message as json
         message = Message(json_message)
         if db.user_exists(message.facebook_id):
             user = db.get_user(message.facebook_id)
-        else:
+            handle_message(message, user)  # process the message and respond
+        elif json_message['facebook_id']:
             user = User(message.facebook_id)
-        handle_message(message, user)       # process the message and respond
+            handle_message(message, user)  # process the message and respond
+        else:
+            logging.warning(f"Message without facebook_id: {json_message}")
     return "Message Processed"
 
 # TODO dodać API żeby np. zacząć od nowa po kliknięciu w menu

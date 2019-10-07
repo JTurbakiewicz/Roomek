@@ -500,5 +500,6 @@ db_tables = {'offers': create_table_scheme(table_name='offers', table_scheme=off
 """SETUP"""
 db_config = tokens.sql_config
 set_up_db(db_config)
-execute_custom("DROP TABLE users")
+if reset_db_at_start:
+    execute_custom("DROP TABLE users")
 set_up_db(db_config)

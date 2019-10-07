@@ -26,7 +26,7 @@ user_questions = {
     "housing_type": {"question": ["Jakiego typu lokal Cię interesuje?"],
                      "responses": ['🛌 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący']},
     "location": {"question": ["Gdzie konkretnie chciałbyś mieszkać?"],
-                 "responses": ['🎯 blisko centrum', 'Mokotów', 'Wola']},
+                 "responses": ['map_location', '🎯 blisko centrum', 'Mokotów', 'Wola']},
     "price_limit": {"question": ["Ile jesteś w stanie płacić? (wraz z ew. czynszem i opłatami)"],
                     "responses": ['<800zł', '<1000zł', '<1500zł', '<2000zł', '💸 dowolna kwota']},
     "city": {"question": ["Które miasto Cię interesuje?"],
