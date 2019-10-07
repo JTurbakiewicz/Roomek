@@ -1,5 +1,5 @@
 import scrapy
-from Scraper.PropertyScraper.items import OfferRoomItem, OfferFeaturesItem
+from Scraper.PropertyScraper.items import OfferRoomItem
 from Scraper.PropertyScraper.itemloaders import OlxRoomLoader, OtodomOfferLoader
 from scrapy.linkextractors import LinkExtractor
 import Databases.mysql_connection as db
@@ -68,8 +68,6 @@ class OlxRoomSpider(scrapy.Spider):
 
     def parse_olx_offer(self, response):
         OfferItem_loader = OlxRoomLoader(item=OfferRoomItem(), response=response)
-        OfferFeaturesItem_loader = OtodomOfferLoader(item=OfferFeaturesItem(), response=response)
-        OfferFeaturesItem_loader.add_value('offer_url', response)
         OfferItem_loader.add_value('city', response.meta['city'])
         OfferItem_loader.add_value('housing_type', response.meta['housing_type'])
         OfferItem_loader.add_value('business_type', 'wynajem')
@@ -91,4 +89,3 @@ class OlxRoomSpider(scrapy.Spider):
                                                        f'//*[@id="offerdescription"]/div[3]/table/tr[{column}]/td[{row}]/table/tr/td/strong')
 
         yield OfferItem_loader.load_item()
-        yield OfferFeaturesItem_loader.load_item()

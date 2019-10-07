@@ -1,5 +1,5 @@
 import os
-
+import logging
 if '/home/RoomekBot' in os.path.abspath(''):
     from Scraper.PropertyScraper.spiders import olx_spider_main, olx_room_spider
 else:
@@ -11,6 +11,8 @@ from scrapy.settings import Settings
 import sys
 from six.moves.configparser import ConfigParser
 from tokens import scraping_python_path
+from Scraper.PropertyScraper.settings import LOG_LEVEL, CUSTOM_LOGGING
+from settings import cities_scope
 
 
 def closest_scrapy_cfg(path='.', prevpath=None):
@@ -89,19 +91,23 @@ ENVVAR = 'SCRAPY_SETTINGS_MODULE'
 
 s = get_project_settings()
 
-configure_logging(settings=s, install_root_handler=False)
+if CUSTOM_LOGGING:
+    logging.basicConfig(
+        level=LOG_LEVEL
+    )
+else:
+    configure_logging(settings=s, install_root_handler=False)
+
 runner = CrawlerRunner(s)
 
 base_string = 'https://www.olx.pl/nieruchomosci'
 housing_types = ['mieszkania', 'stancje-pokoje']
 business_types = ['sprzedaz', 'wynajem']
-cities = ['warszawa', 'krakow', 'lodz', 'wroclaw', 'poznan', 'gdansk', 'szczecin', 'bydgoszcz', 'lublin', 'bialystok']
-# cities = ['warszawa']
 urls_flats_OLX = []
 urls_rooms_OLX = []
 
 for type in housing_types:
-    for city in cities:
+    for city in cities_scope:
         if type == 'mieszkania':
             for purpose in business_types:
                 urls_flats_OLX.append('/'.join([base_string, type, purpose, city, '']))
