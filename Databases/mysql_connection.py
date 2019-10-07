@@ -4,8 +4,8 @@ from mysql.connector import errorcode
 import logging
 import tokens
 import sys
-# from Bot.user import User
-# from Bot.message import Message
+from Bot.user import User
+from Bot.message import Message
 from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, conversations_scheme, ratings_scheme, \
     query_scheme
 from settings import reset_db_at_start

@@ -4,9 +4,9 @@
 
 # from Bot.bot_responses_PL import *
 import logging
-from Databases import mysql_connection as db
+# from Databases import mysql_connection as db
 from settings import MINIMUM_CONFIDENCE
-import Bot.reactions_PL as response
+# import Bot.reactions_PL as response
 from OfferParser.translator import translate
 from pprint import pprint
 
@@ -34,7 +34,8 @@ def collect_information(message, user, bot):
         if message.NLP_entities:
             for entity in message.NLP_entities:
                 if entity['entity'] == "housing_type":
-                    db.update_query(facebook_id=user.facebook_id, field_name="housing_type", field_value=entity['value'])
+                    user.set_param("housing_type", entity['value'])
+                    # db.update_query(facebook_id=user.facebook_id, field_name="housing_type", field_value=entity['value'])
 
                 if entity['entity'] == "location":
                     user.add_location(location=entity['value'])
