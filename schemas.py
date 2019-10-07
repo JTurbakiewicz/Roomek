@@ -1,3 +1,4 @@
+from settings import cities_scope
 
 user_scheme = {
     "facebook_id": {"init": None, "db": "char(100) NOT NULL"},
@@ -32,23 +33,35 @@ user_scheme = {
     "add_more": {"init": False, "db": "BOOLEAN"}
 }
 
-
 user_questions = {
-    "how_help": {"question": "Jak mogę Ci dzisiaj pomóc?", "responses": ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', '💰 Sprzedam', '💰 Kupię']},
-    "housing_type": {"question": "Jakiego typu lokal Cię interesuje?", "responses": ['🛌 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący']},
-    "location": {"question": "Gdzie konkretnie chciałbyś mieszkać?", "responses": ['🎯 blisko centrum', 'Mokotów', 'Wola']},
-    "price_limit": {"question": "Ile jesteś w stanie płacić? (wraz z ew. czynszem i opłatami)", "responses": ['<800zł', '<1000zł', '<1500zł', '<2000zł','💸 dowolna kwota']},
-    "city": {"question": "Które miasto Cię interesuje?", "responses": ['Warszawa', 'Kraków', 'Łódź', 'Wrocław', 'Poznań', 'Gdańsk', 'Szczecin', 'Bydgoszcz',
-                           'Białystok']},
-    "features": {"question": ["Czy masz jakieś szczególne preferencje?", "na czymś jeszcze Ci zależy?"], "responses": ['Nie, pokaż oferty', 'od zaraz', 'przyjazne dla 🐶🐱', 'blisko do...', 'ma garaż', '🔨 wyremontowane', 'umeblowane', 'ma 🛀', 'dla 🚬', 'dla 🚭']}
+    "interest": {"question": ["Jak mogę Ci dzisiaj pomóc?"],
+                 "responses": ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', '💰 Sprzedam', '💰 Kupię']},
+    "housing_type": {"question": ["Jakiego typu lokal Cię interesuje?"],
+                     "responses": ['🛌 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący']},
+    "location": {"question": ["Gdzie konkretnie chciałbyś mieszkać?"],
+                 "responses": ['🎯 blisko centrum', 'Mokotów', 'Wola']},
+    "price_limit": {"question": ["Ile jesteś w stanie płacić? (wraz z ew. czynszem i opłatami)"],
+                    "responses": ['<800zł', '<1000zł', '<1500zł', '<2000zł', '💸 dowolna kwota']},
+    "city": {"question": ["Które miasto Cię interesuje?"],
+             "responses": cities_scope},
+    "features": {"question": ["Czy masz jakieś szczególne preferencje?", "Na czymś jeszcze Ci zależy?"],
+                 "responses": ['Nie, pokaż oferty', 'od zaraz', 'przyjazne dla 🐶🐱', 'blisko do...', 'ma garaż',
+                               '🔨 wyremontowane', 'umeblowane', 'ma 🛀', 'dla 🚬', 'dla 🚭']}
 }
 
+bot_phrases = {
+    "greeting": ["{greeting} {first_name}! Jestem Roomek i jestem na bieżąco z rynkiem nieruchomości.",
+                 "{greeting} {first_name}! Nazywam się Roomek i zajmuję się znajdywaniem najlepszych nieruchomości."],
+    "default": ["Przepraszam, nie zrozumiałem",
+                "Wybacz, nie rozumiem",
+                "Nie do końca rozumiem"],
+    "back_to_context": ["O co ja miałem spytać...", "Wracając do pytania"]
+}
 
 db_scheme = {
     "beggining": {"text": "CREATE TABLE `{table_name}` ("},
     "end": {"text": "PRIMARY KEY (`{primary_key}`)) ENGINE=InnoDB"}
 }
-
 
 # misc -> coś pozornie bez kategorii, ale pozwalające jednoznacznie zdeklarować, którego pola dotyczy
 offer_scheme = {

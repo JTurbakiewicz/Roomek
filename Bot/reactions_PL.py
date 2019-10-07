@@ -10,11 +10,11 @@ from settings import *
 from OfferBrowser.best_offer import best_offer
 from OfferParser.translator import translate
 from time import sleep
-from schemas import user_questions
+from schemas import user_questions, bot_phrases
 
 
 def response_decorator(original_function):
-    def wrapper(message, user, bot, *args, **kwargs):
+    def wrapper(message, user, bot, **kwargs):
 
         # Do something BEFORE the original function:
         if fake_typing:
@@ -22,15 +22,15 @@ def response_decorator(original_function):
             bot.fb_fake_typing(message.facebook_id, duration=delay)
         # show_message_object(message, user, bot)
         # TODO naprawić to, bo tak nie działa :(
-        if param in original_function.:
-            user.set_param("context", param)
-        else:
-            user.set_param("context", original_function.__name__)
-        user.increment()
+
+        for key, value in kwargs.items():
+            if key == "param":
+                user.set_param("context", value)
+            else:
+                user.set_param("context", original_function.__name__)
 
         # The original function:
-
-        original_function(message, user, bot, *args, **kwargs)
+        original_function(message, user, bot, **kwargs)
 
         # Do something AFTER the original function:
         # TODO: bot.fb_send_text_message(str(message.facebook_id), response)
@@ -40,25 +40,8 @@ def response_decorator(original_function):
 
 @response_decorator
 def default_message(message, user, bot):
-    response = random.choice([
-        "przepraszam?",
-        "wybacz, nie rozumiem, czy mógłbyś powtórzyć innymi słowami?",
-        "słucham?",
-        "nie do końca rozumiem"])
+    response = random.choice(bot_phrases['default'])
     bot.fb_send_text_message(str(message.facebook_id), response)
-
-
-@response_decorator
-def greeting(message, user, bot):
-    userword = message.text.split(' ', 1)[0].capitalize()
-    if userword == 'Dzie' or userword == 'Dzien' or userword == 'Dzień':
-        userword = "Dzień dobry"
-    response = random.choice([
-        f"{userword} {user.first_name}! Jestem Roomek i jestem na bieżąco z rynkiem nieruchomości.",
-        f"{userword} {user.first_name}! Nazywam się Roomek i zajmuję się znajdywaniem najlepszych nieruchomości."
-        ])
-    bot.fb_send_text_message(str(message.facebook_id), response)
-    ask_how_help(message, user, bot)
 
 
 @response_decorator
@@ -67,14 +50,19 @@ def ask_for(message, user, bot, param):
     options = user_questions[param]['responses']
     bot.fb_send_quick_replies(message.facebook_id, question, options)
 
-# TODO Replace
-# ask_for_housing_type
-# ask_how_help
-# ask_for_city
-# ask_for_features
-# ask_for_location
-# TODO ask_for_location miało dawniej location=True żeby dawać lokalizację z mapy orazpowinno sugerować dzielnice
-# ask_for_price_limit
+# TODO ask_for_location miało dawniej location=True żeby dawać lokalizację z mapy oraz powinno sugerować dzielnice
+
+
+@response_decorator
+def greeting(message, user, bot):
+    user_greeting = message.text.split(' ', 1)[0].capitalize()
+    if user_greeting == 'Dzie' or user_greeting == 'Dzien' or user_greeting == 'Dzień':
+        user_greeting = "Dzień dobry"
+    bot_greeting = random.choice(bot_phrases['greeting'])
+    bot_greeting = bot_greeting.format(greeting=user_greeting, first_name=user.first_name)
+    bot.fb_send_text_message(str(message.facebook_id), bot_greeting)
+    ask_for(message, user, bot, param="interest")
+
 
 @response_decorator
 def ask_if_new_housing_type(message, user, bot, new_value):
@@ -140,35 +128,6 @@ def show_offers(message, user, bot):
         bot.fb_send_text_message(message.facebook_id, "Niestety nie znalazłem ofert spełniających Twoje kryteria :(")
 
 
-# @response_decorator
-# def yes(message, user, bot):
-#     response = random.choice([
-#         "ok",
-#         "super",
-#         "jasne",
-#         "zanotowałem",
-#         "(y)"
-#     ])
-#     bot.fb_send_text_message(message.facebook_id, response)
-#
-#
-# @response_decorator
-# def no(message, user, bot):
-#     response = random.choice([
-#         ":(",
-#         "nieeee",
-#         "dlaczego nie?",
-#         "trudno"
-#     ])
-#     bot.fb_send_text_message(str(message.facebook_id), response)
-#
-#
-# @response_decorator
-# def maybe(message, user, bot):
-#     response = f"'{message.text.capitalize()}'? Potrzebuejesz chwilę, żeby się zastanowić?"
-#     bot.fb_send_text_message(str(message.facebook_id), response)
-
-
 @response_decorator
 def dead_end(message, user, bot):
     response = "Ups, to ślepy zaułek tej konwersacji!"
@@ -179,29 +138,6 @@ def dead_end(message, user, bot):
 def unable_to_answer(message, user, bot):
     response = "Wybacz, na ten moment potrafię jedynie wyszukiwać najlepsze dostępne oferty wynajmu."
     bot.fb_send_text_message(str(message.facebook_id), response)
-
-
-# @response_decorator
-# def curse(message, user, bot):
-#     response = random.choice([
-#         "proszę, nie używaj takich słów",
-#         "spokojnie",
-#         "czy masz zamiar mnie obrazić?",
-#         "przykro mi"
-#     ])
-#     bot.fb_send_text_message(str(message.facebook_id), response)
-#
-#
-# # TODO!
-# @response_decorator
-# def thanks(message, user, bot):
-#     response = random.choice([
-#         "Nie ma sprawy!",
-#         "Cała przyjemność po mojej stronie!",
-#         "Nie ma za co",
-#         "od tego jestem :)"
-#     ])
-#     bot.fb_send_text_message(str(message.facebook_id), response)
 
 
 @response_decorator
