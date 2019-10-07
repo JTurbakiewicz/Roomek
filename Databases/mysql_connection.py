@@ -385,6 +385,17 @@ def get_custom(sql_query):
         return cursor.fetchall()
 
 
+def user_query(facebook_id, field_name, query_no=1):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        query = """SELECT %s
+                 FROM queries
+                 WHERE facebook_id = %s
+                 """ % (field_name, "'" + facebook_id + "'")  # TODO change
+
+        cursor.execute(query)
+        data = cursor.fetchone()
+        return data[field_name]
+
 def get_user(facebook_id):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """SELECT *
@@ -503,3 +514,4 @@ set_up_db(db_config)
 if reset_db_at_start:
     execute_custom("DROP TABLE users")
 set_up_db(db_config)
+
