@@ -5,7 +5,7 @@
 import os
 import random
 import logging
-from Bot.cognition import *
+import Bot.cognition as cog
 from settings import *
 from OfferBrowser.best_offer import best_offer
 from OfferParser.translator import translate
@@ -188,12 +188,11 @@ def url(message, user, bot):
 # @response_decorator
 def sticker_response(message, user, bot):
     sticker_name = 'thumb'  # TODO
-    # sticker_name = recognize_sticker(message.stickerID)
+    # sticker_name = cog.recognize_sticker(message.stickerID)
     if sticker_name == 'thumb' or sticker_name == 'thumb+' or sticker_name == 'thumb++':
+        # Fake message NLP:
         message.NLP_entities = [{'entity': "boolean", "value": "yes"}]
-
-        collect_information(message, user, bot)
-        # yes(message, user, bot)
+        cog.collect_information(message, user, bot)
     else:
         response = {
             'cactus': "Czy ten kaktus ma drugie znaczenie? :)",
