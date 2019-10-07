@@ -107,7 +107,6 @@ business_types = ['sprzedaz', 'wynajem']
 urls_flats_OLX = []
 urls_rooms_OLX = []
 cities_scope = [unidecode.unidecode(x) for x in cities_scope]
-print(cities_scope)
 
 for type in housing_types:
     for city in cities_scope:
