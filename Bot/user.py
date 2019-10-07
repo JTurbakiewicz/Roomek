@@ -41,9 +41,7 @@ class User(UserTemplate):
         if name == "price_limit":
             self.set_price_limit(value)
         else:
-            setattr(self, name, value)
-        logging.info(f"[User info] {name} set to {value}")
-        db.update_user(self.facebook_id, field_to_update=name, field_value=value)
+            db.update_query(facebook_id=self.facebook_id, field_name=name, field_value=value)
 
     def set_price_limit(self, price_limit):
         try:
@@ -51,9 +49,7 @@ class User(UserTemplate):
             if "-" in str(price_limit) and ":" in str(price_limit):
                 price_limit = price_limit[0:5]
             clean = re.sub("[^0-9]", "", str(price_limit))
-            self.price_limit = int(clean)
-            db.update_user(self.facebook_id, field_to_update="price_limit", field_value=self.price_limit)
-            logging.info(f"[User info] price_limit set to {str(self.price_limit)}")
+            db.update_query(facebook_id=self.facebook_id, field_name='price_limit', field_value=int(clean))
         except:
             logging.warning(
                 f"Couldn't set the price limit using: '{price_limit}', so it remains at {self.price_limit}.")
@@ -72,35 +68,30 @@ class User(UserTemplate):
         else:
             loc = recognize_location(location=str(location))
 
-        self.latitude = float(loc['lat'])
-        self.longitude = float(loc['lon'])
-        self.country = loc['country']
-        self.city = loc['city']
-        self.street = loc['street']
-        # self.state = loc['state']
-        # self.county = loc['county']
+        db.update_query(facebook_id=self.facebook_id, field_name='latitude', field_value=float(loc['lat'])
+        db.update_query(facebook_id=self.facebook_id, field_name='longitude', field_value=float(loc['lon'])
+        db.update_query(facebook_id=self.facebook_id, field_name='country', field_value=loc['country'])
+        db.update_query(facebook_id=self.facebook_id, field_name='city', field_value=loc['city'])
+        db.update_query(facebook_id=self.facebook_id, field_name='district', field_value='TODO')
 
-        db.update_user(self.facebook_id, field_to_update="city", field_value=self.city)
-        db.update_user(self.facebook_id, field_to_update="latitude", field_value=self.latitude)
-        db.update_user(self.facebook_id, field_to_update="longitude", field_value=self.longitude)
-        if self.context != "ask_for_city":
-            db.update_user(self.facebook_id, field_to_update="street", field_value=self.street)
-        db.update_user(self.facebook_id, field_to_update="country", field_value=self.country)
+        if self.context != "ask_for_city":  # TODO
+            db.update_query(facebook_id=self.facebook_id, field_name='street', field_value=loc['street'])
 
-        logging.info(f"User({self.facebook_id[0:5]})'s location changed to: latitude={self.latitude}, longitude={self.longitude}, city={self.city}, street={self.street}, country={self.country}")
-
-    def add_feature(self, feature):
+    def add_feature(self, feature, value=None):
         feature = replace_emojis(feature)
-        if not self.features:
-            self.features = ""
-        if feature not in self.features:
-            self.features += "&" + str(feature)
-            logging.info(f"[User info] added feature: {feature}. Now features are: {str(self.features)}")
-            current = db.get_user(self.facebook_id).features
-            appended = str(current) + "&" + str(feature)
-            db.update_user(self.facebook_id, field_to_update="features", field_value=appended)
-        else:
-            logging.info(f"[User info] Feature: {feature} was already in the object.")
+
+        db.update_query(facebook_id=self.facebook_id, field_name=feature, field_value=value)
+
+        # if not self.features:
+        #     self.features = ""
+        # if feature not in self.features:
+        #     self.features += "&" + str(feature)
+        #     logging.info(f"[User info] added feature: {feature}. Now features are: {str(self.features)}")
+        #     current = db.get_user(self.facebook_id).features
+        #     appended = str(current) + "&" + str(feature)
+        #     db.update_user(self.facebook_id, field_to_update="features", field_value=appended)
+        # else:
+        #     logging.info(f"[User info] Feature: {feature} was already in the object.")
 
     def restart(self, restart):
         if restart:

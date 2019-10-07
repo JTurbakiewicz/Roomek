@@ -175,6 +175,7 @@ def update_query(facebook_id, field_name, field_value, query_no=1):
          """
         cursor.execute(query, (query_no, facebook_id, field_value, field_value))
         cnx.commit()
+        logging.info(f"[Query info] {field_name} set to {field_value}")
 
 
 def create_rating(rating):
