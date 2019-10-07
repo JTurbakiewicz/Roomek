@@ -396,6 +396,18 @@ def user_query(facebook_id, field_name, query_no=1):
         data = cursor.fetchone()
         return data[field_name]
 
+
+def get_all_queries(facebook_id, query_no=1):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        query = """SELECT *
+                 FROM queries
+                 WHERE facebook_id = %s
+                 """ % ("'" + facebook_id + "'")  # TODO change
+        cursor.execute(query)
+        data = cursor.fetchone()
+        return [(x, y) for x, y in data.items() if
+                (x != 'creation_time' and x != 'modification_time' and y is not None and query_scheme[x]['is_feature'])]
+
 def get_user(facebook_id):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """SELECT *
@@ -514,4 +526,3 @@ set_up_db(db_config)
 if reset_db_at_start:
     execute_custom("DROP TABLE users")
 set_up_db(db_config)
-
