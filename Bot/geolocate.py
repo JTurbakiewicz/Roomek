@@ -104,155 +104,20 @@ def recognize_location(location="", lat=0, long=0, city=""):
 
 
 
-# TODO wariant z geopy:
-# DEFAULT_SENTINEL = None
-# geolocator = Nominatim(user_agent="Roomek", format_string=None, view_box=None, bounded=None, country_bias=None, timeout=DEFAULT_SENTINEL, proxies=DEFAULT_SENTINEL, domain='nominatim.openstreetmap.org', scheme=None, ssl_context=DEFAULT_SENTINEL)
-# geolocator = GeoNames(country_bias=None, username='ar3i', timeout=3, proxies=None, user_agent='geopy/1.20.0', format_string=None, ssl_context=None, scheme='http')
-# geolocator = OpenCage(api_key='9426f4964f6c416e924e3486879c1e49', domain='api.opencagedata.com', scheme='https', timeout=1, proxies=None)
-# loc = geolocator.reverse(Point(lat, long), exactly_one=True, timeout=1, language=False, addressdetails=True)
-# recognize the place by name:
-# loc = geolocator.geocode(location, exactly_one=True, timeout=2, limit=None, addressdetails=False, language=False, geometry=None, extratags=False, country_codes=None, viewbox=None, bounded=None)
-
-# Narrow search when city is known:
-# elif city != "":
-# loc = geolocator.geocode(location, exactly_one=True, timeout=3, country=None, country_bias=None)
-
-
 # TODO to dziala, wersja z Nominatim:
 # https://nominatim.openstreetmap.org/details.php?osmtype=W&place_id=198731171&format=json&hierarchy=1&pretty=1&addressdetails=1&keywords=1&linkedplaces=1&group_hierarchy=1&polygon_geojson=0
 
-place_id = 198731171
+def child_locations(city):
+    place_id = recognize_location(location=city)["place_id"]
+    dzieci_poznania = requests.get(url=f"https://nominatim.openstreetmap.org/details.php?osmtype=W&place_id={place_id}&format=json&hierarchy=1&pretty=1&addressdetails=1&keywords=1&linkedplaces=1&group_hierarchy=1&polygon_geojson=0")
+    children=[]
+    for e in json.loads(dzieci_poznania.text)["hierarchy"]["administrative"]:
+        if e["admin_level"] == 9:
+            place_id = e["place_id"]
+            dzielnica = requests.get(url=f"https://nominatim.openstreetmap.org/details.php?osmtype=W&place_id={place_id}&format=json&hierarchy=1&pretty=1&addressdetails=1&keywords=1&linkedplaces=1&group_hierarchy=1&polygon_geojson=0")
+            if json.loads(dzielnica.text)["importance"] > 0.1:
+                children.append(json.loads(dzielnica.text)["localname"])
+    return children
 
-dzieci_poznania = requests.get(url=f"https://nominatim.openstreetmap.org/details.php?osmtype=W&place_id={place_id}&format=json&hierarchy=1&pretty=1&addressdetails=1&keywords=1&linkedplaces=1&group_hierarchy=1&polygon_geojson=0")
-for e in json.loads(dzieci_poznania.text)["hierarchy"]["administrative"]:
-    pprint(e)
-    # if e["admin_level"] == 9:
-    #     place_id = e["place_id"]
-    #     dzielnica = requests.get(url=f"https://nominatim.openstreetmap.org/details.php?osmtype=W&place_id={place_id}&format=json&hierarchy=1&pretty=1&addressdetails=1&keywords=1&linkedplaces=1&group_hierarchy=1&polygon_geojson=0")
-    #     print(str(json.loads(dzielnica.text)["importance"]) + str(json.loads(dzielnica.text)["localname"]))
-    #
-
-
-
-
-# TODO get subregions (dzielnice żeby zasugerować) http://www.geonames.org/export/place-hierarchy.html#children
-# def child_locations(location=""):
-#     loc = recognize_location(location=location)
-#     geoId = loc['place_id']
-#     user = "ar3i"
-#     req = requests.get(url="http://api.geonames.org/children?format=JSON&username="+user+"&geonameId="+str(geoId))
-#     return req  #json.loads(req.text)
-
-# dzielnice Warszawy
-# print(child_locations(location="Warszawa"))
-
-# # https://www.geonames.org/export/place-hierarchy.html
-# username = "ar3i"
-# placeID = "7531926"
-# print("\n4) Miejsca podrzędne na podstawie ID:")
-# geolocate = requests.get(url="http://api.geonames.org/children?format=JSON&username=ar3i&geonameId=7531926")
-#
-# g = json.loads(geolocate.text)
-# print(g)
-
-""" TEST """
-
-# print("\n1) Miejsce na podstawie Lat i Long:")
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']))
-# except KeyError:
-#     print("keyerror")
-#
-# print("\n1) Miejsce na podstawie Lat i Long:")
-# try:
-#     print(" -->  "+str(recognize_location(location="Łódź").raw))
-# except KeyError:
-#     print("keyerror")
-
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']['road']))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']['suburb']))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']['hamlet']))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']['state']))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']['county']))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']['country']))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(location="Mokotów").latitude))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(location="Mokotów").longitude))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(location="Mokotów").address))
-# except KeyError:
-#     print("keyerror")
-
-# print("\n2) Miejsce na podstawie nazwy:")
-# print(" -->  "+str(recognize_location(location="Mokotów")))
-#
-# print("\n3) Miejsce na podstawie nazwy, odmienione:")
-# print(" -->  "+str(recognize_location(location="Warszawie")))
-#
-
-
-# print("\n4) Miejsce na podstawie nazwy 2:")
-# geolocate = requests.get(url = "http://api.geonames.org/search"+format+"?"+"q="+querry+"&fuzzy=0.7&username="+username)
-# for n in geolocate.json()['geonames']:
-#     print(" -->  "+n["name"])
-#
-# print("\n5) Neighbours na podstawie nazwy 3:")
-# geoId = 764484
-# geolocate = requests.get(url = "http://api.geonames.org/neighbours"+format+"?"+"q="+querry+"&geonameId="+str(geoId)+"&username="+username)
-# print(geolocate.json())
-# for n in geolocate.json()['geonames']:
-#     print(" -->  "+n["name"])
-#
-# print("\n6) Neighbours na podstawie nazwy 4:")
-# geolocate = requests.get(url = "http://api.geonames.org/containsJSON"+format+"?"+"q="+querry+"&username="+username)
-# print(geolocate.json())
-#
-# print("\n7) Neighbours na podstawie nazwy 5:")
-# geolocate = requests.get(url = "http://api.geonames.org/siblings"+format+"?"+"q="+querry+"&username="+username)
-# for n in geolocate.json()['geonames']:
-#     print(" -->  "+n["name"])
-#
-# print("\n8) Miejsca pokrewne:")
-# geolocate = requests.get(url = "http://api.geonames.org/search"+format+"?"+"q="+querry+"&username="+username)
-# for n in geolocate.json()['geonames']:
-#     print(" -->  "+n["name"])
-#
-# print("\n9) Miejsca równorzędne (siblings):")
-# siblings = requests.get(url="http://api.geonames.org/siblings"+format+"?"+"geonameId="+str(geoId)+"&username="+username)
-# print(siblings.json())
+# test = child_locations("Kraków")
+# print(test)

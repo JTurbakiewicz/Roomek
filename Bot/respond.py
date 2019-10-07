@@ -35,7 +35,7 @@ def ask_for_information(message, user, bot):
 
     # TODO not the best approach
     elif user.context == "ask_for_city":
-        response.ask_for(message, user, bot, param="location")
+        response.ask_for_location(message, user, bot)
 
     elif user.wants_more_locations:
         response.ask_more_locations(message, user, bot)

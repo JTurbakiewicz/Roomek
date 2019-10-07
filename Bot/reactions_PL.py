@@ -5,12 +5,13 @@
 import os
 import random
 import logging
-import Bot.cognition as cog
+from Bot.cognition import collect_information
 from settings import *
 from OfferBrowser.best_offer import best_offer
 from OfferParser.translator import translate
 from time import sleep
 from schemas import user_questions, bot_phrases
+from Bot.geolocate import child_locations
 
 
 def response_decorator(original_function):
@@ -51,11 +52,7 @@ def default_message(message, user, bot):
 def ask_for(message, user, bot, param):
     question = random.choice(user_questions[param]['question'])
     responses = user_questions[param]['responses']
-    if "map_location" in responses:
-        responses.remove("map_location")
-        bot.fb_send_quick_replies(message.facebook_id, question, responses, location=True)
-    else:
-        bot.fb_send_quick_replies(message.facebook_id, question, responses, location=False)
+    bot.fb_send_quick_replies(message.facebook_id, question, responses)
 
 
 @response_decorator
@@ -67,6 +64,24 @@ def greeting(message, user, bot):
     bot_greeting = bot_greeting.format(greeting=user_greeting, first_name=user.first_name)
     bot.fb_send_text_message(str(message.facebook_id), bot_greeting)
     ask_for(message, user, bot, param="interest")
+
+
+@response_decorator
+def ask_for_location(message, user, bot):
+    question = random.choice(bot_phrases['ask_location'])
+    responses = ['🎯 blisko centrum']
+    # TODO zmienić na miasto użytkownika:
+    child_locations("Warszawa")
+    bot.fb_send_quick_replies(message.facebook_id, question, responses, location=True)
+
+
+@response_decorator
+def ask_more_locations(message, user, bot):
+    question = random.choice(["Czy chciałbyś dodać jeszcze jakieś miejsce?", "Zanotowałem, coś oprócz tego?"])
+    bot.fb_send_quick_replies(message.facebook_id, reply_message=question,
+                              replies=['Nie', '🎯 blisko centrum', 'Mokotów', 'Wola'], location=True)
+    # TODO tez powinno sugerować dzielnice i wiedzieć co już padło
+
 
 
 @response_decorator
@@ -97,14 +112,6 @@ def ask_for_more_features(message, user, bot):
                               ['Nie, wystarczy', 'od zaraz', 'przyjazne dla 🐶🐱', 'blisko do...', 'garaż',
                                '🔨 wyremontowane', 'umeblowane', 'ma 🛀', 'dla 🚬', 'dla 🚭'])
     # TODO powinno wiedzieć jakie już padły
-
-
-@response_decorator
-def ask_more_locations(message, user, bot):
-    question = random.choice(["Czy chciałbyś dodać jeszcze jakieś miejsce?", "Zanotowałem, coś oprócz tego?"])
-    bot.fb_send_quick_replies(message.facebook_id, reply_message=question,
-                              replies=['Nie', '🎯 blisko centrum', 'Mokotów', 'Wola'], location=True)
-    # TODO tez powinno sugerować dzielnice i wiedzieć co już padło
 
 
 @response_decorator
@@ -192,7 +199,7 @@ def sticker_response(message, user, bot):
     if sticker_name == 'thumb' or sticker_name == 'thumb+' or sticker_name == 'thumb++':
         # Fake message NLP:
         message.NLP_entities = [{'entity': "boolean", "value": "yes"}]
-        cog.collect_information(message, user, bot)
+        collect_information(message, user, bot)
     else:
         response = {
             'cactus': "Czy ten kaktus ma drugie znaczenie? :)",

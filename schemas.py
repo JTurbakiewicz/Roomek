@@ -25,8 +25,6 @@ user_questions = {
                  "responses": ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', '💰 Sprzedam', '💰 Kupię']},
     "housing_type": {"question": ["Jakiego typu lokal Cię interesuje?"],
                      "responses": ['🛌 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący']},
-    "location": {"question": ["Gdzie konkretnie chciałbyś mieszkać?"],
-                 "responses": ['map_location', '🎯 blisko centrum', 'Mokotów', 'Wola']},
     "price_limit": {"question": ["Ile jesteś w stanie płacić? (wraz z ew. czynszem i opłatami)"],
                     "responses": ['<800zł', '<1000zł', '<1500zł', '<2000zł', '💸 dowolna kwota']},
     "city": {"question": ["Które miasto Cię interesuje?"],
@@ -42,7 +40,8 @@ bot_phrases = {
     "default": ["Przepraszam, nie zrozumiałem",
                 "Wybacz, nie rozumiem",
                 "Nie do końca rozumiem"],
-    "back_to_context": ["O co ja miałem spytać...", "Wracając do pytania"]
+    "back_to_context": ["O co ja miałem spytać...", "Wracając do pytania"],
+    "ask_location": ["Gdzie konkretnie chciałbyś mieszkać?"]
 }
 
 db_scheme = {
