@@ -190,7 +190,10 @@ def sticker_response(message, user, bot):
     sticker_name = 'thumb'  # TODO
     # sticker_name = recognize_sticker(message.stickerID)
     if sticker_name == 'thumb' or sticker_name == 'thumb+' or sticker_name == 'thumb++':
-        yes(message, user, bot)
+        message.NLP_entities = [{'entity': "boolean", "value": "yes"}]
+
+        collect_information(message, user, bot)
+        # yes(message, user, bot)
     else:
         response = {
             'cactus': "Czy ten kaktus ma drugie znaczenie? :)",
