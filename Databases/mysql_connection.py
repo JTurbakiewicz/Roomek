@@ -4,8 +4,8 @@ from mysql.connector import errorcode
 import logging
 import tokens
 import sys
-from Bot.user import User
-from Bot.message import Message
+# from Bot.user import User
+# from Bot.message import Message
 from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, conversations_scheme, ratings_scheme, \
     query_scheme
 from settings import reset_db_at_start
@@ -408,6 +408,7 @@ def get_all_queries(facebook_id, query_no=1):
         return [(x, y) for x, y in data.items() if
                 (x != 'creation_time' and x != 'modification_time' and y is not None and query_scheme[x]['is_feature'])]
 
+
 def get_user(facebook_id):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """SELECT *
@@ -525,4 +526,5 @@ db_config = tokens.sql_config
 set_up_db(db_config)
 if reset_db_at_start:
     execute_custom("DROP TABLE users")
-set_up_db(db_config)
+    user_table_query = create_table_scheme(table_name='users', table_scheme=user_scheme)
+    execute_custom(query=user_table_query)
