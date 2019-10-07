@@ -500,3 +500,4 @@ db_config = tokens.sql_config
 set_up_db(db_config)
 if reset_db_at_start:
     execute_custom("DROP TABLE users")
+    create_table_scheme(table_name='users', table_scheme=user_scheme)
