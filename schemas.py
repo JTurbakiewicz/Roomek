@@ -1,3 +1,4 @@
+from settings import cities_scope
 import datetime
 
 user_scheme = {
@@ -22,7 +23,7 @@ user_scheme = {
     "latitude": {"init": 0, "db": "FLOAT"},
     "longitude": {"init": 0, "db": "FLOAT"},
     # dialogue parameters:
-    "context": {"init": None, "db": "varchar(100)"},
+    "context": {"init": 'initialization', "db": "varchar(100)"},
     "interactions": {"init": 0, "db": "int(1)"},
     "shown_input": {"init": False, "db": "BOOLEAN"},
     "wants_more_features": {"init": True, "db": "BOOLEAN"},
@@ -31,6 +32,31 @@ user_scheme = {
     "wants_restart": {"init": False, "db": "BOOLEAN"},  # Artur, zakłądam, ze nowe -> dodaje
     "confirmed_data": {"init": False, "db": "BOOLEAN"},
     "add_more": {"init": False, "db": "BOOLEAN"}
+}
+
+user_questions = {
+    "interest": {"question": ["Jak mogę Ci dzisiaj pomóc?"],
+                 "responses": ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', '💰 Sprzedam', '💰 Kupię']},
+    "housing_type": {"question": ["Jakiego typu lokal Cię interesuje?"],
+                     "responses": ['🛌 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący']},
+    "location": {"question": ["Gdzie konkretnie chciałbyś mieszkać?"],
+                 "responses": ['🎯 blisko centrum', 'Mokotów', 'Wola']},
+    "price_limit": {"question": ["Ile jesteś w stanie płacić? (wraz z ew. czynszem i opłatami)"],
+                    "responses": ['<800zł', '<1000zł', '<1500zł', '<2000zł', '💸 dowolna kwota']},
+    "city": {"question": ["Które miasto Cię interesuje?"],
+             "responses": cities_scope},
+    "features": {"question": ["Czy masz jakieś szczególne preferencje?", "Na czymś jeszcze Ci zależy?"],
+                 "responses": ['Nie, pokaż oferty', 'od zaraz', 'przyjazne dla 🐶🐱', 'blisko do...', 'ma garaż',
+                               '🔨 wyremontowane', 'umeblowane', 'ma 🛀', 'dla 🚬', 'dla 🚭']}
+}
+
+bot_phrases = {
+    "greeting": ["{greeting} {first_name}! Jestem Roomek i jestem na bieżąco z rynkiem nieruchomości.",
+                 "{greeting} {first_name}! Nazywam się Roomek i zajmuję się znajdywaniem najlepszych nieruchomości."],
+    "default": ["Przepraszam, nie zrozumiałem",
+                "Wybacz, nie rozumiem",
+                "Nie do końca rozumiem"],
+    "back_to_context": ["O co ja miałem spytać...", "Wracając do pytania"]
 }
 
 db_scheme = {

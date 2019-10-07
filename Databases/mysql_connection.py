@@ -450,10 +450,7 @@ def update_user(facebook_id, field_to_update, field_value, if_null_required=Fals
 
 def user_exists(facebook_id):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-        query = """SELECT *
-                 FROM users
-                 WHERE facebook_id = %s
-                 """ % ("'" + facebook_id + "'")  # TODO change
+        query = f"SELECT * FROM users WHERE facebook_id = '{facebook_id}'"
 
         cursor.execute(query)
         data = cursor.fetchone()
