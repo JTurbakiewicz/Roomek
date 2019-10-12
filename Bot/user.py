@@ -32,6 +32,7 @@ class User(UserTemplate):
 
         if not db.user_exists(self.facebook_id):
             db.push_user(user_obj=self, update=False)
+            db.create_query(facebook_id=facebook_id)
 
     def set_param(self, name, value):
         if name == "price_limit":

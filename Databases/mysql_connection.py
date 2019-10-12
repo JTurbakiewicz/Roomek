@@ -165,6 +165,17 @@ def create_record(table_name, field_name, field_value, offer_url):
         cnx.commit()
 
 
+def create_query(facebook_id, query_no=1):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        query = """
+            INSERT INTO queries
+            (query_no, facebook_id)
+            VALUES (%s, %s)
+         """
+        cursor.execute(query, (query_no, facebook_id))
+        cnx.commit()
+
+
 def update_query(facebook_id, field_name, field_value, query_no=1):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = f"""
@@ -519,7 +530,7 @@ db_tables = {'offers': create_table_scheme(table_name='offers', table_scheme=off
              'conversations': create_table_scheme(table_name='conversations', table_scheme=conversations_scheme,
                                                   primary_key='conversation_no'),
              'ratings': create_table_scheme(table_name='ratings', table_scheme=ratings_scheme, primary_key='offer_url'),
-             'queries': create_table_scheme(table_name='queries', table_scheme=query_scheme, primary_key='query_no')}
+             'queries': create_table_scheme(table_name='queries', table_scheme=query_scheme, primary_key='facebook_id')}
 
 """SETUP"""
 db_config = tokens.sql_config
