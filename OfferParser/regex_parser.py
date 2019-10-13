@@ -43,6 +43,18 @@ def find_dict_key_regex(text):
                     if field_name == 'area' and field_value == 'm2':
                         parsing_result = ParsingResult(field_name=field_name,
                                                        field_value=str(pattern.search(text).group(1)))
+                    elif field_name == 'security_deposit' and field_value == 'zł':
+                        found_value = pattern.search(text).group(2)
+                        if found_value:
+                            try:
+                                parsing_result = ParsingResult(field_name=field_name,
+                                                               field_value=found_value)
+                                print(parsing_result)
+                            except:
+                                pass
+                        else:
+                            parsing_result = ParsingResult(field_name=field_name, field_value=None)
+
                     elif field_name == 'street' and field_value == 'street':
                         parsing_result = ParsingResult(field_name=field_name,
                                                        field_value=str(pattern.search(text).group(2)))
