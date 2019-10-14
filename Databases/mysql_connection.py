@@ -539,3 +539,7 @@ if reset_db_at_start:
     execute_custom("DROP TABLE users")
     user_table_query = create_table_scheme(table_name='users', table_scheme=user_scheme)
     execute_custom(query=user_table_query)
+    execute_custom("DROP TABLE queries")
+    queries_table_query = create_table_scheme(table_name='queries', table_scheme=query_scheme,
+                                              primary_key='facebook_id')
+    execute_custom(query=queries_table_query)
