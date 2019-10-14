@@ -24,6 +24,9 @@ class User(UserTemplate):
         self.facebook_id = facebook_id
 
         info = get_user_info(facebook_id)
+
+        print("TEST: " + str(info))
+
         for n in info.keys():
             try:
                 setattr(self, n, info[n])
@@ -35,6 +38,7 @@ class User(UserTemplate):
             db.create_query(facebook_id=facebook_id)
 
     def set_param(self, name, value):
+        print(f"***************     TEST: user set_param {name}, {value}")
         if name == "price_limit":
             self.set_price_limit(value)
         elif name in user_scheme.keys():
@@ -55,7 +59,7 @@ class User(UserTemplate):
                 f"Couldn't set the price limit using: '{price_limit}', so it remains at {self.price_limit}.")
 
     # TODO narazie nadpisuje, a powinno dodawać bo przecież może chcieć Mokotów Wolę i Pragę
-    def add_location(self, location="", lat=0, long=0, city_known = False):
+    def add_location(self, location="", lat=0, long=0, city_known=False):
 
         if lat != 0 and long != 0:
             loc = recognize_location(lat=lat, long=long)

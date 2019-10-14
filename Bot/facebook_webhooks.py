@@ -358,27 +358,6 @@ class Bot:
         sleep(duration)
         self.fb_send_action(userid, 'typing_off')
 
-    def fb_get_user_info(self, userid, fields=None):
-        """Getting information about the user
-        https://developers.facebook.com/docs/messenger-platform/user-profile
-        Input:
-        userid: recipient id to send to
-        Output:
-        Response from API as <dict>
-        """
-        params = {}
-        if fields is not None and isinstance(fields, (list, tuple)):
-            params['fields'] = ",".join(fields)
-
-            params.update(self.auth_args)
-
-            request_endpoint = f'{self.graph_url}/{userid}'
-            response = requests.get(request_endpoint, params=params)
-            if response.status_code == 200:
-                return response.json()
-            else:
-                return None
-
     def fb_send_audio(self, userid, audio_path, notification_type=NotificationType.regular):
         """Send audio to the specified recipient.
         Audio must be MP3 or WAV
@@ -459,6 +438,27 @@ class Bot:
         result = response.json()
 
         return result
+
+    # def fb_get_user_info(self, userid, fields=None):
+    #     """Getting information about the user
+    #     https://developers.facebook.com/docs/messenger-platform/user-profile
+    #     Input:
+    #     userid: recipient id to send to
+    #     Output:
+    #     Response from API as <dict>
+    #     """
+    #     params = {}
+    #     if fields is not None and isinstance(fields, (list, tuple)):
+    #         params['fields'] = ",".join(fields)
+    #
+    #         params.update(self.auth_args)
+    #
+    #         request_endpoint = f'{self.graph_url}/{userid}'
+    #         response = requests.get(request_endpoint, params=params)
+    #         if response.status_code == 200:
+    #             return response.json()
+    #         else:
+    #             return None
 
 
 def get_user_info(facebook_id):
