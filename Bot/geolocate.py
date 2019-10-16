@@ -31,23 +31,28 @@ def recognize_location(location="", lat=0, long=0, city=""):
 
     loc = json.loads(req.text)
 
+    print(f"***** TEMP ****** {str(loc)}, of type {type(loc)}")
+
     if isinstance(loc, list):
         logging.info(f"loc object: {loc}")
         # TODO co jeśli szukane nie jest pierwsze na liście?
         # for n in loc:
         #     print(n["display_name"])
         # TODO co jesli loc jest pusty?
-        loc = loc[0]
+        try:
+           loc = loc[0]
+        except IndexError:
+            logging.warning(f"Location object is probably empty or single object: {str(loc)}")
 
     loca = {
-        "name": "",
-        "lat": "",
-        "lon": "",
-        "street": "",
-        "city": "",
-        "county": "",
-        "state": "",
-        "country": "",
+        "name": "no_name",
+        "lat": "0.0",
+        "lon": "0.0",
+        "street": "no_street",
+        "city": "no_city",
+        "county": "no_conty",
+        "state": "no_state",
+        "country": "no_country",
         "boundingbox": "",
         "place_id": "",
         "osm_id": ""
@@ -62,23 +67,29 @@ def recognize_location(location="", lat=0, long=0, city=""):
     if "lon" in loc:
         loca["lon"] = loc["lon"]
 
-    if "road" in loc["address"]:
-        loca["street"] = loc["address"]["road"]
+    if "address" in loc:
+        if "road" in loc["address"]:
+            loca["street"] = loc["address"]["road"]
 
-    if "city" in loc["address"]:
-        loca["city"] = loc["address"]["city"]
+    if "address" in loc:
+        if "city" in loc["address"]:
+            loca["city"] = loc["address"]["city"]
 
-    if "county" in loc["address"]:
-        loca["county"] = loc["address"]["county"]
+    if "address" in loc:
+        if "county" in loc["address"]:
+            loca["county"] = loc["address"]["county"]
 
-    if "state" in loc["address"]:
-        loca["state"] = loc["address"]["state"]
+    if "address" in loc:
+        if "state" in loc["address"]:
+            loca["state"] = loc["address"]["state"]
 
-    if "country" in loc["address"]:
-        loca["country"] = loc["address"]["country"]
+    if "address" in loc:
+        if "country" in loc["address"]:
+            loca["country"] = loc["address"]["country"]
 
-    if "boundingbox" in loc["address"]:
-        loca["boundingbox"] = loc["address"]["boundingbox"]
+    if "address" in loc:
+        if "boundingbox" in loc["address"]:
+            loca["boundingbox"] = loc["address"]["boundingbox"]
 
     if "place_id" in loc:
         loca["place_id"] = loc["place_id"]
@@ -101,7 +112,6 @@ def recognize_location(location="", lat=0, long=0, city=""):
 # pprint(recognize_location(location="Warszawie"))
 # pprint(recognize_location(location="Poznaniu"))
 # pprint(recognize_location(location="Krakowie"))
-
 
 
 # TODO to dziala, wersja z Nominatim:

@@ -43,8 +43,8 @@ def ask_for_information(message, user, bot):
     elif db.user_query(user.facebook_id, "housing_type") is None:
         response.ask_for(message, user, bot, param="housing_type")
 
-    elif db.user_query(user.facebook_id, "price_limit") is None:
-        response.ask_for(message, user, bot, param="price_limit")
+    elif db.user_query(user.facebook_id, "price") is None:
+        response.ask_for(message, user, bot, param="price")
 
     elif not db.user_query(user.facebook_id, "features") and user.wants_more_features:
         response.ask_for(message, user, bot, param="features")

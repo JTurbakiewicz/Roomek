@@ -186,7 +186,7 @@ def update_query(facebook_id, field_name, field_value, query_no=1):
          """
         cursor.execute(query, (query_no, facebook_id, field_value, field_value))
         cnx.commit()
-        logging.info(f"[Query info] {field_name} set to {field_value}")
+        logging.info(f"[Query info] Field: '{field_name}' set to '{field_value}'")
 
 
 def create_rating(rating):
@@ -403,6 +403,7 @@ def user_query(facebook_id, field_name, query_no=1):
                  WHERE facebook_id = %s
                  """ % (field_name, "'" + facebook_id + "'")  # TODO change
 
+        logging.debug(f"Query is: {query}")
         cursor.execute(query)
         data = cursor.fetchone()
         return data[field_name]
@@ -432,6 +433,7 @@ def get_user(facebook_id):
 
         if data:
             if len(data) != 0:
+                # TODO Jeśli będzie po każdej wiadomości tworzył obiekt User to zawsze pyta FB o jego imie.
                 created_user = User(data['facebook_id'])
                 for field_name in user_scheme.keys():
                     setattr(created_user, field_name, data[field_name])
@@ -483,7 +485,7 @@ def update_user(facebook_id, field_to_update, field_value, if_null_required=Fals
             query = query + 'AND ' + field_to_update + ' IS NULL'
         cursor.execute(query, (field_value, facebook_id))
         cnx.commit()
-        logging.info(f"[User info] {field_to_update} set to {field_value}")
+        logging.info(f"[User info] Field '{field_to_update}' set to: '{field_value}'")
 
 
 def user_exists(facebook_id):

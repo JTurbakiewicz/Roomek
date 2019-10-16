@@ -41,7 +41,7 @@ def collect_information(message, user, bot):
                     user.add_location(location=entity['value'])
 
                 if entity['entity'] == "amount_of_money" or entity['entity'] == "number" and user.context != "show_offers":
-                    user.set_param("price_limit", entity['value'])
+                    user.set_param("price", entity['value'])
                 elif entity['entity'] == "number" and user.context == "show_offers":
                     logging.warning(f"User liked the {entity['value']} offer but we don't use that info yet!")
 
@@ -96,8 +96,8 @@ def collect_information(message, user, bot):
             elif user.housing_type is None:
                 user.set_param("housing_type", message.text)
 
-            elif user.price_limit is None:
-                user.set_param("price_limit", message.text)
+            elif user.price is None:
+                user.set_param("price", message.text)
 
             elif user.wants_more_features:
 

@@ -25,7 +25,7 @@ class User(UserTemplate):
 
         info = get_user_info(facebook_id)
 
-        print("TEST: " + str(info))
+        print("TEMP TEST USER INFO: " + str(info))
 
         for n in info.keys():
             try:
@@ -38,25 +38,25 @@ class User(UserTemplate):
             db.create_query(facebook_id=facebook_id)
 
     def set_param(self, name, value):
-        print(f"***************     TEST: user set_param {name}, {value}")
-        if name == "price_limit":
-            self.set_price_limit(value)
+
+        if name == "price":
+            self.set_price(value)
         elif name in user_scheme.keys():
             setattr(self, name, value)
             db.update_user(self.facebook_id, field_to_update=name, field_value=value)
         else:
             db.update_query(facebook_id=self.facebook_id, field_name=name, field_value=value)
 
-    def set_price_limit(self, price_limit):
+    def set_price(self, price):
         try:
             # workaround for witai returning date instead of price:
-            if "-" in str(price_limit) and ":" in str(price_limit):
-                price_limit = price_limit[0:5]
-            clean = re.sub("[^0-9]", "", str(price_limit))
-            db.update_query(facebook_id=self.facebook_id, field_name='price_limit', field_value=int(clean))
+            if "-" in str(price) and ":" in str(price):
+                price = price[0:5]
+            clean = re.sub("[^0-9]", "", str(price))
+            db.update_query(facebook_id=self.facebook_id, field_name='price', field_value=int(clean))
         except:
             logging.warning(
-                f"Couldn't set the price limit using: '{price_limit}', so it remains at {self.price_limit}.")
+                f"Couldn't set the price limit using: '{price}', so it remains at {self.price}.")
 
     # TODO narazie nadpisuje, a powinno dodawać bo przecież może chcieć Mokotów Wolę i Pragę
     def add_location(self, location="", lat=0, long=0, city_known=False):
@@ -71,6 +71,8 @@ class User(UserTemplate):
                 loc = recognize_location(location=str(location))
         else:
             loc = recognize_location(location=str(location))
+
+        print(str(loc))
 
         db.update_query(facebook_id=self.facebook_id, field_name='latitude', field_value=float(loc['lat']))
         db.update_query(facebook_id=self.facebook_id, field_name='longitude', field_value=float(loc['lon']))

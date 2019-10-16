@@ -127,7 +127,7 @@ class Message:
                                 for n in self.messaging['message']['nlp']['detected_locales']:
                                     self.NLP_language.append([n['locale'], n['confidence']])
                             except:
-                                logging.warning(str(self.messaging))
+                                logging.debug(f"Didn't find the language in: ' {str(self.messaging)}")
 
                             if 'intent' in entities:
                                 if nlp['intent'][0]['confidence'] >= MINIMUM_CONFIDENCE:
@@ -159,7 +159,7 @@ class Message:
                                             'confidence': nlp[e][0]['confidence'],
                                             'body': nlp[e][0]['_body']})
                                 else:
-                                    logging.warning(f"NLP entity not correct: {e}")
+                                    logging.debug(f"NLP entity: {e} id below confidence limit.")
             else:
                 self.type = "UnknownType"
         else:

@@ -1,7 +1,7 @@
 import logging
 
 # ------------------app-configuration----------------------------------------------------------------
-logging_level = logging.DEBUG   # levels in order: DEBUG, INFO, WARNING, EXCEPTION, ERROR, CRITICAL
+logging_level = logging.INFO    # levels in order: DEBUG, INFO, WARNING, EXCEPTION, ERROR, CRITICAL
 fake_typing = False
 MINIMUM_CONFIDENCE = 0.88
 reset_db_at_start = True
