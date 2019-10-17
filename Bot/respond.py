@@ -46,11 +46,15 @@ def ask_for_information(message, user, bot):
     elif db.user_query(user.facebook_id, "price") is None:
         response.ask_for(message, user, bot, param="price")
 
-    elif not db.user_query(user.facebook_id, "features") and user.wants_more_features:
-        response.ask_for(message, user, bot, param="features")
-
     elif user.wants_more_features:
-        response.ask_for_more_features(message, user, bot)
+        features_in_schema = [field_name for field_name, field_value in query_scheme.items() if
+                              field_value['is_feature']]
+        user_features_queried = [query_tuple[0] for query_tuple in db.get_all_queries(facebook_id='2')]
+        features_recorded = [i for i in user_features_queried if i in features_in_schema]
+        if len(features_recorded) = 0:
+            response.ask_for(message, user, bot, param="features")
+        else:
+            response.ask_for_more_features(message, user, bot)
 
     elif not user.wants_more_features and not user.confirmed_data:
         response.show_input_data(message, user, bot)

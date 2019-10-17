@@ -418,7 +418,7 @@ def get_all_queries(facebook_id, query_no=1):
         cursor.execute(query)
         data = cursor.fetchone()
         return [(x, y) for x, y in data.items() if
-                (x != 'creation_time' and x != 'modification_time' and y is not None and query_scheme[x]['is_feature'])]
+                (x != 'creation_time' and x != 'modification_time' and y is not None and query_scheme[x]['to_compare'])]
 
 
 def get_user(facebook_id):
