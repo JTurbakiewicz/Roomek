@@ -12,6 +12,7 @@ from OfferParser.translator import translate
 from time import sleep
 from schemas import user_questions, bot_phrases
 from Bot.geolocate import child_locations
+from Databases import mysql_connection as db
 
 
 def response_decorator(original_function):
@@ -69,19 +70,18 @@ def greeting(message, user, bot):
 @response_decorator
 def ask_for_location(message, user, bot):
     question = random.choice(bot_phrases['ask_location'])
-    responses = ['🎯 blisko centrum']
-    # TODO zmienić na miasto użytkownika:
-    child_locations("Warszawa")
-    bot.fb_send_quick_replies(message.facebook_id, question, responses, location=True)
+    city = db.user_query(user.facebook_id, "city")
+    replies = ['🎯 centrum'] + child_locations(city)[0:10]
+    bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies, location=True)
 
 
 @response_decorator
 def ask_more_locations(message, user, bot):
     question = random.choice(["Czy chciałbyś dodać jeszcze jakieś miejsce?", "Zanotowałem, coś oprócz tego?"])
-    bot.fb_send_quick_replies(message.facebook_id, reply_message=question,
-                              replies=['Nie', '🎯 blisko centrum', 'Mokotów', 'Wola'], location=True)
-    # TODO tez powinno sugerować dzielnice i wiedzieć co już padło
-
+    city = db.user_query(user.facebook_id, "city")
+    replies = ['Nie', '🎯 centrum'] + child_locations(city)[0:9]
+    bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies, location=True)
+    # TODO powinno wiedzieć co już padło
 
 
 @response_decorator
