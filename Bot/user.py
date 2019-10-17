@@ -23,17 +23,14 @@ class User(UserTemplate):
 
         self.facebook_id = facebook_id
 
-        info = get_user_info(facebook_id)
-
-        print("TEMP TEST USER INFO: " + str(info))
-
-        for n in info.keys():
-            try:
-                setattr(self, n, info[n])
-            except KeyError:
-                logging.warning(f"User {facebook_id} has no parameter {n}.")
-
         if not db.user_exists(self.facebook_id):
+            info = get_user_info(facebook_id)
+            logging.debug("User data gathered from facebook: " + str(info))
+            for n in info.keys():
+                try:
+                    setattr(self, n, info[n])
+                except KeyError:
+                    logging.warning(f"User {facebook_id} has no parameter {n}.")
             db.push_user(user_obj=self, update=False)
             db.create_query(facebook_id=facebook_id)
 
