@@ -4,7 +4,7 @@
 
 import os
 import logging
-from datetime import date
+import datetime
 import re
 from Bot.cognition import recognize_sticker, replace_emojis
 from Bot.geolocate import recognize_location
@@ -82,7 +82,8 @@ class User(UserTemplate):
 
     def add_feature(self, feature, value=None):
         feature = replace_emojis(feature)
-
+        if value == 'asap':
+            value = datetime.datetime.today()
         db.update_query(facebook_id=self.facebook_id, field_name=feature, field_value=value)
 
     def restart(self, restart):
