@@ -2,8 +2,8 @@ from Databases import mysql_connection as db
 from schemas import query_scheme
 from datetime import timedelta
 
-def best_offer(user_obj=None, count=1, return_amount=False):
 
+def best_offer(user_obj=None, count=1):
     try:
         queries = db.get_all_queries(facebook_id=user_obj.facebook_id)
     except AttributeError:
@@ -27,11 +27,8 @@ def best_offer(user_obj=None, count=1, return_amount=False):
             print('TODO')
             print(query_scheme[field[0]]['db'])
 
-
     print(query)
 
     offers = db.get_custom(query)
-    if return_amount is False:
-        return offers[0:count]
-    elif return_amount is True:
-        return len(offers)
+
+    return {'offers': offers[0:count], 'offers_count': len(offers)}
