@@ -22,6 +22,13 @@ user_scheme = {
     "queries_no": {"init": False, "db": "BOOLEAN"}
 }
 
+districts_scheme = {
+    "id": {"init": None, "db": "char(100) NOT NULL"},
+    "city": {"init": None, "db": "char(100) NOT NULL"},
+    "district": {"init": None, "db": "char(100) NOT NULL"},
+    "searches": {"init": 0, "db": "int(1)"}
+}
+
 # "responses": ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', '💰 Sprzedam', '💰 Kupię']},
 user_questions = {
     "interest": {"question": ["Jak mogę Ci dzisiaj pomóc?", "W czym mogę służyć?"],

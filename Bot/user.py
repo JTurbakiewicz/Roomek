@@ -73,10 +73,8 @@ class User(UserTemplate):
         db.update_query(facebook_id=self.facebook_id, field_name='longitude', field_value=float(loc['lon']))
         db.update_query(facebook_id=self.facebook_id, field_name='country', field_value=loc['country'])
         db.update_query(facebook_id=self.facebook_id, field_name='city', field_value=loc['city'])
-        db.update_query(facebook_id=self.facebook_id, field_name='district', field_value='TODO')
-
-        if self.context != "ask_for_city":  # TODO
-            db.update_query(facebook_id=self.facebook_id, field_name='street', field_value=loc['street'])
+        db.update_query(facebook_id=self.facebook_id, field_name='district', field_value=loc['district'])
+        db.update_query(facebook_id=self.facebook_id, field_name='street', field_value=loc['street'])
 
     def add_feature(self, feature, value=None):
         feature = replace_emojis(feature)

@@ -6,8 +6,9 @@ import tokens
 import sys
 from Bot.user import User
 from Bot.message import Message
+from Bot.geolocate import child_locations
 from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, conversations_scheme, ratings_scheme, \
-    query_scheme
+    query_scheme, districts_scheme
 from settings import reset_db_at_start
 
 # logging.basicConfig(level='DEBUG')
@@ -153,6 +154,7 @@ def create_message(msg_obj=None, update=False):
     #     cnx.commit()
 
 
+# TODO uniwersalne nie powinno korzystac z offer_url
 def create_record(table_name, field_name, field_value, offer_url):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """
@@ -165,6 +167,20 @@ def create_record(table_name, field_name, field_value, offer_url):
         cnx.commit()
 
 
+# TODO uproscic uniwersalnym create_record
+def add_districts(city, districts):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        for district in districts:
+            query = """
+                INSERT INTO districts
+                (id, city, district, searches)
+                VALUES (%s, %s, %s, 0)
+            """
+            cursor.execute(query, (f"{city}_{district}", city, district))
+            cnx.commit()
+
+
+# TODO uproscic uniwersalnym create_record
 def create_query(facebook_id, query_no=1):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """
@@ -533,6 +549,7 @@ db_tables = {'offers': create_table_scheme(table_name='offers', table_scheme=off
              'conversations': create_table_scheme(table_name='conversations', table_scheme=conversations_scheme,
                                                   primary_key='conversation_no'),
              'ratings': create_table_scheme(table_name='ratings', table_scheme=ratings_scheme, primary_key='offer_url'),
+             'districts': create_table_scheme(table_name='districts', table_scheme=districts_scheme, primary_key='id'),
              'queries': create_table_scheme(table_name='queries', table_scheme=query_scheme, primary_key='facebook_id')}
 
 """SETUP"""

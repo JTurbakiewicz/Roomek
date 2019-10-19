@@ -71,6 +71,8 @@ def greeting(message, user, bot):
 def ask_for_location(message, user, bot):
     question = random.choice(bot_phrases['ask_location'])
     city = db.user_query(user.facebook_id, "city")
+    # TODO DISTRICTS!
+
     replies = ['🎯 centrum'] + child_locations(city)[0:10]
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies, location=True)
 
@@ -79,6 +81,8 @@ def ask_for_location(message, user, bot):
 def ask_more_locations(message, user, bot):
     question = random.choice(["Czy chciałbyś dodać jeszcze jakieś miejsce?", "Zanotowałem, coś oprócz tego?"])
     city = db.user_query(user.facebook_id, "city")
+    # TODO DISTRICTS!
+
     replies = ['Nie', '🎯 centrum'] + child_locations(city)[0:9]
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies, location=True)
     # TODO powinno wiedzieć co już padło
@@ -155,18 +159,17 @@ def ask_what_wrong(message, user, bot):
 @response_decorator
 def show_offers(message, user, bot):
     best = best_offer(user_obj=user, count=3)
-
-    if len(best) != 0:
-        bot.fb_send_text_message(message.facebook_id, ["Zobacz co dla Ciebie znalazłem:",
-                                                       "Takich ofert jest dużo, ale wybrałem kilka ciekawych",
-                                                       "Co powiesz o tych:", "Może któraś z tych ofert:"])
-        bot.fb_send_offers_carousel(message.facebook_id, best)
-        sleep(4)
+    if len(best['offers']) != 0:
+        bot.fb_send_text_message(message.facebook_id, [
+            f"Jest {best['offers_count']} ofert, które spełniają Twoje kryteria. Moim zdaniem te są najciekawsze:",
+            f"Takich ofert znalazłem {best['offers_count']}. Co powiesz o tych:"])
+        bot.fb_send_offers_carousel(message.facebook_id, best['offers'])
+        sleep(4)    # TODO asyncio!
         bot.fb_fake_typing(message.facebook_id, 0.7)
-        response = random.choice(["Czy któraś oferta Ci się podoba?", "Masz jakiegoś faworyta?",
-                                  "Która z powyższych najbardziej Ci odpowiada?"])
+        response = random.choice(["Znalazłeś to czego szukałeś, czy pokazać następne?", "Masz jakiegoś faworyta, czy pokazać kolejne oferty?"])
+        # "Która z powyższych najbardziej Ci odpowiada?""Która z powyższych najbardziej Ci odpowiada?"
         bot.fb_send_quick_replies(message.facebook_id, response,
-                                  ['1', '2', '3', 'pokaż następne oferty', 'zacznijmy od nowa'])
+                                  ['pokaż następne oferty', 'zacznijmy od nowa'])
     else:
         bot.fb_send_text_message(message.facebook_id, "Niestety nie znalazłem ofert spełniających Twoje kryteria :(")
 
