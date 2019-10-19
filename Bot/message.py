@@ -139,7 +139,6 @@ class Message:
                                 self.NLP_intent = None
 
                             for e in entities:
-                                print(e)
                                 if float(nlp[e][0]['confidence']) >= MINIMUM_CONFIDENCE:
                                     if e != 'datetime':
                                         try:

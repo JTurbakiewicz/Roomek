@@ -393,6 +393,7 @@ def get_custom(sql_query):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = sql_query
         cursor.execute(query)
+        print(query)
         return cursor.fetchall()
 
 

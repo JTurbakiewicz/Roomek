@@ -69,8 +69,6 @@ class User(UserTemplate):
         else:
             loc = recognize_location(location=str(location))
 
-        print(str(loc))
-
         db.update_query(facebook_id=self.facebook_id, field_name='latitude', field_value=float(loc['lat']))
         db.update_query(facebook_id=self.facebook_id, field_name='longitude', field_value=float(loc['lon']))
         db.update_query(facebook_id=self.facebook_id, field_name='country', field_value=loc['country'])
@@ -82,7 +80,8 @@ class User(UserTemplate):
 
     def add_feature(self, feature, value=None):
         feature = replace_emojis(feature)
-        if value == 'asap':
+        if feature == 'asap':
+            feature = 'ready_from'
             value = datetime.datetime.today()
         db.update_query(facebook_id=self.facebook_id, field_name=feature, field_value=value)
 

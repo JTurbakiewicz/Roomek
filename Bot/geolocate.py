@@ -100,5 +100,4 @@ try:
     else:
         logging.warning("NOMINATIM NOT WORKING!")
 except (KeyError, TypeError) as e:
-    logging.warning("GEOLOCATION NOT WORKING!")
-    print(e)
+    logging.warning(f"GEOLOCATION NOT WORKING! {e}")

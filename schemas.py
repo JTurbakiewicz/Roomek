@@ -22,11 +22,14 @@ user_scheme = {
     "queries_no": {"init": False, "db": "BOOLEAN"}
 }
 
+# "responses": ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', '💰 Sprzedam', '💰 Kupię']},
 user_questions = {
-    "interest": {"question": ["Jak mogę Ci dzisiaj pomóc?"],
-                 "responses": ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', '💰 Sprzedam', '💰 Kupię']},
+    "interest": {"question": ["Jak mogę Ci dzisiaj pomóc?", "W czym mogę służyć?"],
+                 "responses": ['Chcę wynająć mieszkanie', ' Chcę wynająć pokój', 'Chcę kupić mieszkanie']},
     "housing_type": {"question": ["Jakiego typu lokal Cię interesuje?"],
                      "responses": ['🛌 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący']},
+    "business_type": {"question": ["Wolisz wynająć czy kupić?"],
+                      "responses": ['wynająć', 'kupić']},
     "price": {"question": ["Ile jesteś w stanie płacić? (wraz z ew. czynszem i opłatami)"],
               "responses": ['<800zł', '<1000zł', '<1500zł', '<2000zł', '💸 dowolna kwota']},
     "city": {"question": ["Które miasto Cię interesuje?"],

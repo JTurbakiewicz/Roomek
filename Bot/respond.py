@@ -5,7 +5,7 @@
 import Bot.reactions_PL as response
 from Bot.cognition import collect_information
 from Databases import mysql_connection as db
-from schemas import user_questions, bot_phrases
+from schemas import user_questions, bot_phrases, query_scheme
 import random
 
 # TODO bug: adding place yes/no returns nothing
@@ -30,7 +30,10 @@ def respond(message, user, bot):
 
 def ask_for_information(message, user, bot):
 
-    if db.user_query(user.facebook_id, "city") is None:
+    if db.user_query(user.facebook_id, "business_type") is None:
+        response.ask_for(message, user, bot, param="business_type")
+
+    elif db.user_query(user.facebook_id, "city") is None:
         response.ask_for(message, user, bot, param="city")
 
     # TODO not the best approach
@@ -49,9 +52,9 @@ def ask_for_information(message, user, bot):
     elif user.wants_more_features:
         features_in_schema = [field_name for field_name, field_value in query_scheme.items() if
                               field_value['is_feature']]
-        user_features_queried = [query_tuple[0] for query_tuple in db.get_all_queries(facebook_id='2')]
+        user_features_queried = [query_tuple[0] for query_tuple in db.get_all_queries(facebook_id=user.facebook_id)]
         features_recorded = [i for i in user_features_queried if i in features_in_schema]
-        if len(features_recorded) = 0:
+        if len(features_recorded) == 0:
             response.ask_for(message, user, bot, param="features")
         else:
             response.ask_for_more_features(message, user, bot)
