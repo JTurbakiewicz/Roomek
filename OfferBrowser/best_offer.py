@@ -22,7 +22,7 @@ def best_offer(user_obj=None, count=1, return_amount=False):
         elif 'bool' in query_scheme[field[0]]['db'].lower():
             query = query + f' and {field[0]} {comparator} {field[1]}'
         elif 'date' in query_scheme[field[0]]['db'].lower():
-            query = query + f' and {field[0]} {comparator} "{field[1] + timedelta(days=5)}"'
+            query = query + f' and ({field[0]} {comparator} "{field[1] + timedelta(days=5)}" or {field[0]} is null)'
         else:
             print('TODO')
             print(query_scheme[field[0]]['db'])
