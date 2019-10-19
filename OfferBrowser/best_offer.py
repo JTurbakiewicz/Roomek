@@ -27,8 +27,15 @@ def best_offer(user_obj=None, count=1):
             print('TODO')
             print(query_scheme[field[0]]['db'])
 
+        if field[0] == 'city':
+            city = field[1]
+
     print(query)
 
     offers = db.get_custom(query)
 
-    return {'offers': offers[0:count], 'offers_count': len(offers)}
+    offers_count_city = db.get_custom(f"SELECT COUNT(IF(city = '{city}', 1, NULL)) '{city}' FROM offers;")
+    offers_count_city = offers_count_city[0][city]
+    print(offers_count_city)
+
+    return {'offers': offers[0:count], 'offers_count': len(offers), 'offers_count_city': offers_count_city}
