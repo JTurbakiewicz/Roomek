@@ -111,46 +111,47 @@ def create_table_scheme(table_name, table_scheme, primary_key='facebook_id'):
 
 
 def create_message(msg_obj=None, update=False):
-    pass  # TODO -> fix UTF with stickers
-    # if msg_obj is None:
-    #     msg_obj = Message('default')
-    #
-    # with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-    #     fields_to_add = ''
-    #     msg_data = []
-    #
-    #     for field_name in conversations_scheme.keys():
-    #         try:
-    #             if isinstance(getattr(msg_obj, field_name), list) or isinstance(getattr(msg_obj, field_name), dict):
-    #                 msg_data.append(str(getattr(msg_obj, field_name)))
-    #             else:
-    #                 msg_data.append(getattr(msg_obj, field_name))
-    #             fields_to_add = fields_to_add + f',{field_name}'
-    #         except AttributeError:
-    #             logging.info(f"Message had no attribute {field_name} while saving.")
-    #
-    #     fields_to_add = fields_to_add[1:]
-    #     placeholders = '%s,' * len(fields_to_add.split(','))
-    #     placeholders = placeholders[:-1]
-    #
-    #     if update:
-    #         duplicate_condition = ''
-    #         for field in fields_to_add.split(','):
-    #             duplicate_condition = duplicate_condition + field + '=%s,'
-    #         duplicate_condition = duplicate_condition[:-1]
-    #         query = f"""
-    #                     INSERT INTO conversations
-    #                     ({fields_to_add})
-    #                     VALUES ({placeholders})
-    #                     ON DUPLICATE KEY UPDATE {duplicate_condition}
-    #                  """
-    #         cursor.execute(query, msg_data*2)
-    #     else:
-    #         query = """INSERT INTO conversations
-    #                 ({})
-    #                 VALUES ({})""".format(fields_to_add, placeholders)
-    #         cursor.execute(query, msg_data)
-    #     cnx.commit()
+    if msg_obj is None:
+        msg_obj = Message('default')
+    if msg_obj.type == "StickerMessage":
+        pass
+    else:
+        with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+            fields_to_add = ''
+            msg_data = []
+
+            for field_name in conversations_scheme.keys():
+                try:
+                    if isinstance(getattr(msg_obj, field_name), list) or isinstance(getattr(msg_obj, field_name), dict):
+                        msg_data.append(str(getattr(msg_obj, field_name)))
+                    else:
+                        msg_data.append(getattr(msg_obj, field_name))
+                    fields_to_add = fields_to_add + f',{field_name}'
+                except AttributeError:
+                    logging.info(f"Message had no attribute {field_name} while saving.")
+
+            fields_to_add = fields_to_add[1:]
+            placeholders = '%s,' * len(fields_to_add.split(','))
+            placeholders = placeholders[:-1]
+
+            if update:
+                duplicate_condition = ''
+                for field in fields_to_add.split(','):
+                    duplicate_condition = duplicate_condition + field + '=%s,'
+                duplicate_condition = duplicate_condition[:-1]
+                query = f"""
+                            INSERT INTO conversations
+                            ({fields_to_add})
+                            VALUES ({placeholders})
+                            ON DUPLICATE KEY UPDATE {duplicate_condition}
+                         """
+                cursor.execute(query, msg_data * 2)
+            else:
+                query = """INSERT INTO conversations
+                        ({})
+                        VALUES ({})""".format(fields_to_add, placeholders)
+                cursor.execute(query, msg_data)
+            cnx.commit()
 
 
 def create_record(table_name, field_name, field_value, offer_url):
