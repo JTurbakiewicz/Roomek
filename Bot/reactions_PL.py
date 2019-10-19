@@ -161,8 +161,8 @@ def show_offers(message, user, bot):
     best = best_offer(user_obj=user, count=3)
     if len(best['offers']) != 0:
         bot.fb_send_text_message(message.facebook_id, [
-            f"Jest {best['offers_count']} ofert, które spełniają Twoje kryteria. Moim zdaniem te są najciekawsze:",
-            f"Takich ofert znalazłem {best['offers_count']}. Co powiesz o tych:"])
+            f"Spośród {best['offers_count_city']} ofert w Twoim mieście jest {best['offers_count']} ofert, które spełniają Twoje kryteria. Moim zdaniem te są najciekawsze:",
+            f"Spośród {best['offers_count_city']} ofert w Twoim mieście, takich ofert znalazłem {best['offers_count']}. Co powiesz o tych:"])
         bot.fb_send_offers_carousel(message.facebook_id, best['offers'])
         sleep(4)    # TODO asyncio!
         bot.fb_fake_typing(message.facebook_id, 0.7)

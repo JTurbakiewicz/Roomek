@@ -177,6 +177,7 @@ def add_districts(city, districts):
                 (id, city, district, searches)
                 VALUES (%s, %s, %s, 0)
             """
+            print(query)
             cursor.execute(query, (f"{city}_{district}", city, district))
             cnx.commit()
 
