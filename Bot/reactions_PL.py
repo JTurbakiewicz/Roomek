@@ -10,9 +10,10 @@ from settings import *
 from OfferBrowser.best_offer import best_offer
 from OfferParser.translator import translate
 from time import sleep
-from schemas import user_questions, bot_phrases
+from schemas import user_questions, bot_phrases, months
 from Bot.geolocate import child_locations
 from Databases import mysql_connection as db
+import datetime
 
 
 def response_decorator(original_function):
@@ -129,7 +130,11 @@ def show_input_data(message, user, bot):
     else:
         location = f"miejsca o współrzędnych: {db.user_query(user.facebook_id, field_name='latitude')}, {db.user_query(user.facebook_id, field_name='longitude')}"
 
-    response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {db.user_query(user.facebook_id, field_name='city')} w okolicy {location}"
+    if location != 'no_district' and location != 'no_street':
+        response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {db.user_query(user.facebook_id, field_name='city')} w okolicy {location}"
+    else:
+        response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {db.user_query(user.facebook_id, field_name='city')}"
+
     bot.fb_send_text_message(str(message.facebook_id), response1)
 
     if db.get_all_queries(user.facebook_id):
@@ -137,8 +142,14 @@ def show_input_data(message, user, bot):
         for feature in db.get_all_queries(user.facebook_id):
             if feature[1] == 1:
                 response2 += ", ma " + str(feature[0])
-            if feature[1] == 0:
+            elif feature[1] == 0:
                 response2 += ", nie ma " + str(feature[0])
+            elif feature[0] == 'ready_from':
+                time_now = datetime.datetime.now()
+                if feature[1] < time_now:
+                    response2 += ", które jest dostępne od zaraz "
+                else:
+                    response2 += f", które będzie dostępne od {months[feature[1]].month}"
             else:
                 response2 += ", którego " + str(feature[0]) + " to " + str(feature[1])
         bot.fb_send_text_message(str(message.facebook_id), response2)

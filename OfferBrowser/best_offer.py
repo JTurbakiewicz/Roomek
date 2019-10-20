@@ -9,8 +9,6 @@ def best_offer(user_obj=None, count=1):
     except AttributeError:
         print('SUCH A USER HAS NOT BEEN FOUND')
 
-    print(queries)
-
     query = 'select * from offers where True'
 
     for field in queries:
@@ -36,6 +34,5 @@ def best_offer(user_obj=None, count=1):
 
     offers_count_city = db.get_custom(f"SELECT COUNT(IF(city = '{city}', 1, NULL)) '{city}' FROM offers;")
     offers_count_city = offers_count_city[0][city]
-    print(offers_count_city)
 
     return {'offers': offers[0:count], 'offers_count': len(offers), 'offers_count_city': offers_count_city}

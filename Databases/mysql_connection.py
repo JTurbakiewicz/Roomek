@@ -6,7 +6,6 @@ import tokens
 import sys
 from Bot.user import User
 from Bot.message import Message
-from Bot.geolocate import child_locations
 from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, conversations_scheme, ratings_scheme, \
     query_scheme, districts_scheme
 from settings import reset_db_at_start
@@ -117,27 +116,24 @@ def create_table_scheme(table_name, table_scheme, primary_key='facebook_id'):
 def create_message(msg_obj=None, update=False):
     if msg_obj is None:
         msg_obj = Message('default')
-    if msg_obj.type == "StickerMessage":
-        pass
-    else:
-        with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-            fields_to_add = ''
-            msg_data = []
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        fields_to_add = ''
+        msg_data = []
 
-            for field_name in conversations_scheme.keys():
-                try:
-                    if isinstance(getattr(msg_obj, field_name), list) or isinstance(getattr(msg_obj, field_name), dict):
-                        msg_data.append(str(getattr(msg_obj, field_name)))
-                    else:
-                        msg_data.append(getattr(msg_obj, field_name))
-                    fields_to_add = fields_to_add + f',{field_name}'
-                except AttributeError:
-                    logging.info(f"Message had no attribute {field_name} while saving.")
+        for field_name in conversations_scheme.keys():
+            try:
+                if isinstance(getattr(msg_obj, field_name), list) or isinstance(getattr(msg_obj, field_name), dict):
+                    msg_data.append(str(getattr(msg_obj, field_name)))
+                else:
+                    msg_data.append(getattr(msg_obj, field_name))
+                fields_to_add = fields_to_add + f',{field_name}'
+            except AttributeError:
+                logging.info(f"Message had no attribute {field_name} while saving.")
 
-            fields_to_add = fields_to_add[1:]
-            placeholders = '%s,' * len(fields_to_add.split(','))
-            placeholders = placeholders[:-1]
-
+        fields_to_add = fields_to_add[1:]
+        placeholders = '%s,' * len(fields_to_add.split(','))
+        placeholders = placeholders[:-1]
+        try:
             if update:
                 duplicate_condition = ''
                 for field in fields_to_add.split(','):
@@ -156,6 +152,9 @@ def create_message(msg_obj=None, update=False):
                         VALUES ({})""".format(fields_to_add, placeholders)
                 cursor.execute(query, msg_data)
             cnx.commit()
+        except mysql.connector.errors.DatabaseError:
+            print('Unsupported formating of message: ' + str(msg_data))
+
 
 
 # TODO uniwersalne nie powinno korzystac z offer_url

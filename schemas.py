@@ -522,3 +522,18 @@ regex_scheme = {
                              'nie wyra[zż]am(.){,2} zgody na.{,15}zwierz', 'Zwierz.{,15}NIE', 'nie akceptuj.{,6}zwierz',
                              'zabrania si[eę].{,12}zwierz', 'nieposiadaj[aą]c.{,6}zwierz', 'nie mog[aą].{,15}zwierz']},
 }
+
+months = {
+    1: 'stycznia',
+    2: 'lutego',
+    3: 'marca',
+    4: 'kwietnia',
+    5: 'maja',
+    6: 'czerwca',
+    7: 'lipca',
+    8: 'sierpnia',
+    9: 'września',
+    10: 'października',
+    11: 'listopada',
+    12: 'grudnia',
+}
