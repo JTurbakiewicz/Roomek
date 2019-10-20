@@ -148,7 +148,6 @@ class Bot:
 
         # if use_database: db.add_conversation(str(userid), 'User', message)
         logging.info(f"BOT({str(userid)[0:5]}): '{str(message)}'")
-
         return self.fb_send_message(userid, {
             'text': message
         }, notification_type)
@@ -345,7 +344,6 @@ class Bot:
 
         # if use_database: db.add_conversation(str(userid), 'User', message)
         logging.info(f"BOT({str(userid)[0:5]}): '{str(reply_message)}' Replies{str(replies)}")
-
         return self.fb_send_message(userid, {
             "text": reply_message,
             "quick_replies": reply_options
@@ -436,7 +434,6 @@ class Bot:
             json=payload
         )
         result = response.json()
-
         return result
 
     # def fb_get_user_info(self, userid, fields=None):

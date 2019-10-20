@@ -32,7 +32,7 @@ districts_scheme = {
 # "responses": ['🔎 Szukam pokoju', '🔎 Szukam mieszkania', '💰 Sprzedam', '💰 Kupię']},
 user_questions = {
     "interest": {"question": ["Jak mogę Ci dzisiaj pomóc?", "W czym mogę służyć?"],
-                 "responses": ['Chcę wynająć mieszkanie', ' Chcę wynająć pokój', 'Chcę kupić mieszkanie']},
+                 "responses": ['Szukam mieszkania', ' Chcę wynająć pokój', 'Chcę kupić dom']},
     "housing_type": {"question": ["Jakiego typu lokal Cię interesuje?"],
                      "responses": ['🛌 pokój', '🏢 mieszkanie', '🐌 kawalerka', '🏠 dom wolnostojący']},
     "business_type": {"question": ["Wolisz wynająć czy kupić?"],

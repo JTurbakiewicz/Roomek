@@ -35,7 +35,7 @@ def set_up_db(db_config):
     try:
         cnx = mysql.connector.connect(**db_config)
         cursor = cnx.cursor()
-        logging.info("Connection succeeded")
+        logging.info("Connection: OK")
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             logging.error("Something is wrong with your user name or password")
@@ -48,24 +48,27 @@ def set_up_db(db_config):
                        "DEFAULT CHARACTER SET utf8mb4".format(DB_NAME))
         logging.info("Database created")
     except mysql.connector.Error as err:
-        logging.info("Failed creating database: {}".format(err))
+        if "database exists" in str(err):
+            logging.info(f"Database {DB_NAME} exists.")
+        else:
+            logging.info("Failed creating database: {}".format(err))
     except UnboundLocalError:
         logging.info("No connection estabilished")
         sys.exit()
     try:
         cursor.execute("USE {}".format(DB_NAME))
-        logging.info("Database chosen")
+        logging.info(f"Database in use: {DB_NAME}")
     except mysql.connector.Error as err:
         logging.error("Failed choosing database: {}".format(err))
 
     for table_name in db_tables:
         table_description = db_tables[table_name]
         try:
-            logging.info("Creating table {0}".format(table_name))
             cursor.execute(table_description)
+            logging.info(f"Created table: {table_name}")
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-                logging.info("Table already exists")
+                logging.info(f"Table '{table_name}' already exists.")
             else:
                 logging.error(str(err.msg))
         else:
@@ -177,7 +180,6 @@ def add_districts(city, districts):
                 (id, city, district, searches)
                 VALUES (%s, %s, %s, 0)
             """
-            print(query)
             cursor.execute(query, (f"{city}_{district}", city, district))
             cnx.commit()
 
@@ -204,7 +206,7 @@ def update_query(facebook_id, field_name, field_value, query_no=1):
          """
         cursor.execute(query, (query_no, facebook_id, field_value, field_value))
         cnx.commit()
-        logging.info(f"[Query info] Field: '{field_name}' set to '{field_value}'")
+        logging.info(f"Query.{field_name} = '{field_value}' ({facebook_id})")
 
 
 def create_rating(rating):
@@ -411,7 +413,6 @@ def get_custom(sql_query):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = sql_query
         cursor.execute(query)
-        print(query)
         return cursor.fetchall()
 
 
@@ -504,7 +505,7 @@ def update_user(facebook_id, field_to_update, field_value, if_null_required=Fals
             query = query + 'AND ' + field_to_update + ' IS NULL'
         cursor.execute(query, (field_value, facebook_id))
         cnx.commit()
-        logging.info(f"[User info] Field '{field_to_update}' set to: '{field_value}'")
+        logging.info(f"User.{field_to_update} = '{field_value}' ({facebook_id})")
 
 
 def user_exists(facebook_id):
@@ -527,9 +528,16 @@ def drop_user(facebook_id=None):
             cursor.execute(query)
             cnx.commit()
             logging.info(f"User {facebook_id} has just been removed from the database.")
-
         except mysql.connector.Error as error:
             logging.warning("Failed to delete record from table: {}".format(error))
+        try:
+            query = f"""Delete from queries where facebook_id = {facebook_id}"""
+            cursor.execute(query)
+            cnx.commit()
+            logging.info(f"User {facebook_id} has just been removed from the database.")
+        except mysql.connector.Error as error:
+            logging.warning("Failed to delete record from table: {}".format(error))
+
 
 
 def execute_custom(query, *args, **kwargs):
