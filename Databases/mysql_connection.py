@@ -124,13 +124,34 @@ def create_message(msg_obj=None, update=False):
         for field_name in conversations_scheme.keys():
             try:
                 if isinstance(getattr(msg_obj, field_name), list) or isinstance(getattr(msg_obj, field_name), dict):
-                    msg_data.append(str(getattr(msg_obj, field_name)))
+                    if field_name == 'text' or field_name == 'messaging':
+                        value = str(getattr(msg_obj, field_name))
+                        try:
+                            value = emoji.demojize(value)
+                        except TypeError:
+                            print('TU')
+                            try:
+                                print(msg_obj.sticker_name)
+                                print(msg_obj.stickerID)
+                            except:
+                                pass
+                            value = 'failed_sticker'
+                        msg_data.append(value)
+                    else:
+                        msg_data.append(str(getattr(msg_obj, field_name)))
                 else:
                     if field_name == 'text' or field_name == 'messaging':
                         value = getattr(msg_obj, field_name)
-                        print(value)
-                        value = emoji.demojize(value)
-                        print(value)
+                        try:
+                            value = emoji.demojize(value)
+                        except TypeError:
+                            print('TU')
+                            try:
+                                print(msg_obj.sticker_name)
+                                print(msg_obj.stickerID)
+                            except:
+                                pass
+                            value = 'failed_sticker'
                         msg_data.append(value)
                     else:
                         msg_data.append(getattr(msg_obj, field_name))
@@ -141,25 +162,27 @@ def create_message(msg_obj=None, update=False):
         fields_to_add = fields_to_add[1:]
         placeholders = '%s,' * len(fields_to_add.split(','))
         placeholders = placeholders[:-1]
-
-        if update:
-            duplicate_condition = ''
-            for field in fields_to_add.split(','):
-                duplicate_condition = duplicate_condition + field + '=%s,'
-            duplicate_condition = duplicate_condition[:-1]
-            query = f"""
-                        INSERT INTO conversations
-                        ({fields_to_add})
-                        VALUES ({placeholders})
-                        ON DUPLICATE KEY UPDATE {duplicate_condition}
-                     """
-            cursor.execute(query, msg_data * 2)
-        else:
-            query = """INSERT INTO conversations
-                    ({})
-                    VALUES ({})""".format(fields_to_add, placeholders)
-            cursor.execute(query, msg_data)
-        cnx.commit()
+        try:
+            if update:
+                duplicate_condition = ''
+                for field in fields_to_add.split(','):
+                    duplicate_condition = duplicate_condition + field + '=%s,'
+                duplicate_condition = duplicate_condition[:-1]
+                query = f"""
+                            INSERT INTO conversations
+                            ({fields_to_add})
+                            VALUES ({placeholders})
+                            ON DUPLICATE KEY UPDATE {duplicate_condition}
+                         """
+                cursor.execute(query, msg_data * 2)
+            else:
+                query = """INSERT INTO conversations
+                        ({})
+                        VALUES ({})""".format(fields_to_add, placeholders)
+                cursor.execute(query, msg_data)
+            cnx.commit()
+        except:
+            logging.debug(f"Message not able to be saved")
 
 
 

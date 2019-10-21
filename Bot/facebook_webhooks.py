@@ -17,12 +17,11 @@ import random
 import logging
 import tokens
 
-
 # TODO add a 'tag' NON_PROMOTIONAL_SUBSCRIPTION
 # TODO add a 'messaging_type' TYPE_MESSAGE_TYPE
 # https://developers.facebook.com/docs/messenger-platform/send-messages/message-tags
 
-DEFAULT_API_VERSION = 3.2   # 2.6
+DEFAULT_API_VERSION = 3.2  # 2.6
 
 
 def verify_fb_token(request, token_sent):
@@ -81,7 +80,7 @@ class Bot:
         }, notification_type)
 
     def fb_send_attachment(self, userid, attachment_type, attachment_path,
-                        notification_type=NotificationType.regular):
+                           notification_type=NotificationType.regular):
         """Send an attachment to the specified recipient using local path.
         Input:
             userid: recipient id to send to
@@ -115,7 +114,7 @@ class Bot:
                              params=self.auth_args, headers=multipart_header).json()
 
     def fb_send_attachment_url(self, userid, attachment_type, attachment_url,
-                            notification_type=NotificationType.regular):
+                               notification_type=NotificationType.regular):
         """Send an attachment to the specified recipient using URL.
         Input:
             userid: recipient id to send to
@@ -156,11 +155,13 @@ class Bot:
     def fb_send_offers_carousel(self, userid, offers):
         elements = []
         for offer in offers:
-            t = f"{offer['area']}m2 za {offer['price']}zł, {offer['district']} {offer['street']}, {offer['date_of_the_offer']}"
+            t = f"{str(offer['area']) + ' m2 ' if offer['area'] else ''}za {offer['price']}zł,{' ' + offer['district'] if offer['district'] else ''}{' ul. ' + offer['street'] if offer['street'] else ''} z {offer['date_of_the_offer'].date()}"
+            print(t)
             st = f"{offer['offer_name']}"
             buttons = [self.fb_create_button(title="Sprawdź", url=offer['offer_url']),
-                self.fb_create_button(title="Podoba mi się!", url=offer['offer_url'])]
-            elements.append(self.fb_create_element(title=t, subtitle=st, image_url=offer['offer_thumbnail_url'], url=offer['offer_url'], buttons=buttons, height="TALL"))
+                       self.fb_create_button(title="Podoba mi się!", url=offer['offer_url'])]
+            elements.append(self.fb_create_element(title=t, subtitle=st, image_url=offer['offer_thumbnail_url'],
+                                                   url=offer['offer_url'], buttons=buttons, height="TALL"))
 
         self.fb_send_generic_message(userid, elements)
 
@@ -251,29 +252,29 @@ class Bot:
         https://developers.facebook.com/docs/messenger-platform/send-messages/buttons
         """
         button = {
-                "title": str(title),
-                "type": "web_url",
-                # "type":"postback",
-                "url": url
-                # "messenger_extensions": "true",
-                # "webview_height_ratio": "tall",
-                # "payload":"DEVELOPER_DEFINED_PAYLOAD"
-                # "fallback_url": "http://www.olx.com"
-            }
+            "title": str(title),
+            "type": "web_url",
+            # "type":"postback",
+            "url": url
+            # "messenger_extensions": "true",
+            # "webview_height_ratio": "tall",
+            # "payload":"DEVELOPER_DEFINED_PAYLOAD"
+            # "fallback_url": "http://www.olx.com"
+        }
         return button
 
     def fb_create_element(self, title="", subtitle="", image_url="", url="", height="TALL", buttons=[]):
-        element={
+        element = {
             "title": str(title),
             "subtitle": str(subtitle),
             "image_url": image_url,
             "buttons": buttons,
             "default_action": {
-                "type": "web_url",      # web_url,
+                "type": "web_url",  # web_url,
                 "url": url,
-                "webview_height_ratio": height     # COMPACT, TALL, FULL
-                }
+                "webview_height_ratio": height  # COMPACT, TALL, FULL
             }
+        }
         return element
 
     def fb_send_action(self, userid, action, notification_type=NotificationType.regular):
@@ -314,11 +315,11 @@ class Bot:
         """
         return self.fb_send_attachment_url(userid, "image", image_url, notification_type)
 
-
     # def fb_send_quick_replies(self, userid, reply_message = "", replies = ['a','b','c'], location=False, notification_type=NotificationType.regular):
 
     # TODO Temp:
-    def fb_send_quick_replies(self, userid, reply_message="", replies=['a', 'b', 'c'], location=False, notification_type=NotificationType.regular):
+    def fb_send_quick_replies(self, userid, reply_message="", replies=['a', 'b', 'c'], location=False,
+                              notification_type=NotificationType.regular):
 
         """Send quick replies to the specified recipient.
         https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies

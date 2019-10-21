@@ -68,13 +68,15 @@ class User(UserTemplate):
                 loc = recognize_location(location=str(location))
         else:
             loc = recognize_location(location=str(location))
-
-        db.update_query(facebook_id=self.facebook_id, field_name='latitude', field_value=float(loc['lat']))
-        db.update_query(facebook_id=self.facebook_id, field_name='longitude', field_value=float(loc['lon']))
-        db.update_query(facebook_id=self.facebook_id, field_name='country', field_value=loc['country'])
-        db.update_query(facebook_id=self.facebook_id, field_name='city', field_value=loc['city'])
-        db.update_query(facebook_id=self.facebook_id, field_name='district', field_value=loc['district'])
-        db.update_query(facebook_id=self.facebook_id, field_name='street', field_value=loc['street'])
+        try:
+            db.update_query(facebook_id=self.facebook_id, field_name='latitude', field_value=float(loc['lat']))
+            db.update_query(facebook_id=self.facebook_id, field_name='longitude', field_value=float(loc['lon']))
+            db.update_query(facebook_id=self.facebook_id, field_name='country', field_value=loc['country'])
+            db.update_query(facebook_id=self.facebook_id, field_name='city', field_value=loc['city'])
+            db.update_query(facebook_id=self.facebook_id, field_name='district', field_value=loc['district'])
+            db.update_query(facebook_id=self.facebook_id, field_name='street', field_value=loc['street'])
+        except TypeError:
+            logging.warning("Probably item was misinterpeted as location by wit")
 
     def add_feature(self, feature, value=None):
         feature = replace_emojis(feature)
