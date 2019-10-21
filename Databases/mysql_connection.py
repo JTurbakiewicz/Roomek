@@ -129,13 +129,10 @@ def create_message(msg_obj=None, update=False):
                         try:
                             value = emoji.demojize(value)
                         except TypeError:
-                            print('TU')
                             try:
-                                print(msg_obj.sticker_name)
-                                print(msg_obj.stickerID)
+                                value = msg_obj.sticker_name
                             except:
-                                pass
-                            value = 'failed_sticker'
+                                value = 'failed_sticker'
                         msg_data.append(value)
                     else:
                         msg_data.append(str(getattr(msg_obj, field_name)))
@@ -145,13 +142,10 @@ def create_message(msg_obj=None, update=False):
                         try:
                             value = emoji.demojize(value)
                         except TypeError:
-                            print('TU')
                             try:
-                                print(msg_obj.sticker_name)
-                                print(msg_obj.stickerID)
+                                value = msg_obj.sticker_name
                             except:
-                                pass
-                            value = 'failed_sticker'
+                                value = 'failed_sticker'
                         msg_data.append(value)
                     else:
                         msg_data.append(getattr(msg_obj, field_name))
