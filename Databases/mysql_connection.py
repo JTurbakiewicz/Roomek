@@ -4,6 +4,7 @@ from mysql.connector import errorcode
 import logging
 import tokens
 import sys
+import emoji
 from Bot.user import User
 from Bot.message import Message
 from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, conversations_scheme, ratings_scheme, \
@@ -125,7 +126,14 @@ def create_message(msg_obj=None, update=False):
                 if isinstance(getattr(msg_obj, field_name), list) or isinstance(getattr(msg_obj, field_name), dict):
                     msg_data.append(str(getattr(msg_obj, field_name)))
                 else:
-                    msg_data.append(getattr(msg_obj, field_name))
+                    if field_name == 'text' or field_name == 'messaging':
+                        value = getattr(msg_obj, field_name)
+                        print(value)
+                        value = emoji.demojize(value)
+                        print(value)
+                        msg_data.append(value)
+                    else:
+                        msg_data.append(getattr(msg_obj, field_name))
                 fields_to_add = fields_to_add + f',{field_name}'
             except AttributeError:
                 logging.info(f"Message had no attribute {field_name} while saving.")
@@ -133,27 +141,26 @@ def create_message(msg_obj=None, update=False):
         fields_to_add = fields_to_add[1:]
         placeholders = '%s,' * len(fields_to_add.split(','))
         placeholders = placeholders[:-1]
-        try:
-            if update:
-                duplicate_condition = ''
-                for field in fields_to_add.split(','):
-                    duplicate_condition = duplicate_condition + field + '=%s,'
-                duplicate_condition = duplicate_condition[:-1]
-                query = f"""
-                            INSERT INTO conversations
-                            ({fields_to_add})
-                            VALUES ({placeholders})
-                            ON DUPLICATE KEY UPDATE {duplicate_condition}
-                         """
-                cursor.execute(query, msg_data * 2)
-            else:
-                query = """INSERT INTO conversations
-                        ({})
-                        VALUES ({})""".format(fields_to_add, placeholders)
-                cursor.execute(query, msg_data)
-            cnx.commit()
-        except mysql.connector.errors.DatabaseError:
-            print('Unsupported formating of message: ' + str(msg_data))
+
+        if update:
+            duplicate_condition = ''
+            for field in fields_to_add.split(','):
+                duplicate_condition = duplicate_condition + field + '=%s,'
+            duplicate_condition = duplicate_condition[:-1]
+            query = f"""
+                        INSERT INTO conversations
+                        ({fields_to_add})
+                        VALUES ({placeholders})
+                        ON DUPLICATE KEY UPDATE {duplicate_condition}
+                     """
+            cursor.execute(query, msg_data * 2)
+        else:
+            query = """INSERT INTO conversations
+                    ({})
+                    VALUES ({})""".format(fields_to_add, placeholders)
+            cursor.execute(query, msg_data)
+        cnx.commit()
+
 
 
 
