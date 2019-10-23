@@ -71,7 +71,8 @@ REDIRECT_ENABLED = False
 ITEM_PIPELINES = {
     'PropertyScraper.pipelines.MySQL_Offer_RatePipeline': 299,
     'PropertyScraper.pipelines.Parse_Offer_Pipeline': 300,
-    'PropertyScraper.pipelines.MySQL_Offer_SQLPipeline': 301,
+    'PropertyScraper.pipelines.Get_Location_Pipeline': 301,
+    'PropertyScraper.pipelines.MySQL_Offer_SQLPipeline': 302,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
