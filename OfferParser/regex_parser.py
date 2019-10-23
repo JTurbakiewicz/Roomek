@@ -49,7 +49,7 @@ def find_dict_key_regex(text):
                             try:
                                 parsing_result = ParsingResult(field_name=field_name,
                                                                field_value=found_value)
-                                print(parsing_result)
+                                # print(parsing_result)
                             except:
                                 pass
                         else:
