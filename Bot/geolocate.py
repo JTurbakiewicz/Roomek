@@ -5,7 +5,8 @@ from Databases import mysql_connection as db
 from pprint import pprint
 
 
-def recognize_location(location="", lat=0, long=0, city=""):
+# TODO add zoom parameter
+def recognize_location(location="", lat=0.00, long=0.00, city=""):
     """ Geocoding using https://nominatim.org/release-docs/develop/api/Search/ """
 
     if lat != 0 or long != 0:
@@ -13,20 +14,15 @@ def recognize_location(location="", lat=0, long=0, city=""):
         req = requests.get(
             url=f"https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat={lat}&lon={long}&zoom={zoom}&limit=5")
 
-    # TODO przypadek ze znanym miastem ale checią czegoś wewnątrz:
-    # elif city != "":
-    #     # using https://nominatim.org/release-docs/develop/api/Search/
-    #     req = requests.get(url=f"https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q={city}&limit=5")
-    #     tloc = json.loads(req.text)
-    #     if isinstance(tloc, list):
-    #         tloc = loc[0]
-    #     box = # x1, y1, x2, y2
-    #     req = requests.get(url=f"https://nominatim.openstreetmap.org/?format=json&bounded=1&viewbox={box}&addressdetails=1&q={location}&limit=5")
+    elif city != "":
+        req = requests.get(url=f"https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q={city}&limit=5")
+        tloc = json.loads(req.text)
+        if isinstance(tloc, list):
+            tloc = tloc[0]
+        req = requests.get(url=f"https://nominatim.openstreetmap.org/search/pl/{tloc['address']['city']}/{location}?format=json&addressdetails=1&limit=5")
 
     else:
-        """ using https://nominatim.org/release-docs/develop/api/Search/ """
-        req = requests.get(
-            url=f"https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q={location}&limit=5")
+          req = requests.get(url=f"https://nominatim.openstreetmap.org/search/pl/{location}?format=json&addressdetails=1&limit=5")
 
     loc = json.loads(req.text)
 
@@ -111,3 +107,11 @@ try:
         logging.warning("NOMINATIM NOT WORKING!")
 except (KeyError, TypeError) as e:
     logging.warning(f"GEOLOCATION NOT WORKING! {e}")
+
+
+if __name__ == "__main__":
+    # print(str(recognize_location(lat="51", long="21"))+"\n")
+    print(str(recognize_location(location="Warszawa"))+"\n")
+    print(str(recognize_location(location="Stare Miasto"))+"\n")
+    print(str(recognize_location(location="Stare Miasto", city="Kraków"))+"\n")
+    print(str(child_locations(city="Warszawa"))+"\n")
