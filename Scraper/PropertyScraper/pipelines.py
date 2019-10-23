@@ -29,7 +29,7 @@ class Get_Location_Pipeline(object):
             geolocate_data = geolocate.recognize_location(location=lowest_location_level, city=city)
             try:
                 if not item['location_latitude']:
-                    item['location_laitude'] = [float(geolocate_data['lat'])]
+                    item['location_latitude'] = [float(geolocate_data['lat'])]
                 if not item['location_longitude']:
                     item['location_longitude'] = [float(geolocate_data['lon'])]
             except KeyError:

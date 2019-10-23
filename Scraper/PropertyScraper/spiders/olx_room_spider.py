@@ -73,6 +73,8 @@ class OlxRoomSpider(scrapy.Spider):
         OfferItem_loader.add_value('housing_type', response.meta['housing_type'])
         OfferItem_loader.add_value('business_type', 'wynajem')
         OfferItem_loader.add_value('offer_url', response)
+        OfferItem_loader.add_value('location_latitude', response.body)
+        OfferItem_loader.add_value('location_longitude', response.body)
 
         for field_name, field_value in offer_scheme.items():
             dict_value = field_value['scraping_path_olxroom']

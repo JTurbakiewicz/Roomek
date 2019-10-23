@@ -21,12 +21,12 @@ OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=23|page=33'), un
                                                   restrict_xpaths=(
                                                       ['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
                                                        '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a']))
-OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=2|page=3|page=4|page=5'), unique=True,
-                                                  restrict_xpaths=(
-                                                  ['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
-                                                   '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a',
-                                                   '//*[@id="body-container"]/div[3]/div/div[8]/span[5]/a',
-                                                   '//*[@id="body-container"]/div[3]/div/div[8]/span[6]/a']))
+# OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=2|page=3|page=4|page=5'), unique=True,
+#                                                   restrict_xpaths=(
+#                                                   ['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
+#                                                    '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a',
+#                                                    '//*[@id="body-container"]/div[3]/div/div[8]/span[5]/a',
+#                                                    '//*[@id="body-container"]/div[3]/div/div[8]/span[6]/a']))
 
 links_to_main_page = set()
 links_to_olx_offers = set()
@@ -83,6 +83,8 @@ class OlxSpiderMain(scrapy.Spider):
         OfferItem_loader.add_value('business_type', response.meta['business_type'])
         OfferItem_loader.add_value('housing_type', response.meta['housing_type'])
         OfferItem_loader.add_value('offer_url', response)
+        OfferItem_loader.add_value('location_latitude', response.body)
+        OfferItem_loader.add_value('location_longitude', response.body)
 
         for field_name, field_value in offer_scheme.items():
             dict_value = field_value['scraping_path_olx']
