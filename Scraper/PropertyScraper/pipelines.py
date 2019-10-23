@@ -30,11 +30,25 @@ class Get_Location_Pipeline(object):
             try:
                 if not item['location_latitude']:
                     item['location_latitude'] = [float(geolocate_data['lat'])]
+                    try:
+                        item['parsed_fields'] = item['parsed_fields'] + ', location_latitude'
+                    except:
+                        item['parsed_fields'] = 'location_latitude'
                 if not item['location_longitude']:
                     item['location_longitude'] = [float(geolocate_data['lon'])]
+                    try:
+                        item['parsed_fields'] = item['parsed_fields'] + ', location_longitude'
+                    except:
+                        item['parsed_fields'] = 'location_longitude'
             except KeyError:
                 item['location_latitude'] = [float(geolocate_data['lat'])]
                 item['location_longitude'] = [float(geolocate_data['lon'])]
+                try:
+                    item['parsed_fields'] = item['parsed_fields'] + ', location_latitude'
+                    item['parsed_fields'] = item['parsed_fields'] + ', location_longitude'
+                except:
+                    item['parsed_fields'] = 'location_latitude'
+                    item['parsed_fields'] = 'location_longitude'
         return item
 
 
