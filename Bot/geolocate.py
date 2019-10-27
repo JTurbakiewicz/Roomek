@@ -2,7 +2,6 @@ import logging
 import json
 import requests
 from Databases import mysql_connection as db
-from pprint import pprint
 
 
 # TODO add zoom parameter
@@ -61,10 +60,8 @@ def recognize_location(location="", lat=0.00, long=0.00, city=""):
             loca["state"] = loc["address"]["state"]
         if "country" in loc["address"]:
             loca["country"] = loc["address"]["country"]
-        # TODO tego chyba nigdy nie ma:
-        if "district" in loc["address"]:
-            loca["district"] = loc["address"]["district"]
-
+        if "city_district" in loc["address"]:
+            loca["district"] = loc["address"]["city_district"]
     return loca
 
 
@@ -110,8 +107,9 @@ except (KeyError, TypeError) as e:
 
 
 if __name__ == "__main__":
-    # print(str(recognize_location(lat="51", long="21"))+"\n")
+    print(str(recognize_location(lat="51", long="21"))+"\n")
     print(str(recognize_location(location="Warszawa"))+"\n")
+    print(str(recognize_location(location="Mokotów", city="Warszawa"))+"\n")
     print(str(recognize_location(location="Stare Miasto"))+"\n")
     print(str(recognize_location(location="Stare Miasto", city="Kraków"))+"\n")
     print(str(child_locations(city="Warszawa"))+"\n")

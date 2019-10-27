@@ -550,14 +550,14 @@ def drop_user(facebook_id=None):
             query = f"""Delete from users where facebook_id = {facebook_id}"""
             cursor.execute(query)
             cnx.commit()
-            logging.info(f"User {facebook_id} has just been removed from the database.")
+            logging.info(f"User {facebook_id} has just been removed from the USERS database.")
         except mysql.connector.Error as error:
             logging.warning("Failed to delete record from table: {}".format(error))
         try:
             query = f"""Delete from queries where facebook_id = {facebook_id}"""
             cursor.execute(query)
             cnx.commit()
-            logging.info(f"User {facebook_id} has just been removed from the database.")
+            logging.info(f"User {facebook_id} has just been removed from the QUERIES database.")
         except mysql.connector.Error as error:
             logging.warning("Failed to delete record from table: {}".format(error))
 

@@ -72,9 +72,10 @@ def greeting(message, user, bot):
 def ask_for_location(message, user, bot):
     question = random.choice(bot_phrases['ask_location'])
     city = db.user_query(user.facebook_id, "city")
-    # TODO DISTRICTS!
-
-    replies = ['🎯 centrum'] + child_locations(city)[0:10]
+    replies = ['blisko centrum']
+    districts = child_locations(city)[0:9]
+    if districts:
+        replies = replies + districts
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies, location=True)
 
 
@@ -82,10 +83,10 @@ def ask_for_location(message, user, bot):
 def ask_more_locations(message, user, bot):
     question = random.choice(["Czy chciałbyś dodać jeszcze jakieś miejsce?", "Zanotowałem, coś oprócz tego?"])
     city = db.user_query(user.facebook_id, "city")
-    # TODO DISTRICTS!
-    print("aaa")
-    replies = ['Nie', '🎯 centrum'] + child_locations(city)[0:9]
-    print("bbb")
+    replies = ['Nie', 'blisko centrum']
+    districts = child_locations(city)[0:9]
+    if districts:
+        replies = replies + child_locations(city)[0:9]
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies, location=True)
     # TODO powinno wiedzieć co już padło
 
