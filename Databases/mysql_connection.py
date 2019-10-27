@@ -203,8 +203,11 @@ def add_districts(city, districts):
                 (id, city, district, searches)
                 VALUES (%s, %s, %s, 0)
             """
-            cursor.execute(query, (f"{city}_{district}", city, district))
-            cnx.commit()
+            try:
+                cursor.execute(query, (f"{city}_{district}", city, district))
+                cnx.commit()
+            except mysql.connector.errors.IntegrityError as e:
+                logging.warning(f"Record already in Districts database ({e}).")
 
 
 # TODO uproscic uniwersalnym create_record

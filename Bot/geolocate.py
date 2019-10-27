@@ -18,10 +18,10 @@ def recognize_location(location="", lat=0.00, long=0.00, city=""):
         tloc = json.loads(req.text)
         if isinstance(tloc, list):
             tloc = tloc[0]
-        req = requests.get(url=f"https://nominatim.openstreetmap.org/search/pl/{tloc['address']['city']}/{location}?format=json&addressdetails=1&limit=5")
-
+            req = requests.get(url=f"https://nominatim.openstreetmap.org/search/pl/{tloc['address']['city']}/{location}?format=json&addressdetails=1&limit=5")
     else:
-          req = requests.get(url=f"https://nominatim.openstreetmap.org/search/pl/{location}?format=json&addressdetails=1&limit=5")
+        req = requests.get(
+            url=f"https://nominatim.openstreetmap.org/search/pl/{location}?format=json&addressdetails=1&limit=5")
 
     loc = json.loads(req.text)
 
@@ -67,10 +67,10 @@ def recognize_location(location="", lat=0.00, long=0.00, city=""):
 
 def child_locations(city):
     # TODO co jesli user wpisze dzielnice ktorej nie ma?
-    cities=[x['city'] for x in db.get_all(table_name='districts', fields_to_get='city')]
+    cities = [x['city'] for x in db.get_all(table_name='districts', fields_to_get='city')]
     if city in cities:
         children = db.get_custom(f"select district from districts where city = '{city}'")
-
+        children = [x['district'] for x in children]
     else:
         children = []
         try:
@@ -95,21 +95,31 @@ def child_locations(city):
         return False
 
 
+def place_boundaries(location):
+    # try:
+    place_id = recognize_location(location=location)["place_id"]
+    boundaries = requests.get(url=f"https://nominatim.openstreetmap.org/details.php?osmtype=W&place_id={place_id}&format=json&hierarchy=1&pretty=1&addressdetails=1&polygon_geojson=1&keywords=1&linkedplaces=1&group_hierarchy=1&polygon_geojson=0")
+    return boundaries.text
+    # except:
+    #     return False
+
+
 """ test indicators """
-try:
-    if recognize_location(lat=52.2319237, long=21.0067265)['city'] == "Warszawa" and \
-            recognize_location(location="Warszawa")['city'] == "Warszawa":
-        logging.info("Geolocation: OK")
-    else:
-        logging.warning("NOMINATIM NOT WORKING!")
-except (KeyError, TypeError) as e:
-    logging.warning(f"GEOLOCATION NOT WORKING! {e}")
+# try:
+#     if recognize_location(lat=52.2319237, long=21.0067265)['city'] == "Warszawa" and \
+#             recognize_location(location="Warszawa")['city'] == "Warszawa":
+#         logging.info("Geolocation: OK")
+#     else:
+#         logging.warning("NOMINATIM NOT WORKING!")
+# except (KeyError, TypeError) as e:
+#     logging.warning(f"GEOLOCATION NOT WORKING! {e}")
 
 
 if __name__ == "__main__":
-    print(str(recognize_location(lat="51", long="21"))+"\n")
-    print(str(recognize_location(location="Warszawa"))+"\n")
-    print(str(recognize_location(location="Mokotów", city="Warszawa"))+"\n")
-    print(str(recognize_location(location="Stare Miasto"))+"\n")
-    print(str(recognize_location(location="Stare Miasto", city="Kraków"))+"\n")
-    print(str(child_locations(city="Warszawa"))+"\n")
+    # print(str(recognize_location(lat="51", long="21"))+"\n")
+    # print(str(recognize_location(location="Warszawa"))+"\n")
+    # print(str(recognize_location(location="Mokotów", city="Warszawa"))+"\n")
+    # print(str(recognize_location(location="Stare Miasto"))+"\n")
+    # print(str(recognize_location(location="Stare Miasto", city="Kraków"))+"\n")
+    # print(str(child_locations(city="Warszawa")) + "\n")
+    print(place_boundaries(location="Mokotów"))

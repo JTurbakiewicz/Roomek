@@ -74,6 +74,7 @@ def ask_for_location(message, user, bot):
     city = db.user_query(user.facebook_id, "city")
     replies = ['blisko centrum']
     districts = child_locations(city)[0:9]
+    print(districts)
     if districts:
         replies = replies + districts
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies, location=True)
@@ -85,6 +86,7 @@ def ask_more_locations(message, user, bot):
     city = db.user_query(user.facebook_id, "city")
     replies = ['Nie', 'blisko centrum']
     districts = child_locations(city)[0:9]
+    print(districts)
     if districts:
         replies = replies + child_locations(city)[0:9]
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies, location=True)

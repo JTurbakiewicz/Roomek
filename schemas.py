@@ -5,7 +5,7 @@ today = datetime.date.today()
 
 user_scheme = {
     "facebook_id": {"init": None, "db": "char(100) NOT NULL"},
-    "first_name": {"init": None, "db": "varchar(100)"},
+    "first_name": {"init": "", "db": "varchar(100)"},
     "last_name": {"init": None, "db": "varchar(100)"},
     "gender": {"init": None, "db": "enum('Female','Male')"},
     "language": {"init": None, "db": "varchar(100)"},
