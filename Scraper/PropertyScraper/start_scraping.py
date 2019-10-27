@@ -1,9 +1,13 @@
+
 import os
 import logging
+
 if '/home/RoomekBot' in os.path.abspath(''):
     from Scraper.PropertyScraper.spiders import olx_spider_main, olx_room_spider
 else:
     from Scraper.PropertyScraper.spiders import olx_spider_main, olx_room_spider, otodom_spider_main
+
+
 from twisted.internet import reactor, defer
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging

@@ -111,7 +111,7 @@ class Message:
                 else:
 
                     self.text = self.messaging['message']['text']
-                    if self.text.startswith('$okoń$'):
+                    if self.text.startswith('///'):
                         self.type = "DevMode"
                     else:
                         self.type = "TextMessage"

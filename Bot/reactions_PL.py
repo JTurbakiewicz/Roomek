@@ -83,8 +83,9 @@ def ask_more_locations(message, user, bot):
     question = random.choice(["Czy chciałbyś dodać jeszcze jakieś miejsce?", "Zanotowałem, coś oprócz tego?"])
     city = db.user_query(user.facebook_id, "city")
     # TODO DISTRICTS!
-
+    print("aaa")
     replies = ['Nie', '🎯 centrum'] + child_locations(city)[0:9]
+    print("bbb")
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies, location=True)
     # TODO powinno wiedzieć co już padło
 

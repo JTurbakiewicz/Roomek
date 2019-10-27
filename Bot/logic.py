@@ -94,10 +94,10 @@ def handle_devmode(message, user, bot):
     #     bot.fb_send_button_message(message.facebook_id, "test", ['test_value_1', 'test_value_2'])  # TODO not working
     # elif 'generic' in message.text:
     #     bot.fb_send_generic_message(message.facebook_id, ['Test_value_1', 'Test_value_2'])
-    elif 'dropme' in message.text:
+    elif 'd' in message.text:
         bot.fb_send_text_message(str(message.facebook_id), 'Your data has been erased.')
         db.drop_user(message.facebook_id)
-    elif 'showme' in message.text:
+    elif 's' in message.text:
         response.show_user_object(message, user, bot)
     else:
         bot.fb_send_text_message(str(message.facebook_id), 'Hello world!')
