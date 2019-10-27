@@ -72,7 +72,7 @@ def greeting(message, user, bot):
 def ask_for_location(message, user, bot):
     question = random.choice(bot_phrases['ask_location'])
     city = db.user_query(user.facebook_id, "city")
-    replies = ['blisko centrum']
+    replies = ['Blisko centrum']
     districts = child_locations(city)[0:9]
     if districts:
         replies = replies + districts
@@ -83,7 +83,7 @@ def ask_for_location(message, user, bot):
 def ask_more_locations(message, user, bot):
     question = random.choice(["Czy chciałbyś dodać jeszcze jakieś miejsce?", "Zanotowałem, coś oprócz tego?"])
     city = db.user_query(user.facebook_id, "city")
-    replies = ['Nie', 'blisko centrum']
+    replies = ['Nie', 'Blisko centrum']
     districts = child_locations(city)[0:9]
     if districts:
         replies = replies + child_locations(city)[0:9]
