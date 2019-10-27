@@ -23,8 +23,8 @@ def collect_information(message, user, bot):
                 pass
             elif message.NLP_intent == "offering":
                 user.set_param("business_type", "offering")
-            elif message.NLP_intent == "looking for":
-                user.set_param("business_type", "looking for")
+            # elif message.NLP_intent == "looking for":
+            #     user.set_param("business_type", "looking for")
             elif message.NLP_intent == "restart":
                 user.set_param("asked_for_restart", True)
                 user.set_param("confirmed_data", False)
@@ -37,6 +37,9 @@ def collect_information(message, user, bot):
                     user.set_param("housing_type", entity['value'])
                     # db.update_query(facebook_id=user.facebook_id, field_name="housing_type", field_value=entity['value'])
 
+                if entity['entity'] == "business_type":
+                    user.set_param("business_type", entity['value'])
+
                 if entity['entity'] == "location":
                     user.add_location(location=entity['value'])
 
@@ -48,9 +51,6 @@ def collect_information(message, user, bot):
 
                 if entity['entity'] == "person_type":
                     user.set_param("person_type", entity['value'])
-
-                if entity['entity'] == "business_type":
-                    user.set_param("business_type", entity['value'])
 
                 if entity['entity'] == "feature":
                     user.add_feature(entity['value'])

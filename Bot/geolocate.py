@@ -66,7 +66,6 @@ def recognize_location(location="", lat=0.00, long=0.00, city=""):
 
 
 def child_locations(city):
-    # TODO co jesli user wpisze dzielnice ktorej nie ma?
     cities = [x['city'] for x in db.get_all(table_name='districts', fields_to_get='city')]
     if city in cities:
         children = db.get_custom(f"select district from districts where city = '{city}'")
@@ -83,7 +82,11 @@ def child_locations(city):
                     district = requests.get(
                         url=f"https://nominatim.openstreetmap.org/details.php?osmtype=W&place_id={place_id}&format=json&hierarchy=1&pretty=1&addressdetails=1&keywords=1&linkedplaces=1&group_hierarchy=1&polygon_geojson=0")
                     if json.loads(district.text)["importance"] > 0.1:
-                        children.append(json.loads(district.text)["localname"])
+                        nazwa = json.loads(district.text)["localname"].replace("Osiedle ", "")
+                        # TODO skróć nazwę (usuń po myślinku i zastąp skrótem z kropką lub Płd. Płn. itd
+                        # if len(nazwa) > 20:
+                        #     nazwa
+                        children.append(nazwa)
             db.add_districts(city, children)
         except (KeyError, TypeError) as e:
             logging.info(f"Couldn't find locations children for: {city}")
@@ -105,14 +108,14 @@ def place_boundaries(location):
 
 
 """ test indicators """
-# try:
-#     if recognize_location(lat=52.2319237, long=21.0067265)['city'] == "Warszawa" and \
-#             recognize_location(location="Warszawa")['city'] == "Warszawa":
-#         logging.info("Geolocation: OK")
-#     else:
-#         logging.warning("NOMINATIM NOT WORKING!")
-# except (KeyError, TypeError) as e:
-#     logging.warning(f"GEOLOCATION NOT WORKING! {e}")
+try:
+    if recognize_location(lat=52.2319237, long=21.0067265)['city'] == "Warszawa" and \
+            recognize_location(location="Warszawa")['city'] == "Warszawa":
+        logging.info("Geolocation: OK")
+    else:
+        logging.warning("NOMINATIM NOT WORKING!")
+except (KeyError, TypeError) as e:
+    logging.warning(f"GEOLOCATION NOT WORKING! {e}")
 
 
 if __name__ == "__main__":

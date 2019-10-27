@@ -111,16 +111,15 @@ def ask_if_restart(message, user, bot):
 def restart(message, user, bot):
     user.set_param("wants_restart", False)
     bot.fb_send_text_message(str(message.facebook_id), "Ok, spróbujmy wyszukać od nowa.")
-    ask_how_help(message, user, bot)
+    ask_for(message, user, bot, param="interest")
 
 
 @response_decorator
 def ask_for_more_features(message, user, bot):
     question = random.choice(["Coś oprócz tego?", "Ok, jeszcze coś?", "Zanotowałem, chciałbyś coś dodać?"])
-    bot.fb_send_quick_replies(message.facebook_id, question,
-                              ['Nie, wystarczy', 'od zaraz', 'przyjazne dla 🐶🐱', 'blisko do...', 'garaż',
-                               '🔨 wyremontowane', 'umeblowane', 'ma 🛀', 'dla 🚬', 'dla 🚭'])
+    replies = user_questions['features']['responses']
     # TODO powinno wiedzieć jakie już padły
+    bot.fb_send_quick_replies(message.facebook_id, question, replies)
 
 
 @response_decorator
