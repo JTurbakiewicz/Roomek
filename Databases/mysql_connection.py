@@ -179,8 +179,6 @@ def create_message(msg_obj=None, update=False):
             logging.debug(f"Message not able to be saved")
 
 
-
-
 # TODO uniwersalne nie powinno korzystac z offer_url
 def create_record(table_name, field_name, field_value, offer_url):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
@@ -224,12 +222,25 @@ def create_query(facebook_id, query_no=1):
 
 def update_query(facebook_id, field_name, field_value, query_no=1):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        if field_name == 'district':
+            query_to_get_all_current_offers = """SELECT district
+                     FROM queries
+                     WHERE facebook_id = %s
+                     """ % ("'" + facebook_id + "'",)
+            cursor.execute(query_to_get_all_current_offers)
+            districts_in_db = cursor.fetchone()['district']
+            if field_value in districts_in_db:
+                field_value = districts_in_db
+            else:
+                field_value = districts_in_db + ',' + field_value
+
         query = f"""
             INSERT INTO queries
             (query_no, facebook_id, {field_name})
             VALUES (%s, %s, %s)
             ON DUPLICATE KEY UPDATE {field_name}=%s
          """
+
         cursor.execute(query, (query_no, facebook_id, field_value, field_value))
         cnx.commit()
         logging.info(f"Query.{field_name} = '{field_value}' ({facebook_id})")
@@ -565,7 +576,6 @@ def drop_user(facebook_id=None):
             logging.warning("Failed to delete record from table: {}".format(error))
 
 
-
 def execute_custom(query, *args, **kwargs):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         try:
@@ -599,3 +609,5 @@ if reset_db_at_start:
     queries_table_query = create_table_scheme(table_name='queries', table_scheme=query_scheme,
                                               primary_key='facebook_id')
     execute_custom(query=queries_table_query)
+
+update_query(facebook_id='2453175168069316', field_name='district', field_value='łeeeeejw')
