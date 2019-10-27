@@ -609,5 +609,3 @@ if reset_db_at_start:
     queries_table_query = create_table_scheme(table_name='queries', table_scheme=query_scheme,
                                               primary_key='facebook_id')
     execute_custom(query=queries_table_query)
-
-update_query(facebook_id='2453175168069316', field_name='district', field_value='łeeeeejw')
