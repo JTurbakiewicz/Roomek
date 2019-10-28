@@ -70,13 +70,12 @@ class Message:
 
             if 'delivery' in self.messaging:
                 self.type = "Delivery"
+                # TODO: delivery has mids not mid
             elif 'read' in self.messaging:
                 self.type = "ReadConfirmation"
             elif 'message' in self.messaging:
-                self.mid = 1234567890   # TODO mid z wiadomości
-                # TODO: delivery has mids not mid
-                # self.mid = self.messaging['message']['mid']
-
+                if 'mid' in self.messaging['message']:
+                    self.mid = self.messaging['message']['mid']
                 if 'attachments' in self.messaging['message']:
                     if 'sticker_id' in self.messaging['message']:
                         self.type = "StickerMessage"

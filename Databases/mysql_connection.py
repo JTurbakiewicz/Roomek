@@ -335,7 +335,7 @@ def get_all(table_name='offers', fields_to_get='*'):
         return result
 
 
-def get(fields_to_get='*', amount_of_items=5, fields_to_compare=None, value_to_compare_to=None, comparator=None):
+def get(table='offers', fields_to_get='*', amount_of_items=5, fields_to_compare=None, value_to_compare_to=None, comparator=None):
     """ Gets rows from DB that meet the specific criteria.
 
     A function that wraps MySQL query into a python function. It lets you to easly return
@@ -420,9 +420,9 @@ def get(fields_to_get='*', amount_of_items=5, fields_to_compare=None, value_to_c
         query = """SELECT 
                         %s
                     FROM 
-                        offers
+                        %s
                     %s
-                    """ % (fields_to_get_clean, comparative_string)
+                    """ % (fields_to_get_clean, table, comparative_string)
         # TODO -> change in a MySQL secure way
         cursor.execute(query)
         return cursor.fetchmany(amount_of_items)

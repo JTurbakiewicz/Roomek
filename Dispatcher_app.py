@@ -38,14 +38,20 @@ def receive_message():
     else:                                  # if type is not 'GET' it must be 'POST' - we have a message
         json_message = request.get_json()  # read message as json
         message = Message(json_message)
+
         if db.user_exists(message.facebook_id):
             user = db.get_user(message.facebook_id)
-            handle_message(message, user)  # process the message and respond
         elif json_message['facebook_id']:
             user = User(message.facebook_id)
+        else:
+            user = User(88888888)
+            logging.warning(f"Message without facebook_id: {json_message}")
+
+        if message.mid and message.mid not in db.get(table='conversations', fields_to_get='mid', amount_of_items=5, fields_to_compare=None, value_to_compare_to=None, comparator=None):
             handle_message(message, user)  # process the message and respond
         else:
-            logging.warning(f"Message without facebook_id: {json_message}")
+            logging.warning(f"Message was already processed and was probably resent by facebook: {json_message}")
+
     return "Message Processed"
 
 # TODO dodać API żeby np. zacząć od nowa po kliknięciu w menu
