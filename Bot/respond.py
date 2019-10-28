@@ -47,7 +47,7 @@ def ask_for_information(message, user, bot):
         response.ask_for(message, user, bot, param="housing_type")
 
     elif db.user_query(user.facebook_id, "price") is None:
-        response.ask_for(message, user, bot, param="price")
+        response.ask_for(message, user, bot, param="price", meta=f"{db.user_query(user.facebook_id,'business_type')}_{db.user_query(user.facebook_id,'housing_type')}")
 
     elif user.wants_more_features:
         features_in_schema = [field_name for field_name, field_value in query_scheme.items() if

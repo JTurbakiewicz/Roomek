@@ -51,11 +51,11 @@ def default_message(message, user, bot):
 
 
 @response_decorator
-def ask_for(message, user, bot, param):
+def ask_for(message, user, bot, param, meta=""):
     question = random.choice(user_questions[param]['question'])
-    if param == 'features':
-        housing_type = db.user_query(user.facebook_id, "housing_type")
-        responses = user_questions[param]['responses' + '_' + housing_type]
+    custom = f'responses_{meta}'
+    if meta != "" and custom in user_questions[param]:
+        responses = user_questions[param][custom]
     else:
         responses = user_questions[param]['responses']
     bot.fb_send_quick_replies(message.facebook_id, question, responses)
@@ -76,10 +76,10 @@ def greeting(message, user, bot):
 def ask_for_location(message, user, bot):
     question = random.choice(bot_phrases['ask_location'])
     city = db.user_query(user.facebook_id, "city")
-    replies = ['Centrum']
-    districts = child_locations(city)[0:9]
+    replies = ['Blisko centrum']
+    districts = child_locations(city)
     if districts:
-        replies = replies + districts
+        replies = replies + child_locations(city)[0:9]
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies, location=True)
 
 
@@ -87,12 +87,10 @@ def ask_for_location(message, user, bot):
 def ask_more_locations(message, user, bot):
     question = random.choice(["Czy chciałbyś dodać jeszcze jakieś miejsce?", "Zanotowałem, coś oprócz tego?"])
     city = db.user_query(user.facebook_id, "city")
-    replies = ['Nie', 'Centrum']
-    try:
-        districts = child_locations(city)[0:9]
-        replies = replies + districts
-    except TypeError:
-        logging.error("child_locations functions returned None when a list was expected")
+    replies = ['Nie', 'Blisko centrum']
+    districts = child_locations(city)
+    if districts:
+        replies = replies + child_locations(city)[0:9]
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies, location=True)
     # TODO powinno wiedzieć co już padło
 
