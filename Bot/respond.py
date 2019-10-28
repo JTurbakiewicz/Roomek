@@ -55,7 +55,7 @@ def ask_for_information(message, user, bot):
         user_features_queried = [query_tuple[0] for query_tuple in db.get_all_queries(facebook_id=user.facebook_id)]
         features_recorded = [i for i in user_features_queried if i in features_in_schema]
         if len(features_recorded) == 0:
-            response.ask_for(message, user, bot, param="features")
+            response.ask_for(message, user, bot, param="features", meta=f"{db.user_query(user.facebook_id,'housing_type')}")
         else:
             response.ask_for_more_features(message, user, bot)
 
