@@ -1,16 +1,9 @@
-
-print('c')
 import scrapy
 from Scraper.PropertyScraper.itemloaders import OlxOfferLoader, OtodomOfferLoader
-print('c')
 from Scraper.PropertyScraper.items import OfferItem
 from scrapy.linkextractors import LinkExtractor
-print('c')
 import Databases.mysql_connection as db
-print('c')
-
 from schemas import offer_scheme
-print('c')
 
 
 def prepare_metadata(request, response):
