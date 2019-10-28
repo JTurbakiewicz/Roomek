@@ -7,7 +7,7 @@ import random
 import logging
 from Bot.cognition import collect_information
 from settings import *
-from OfferBrowser.best_offer import best_offer
+from RatingEngine.best_offer import best_offer
 from OfferParser.translator import translate
 from time import sleep
 from schemas import user_questions, bot_phrases, months
