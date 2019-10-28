@@ -45,8 +45,12 @@ def collect_information(message, user, bot):
 
                 if entity['entity'] == "amount_of_money" or entity['entity'] == "number" or entity[
                     'entity'] == "any_amount" and user.context != "show_offers":
-                    if "milion" in entity['value']:
-                        user.set_param("price", 1000000)
+                    if "'" in str(entity['value']) or " " in str(entity['value']) or "zł" in str(entity['value']):
+                        entity['value'].replace("'","")
+                        entity['value'].replace(" ", "")
+                        entity['value'].replace("zł", "")
+                    if "milion" in str(entity['value']):
+                            user.set_param("price", 1000000)
                     else:
                         user.set_param("price", entity['value'])
                 elif entity['entity'] == "number" and user.context == "show_offers":

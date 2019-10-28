@@ -47,7 +47,7 @@ def receive_message():
             user = User(88888888)
             logging.warning(f"Message without facebook_id: {json_message}")
 
-        if message.mid and message.mid not in db.get(table='conversations', fields_to_get='mid', amount_of_items=5, fields_to_compare=None, value_to_compare_to=None, comparator=None):
+        if message.mid and message.mid not in db.get(table='conversations', fields_to_get='mid'):
             handle_message(message, user)  # process the message and respond
         else:
             logging.warning(f"Message was already processed and was probably resent by facebook: {json_message}")
