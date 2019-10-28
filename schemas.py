@@ -42,9 +42,12 @@ user_questions = {
     "city": {"question": ["Które miasto Cię interesuje?"],
              "responses": cities_scope},
     "features": {"question": ["Czy masz jakieś szczególne preferencje?", "Na czymś jeszcze Ci zależy?"],
-                 "responses": ['Nie, wystarczy', 'Od zaraz', 'Zwierzęta dozwolone', 'Miejsce postojowe', 'Dwupokojowe', 'Umeblowane', 'Stan deweloperski', 'dla 🚬', 'dla 🚭']}
+                 "responses_room": ['Nie, wystarczy', 'Od zaraz', 'Umeblowany', 'Nieprzechodni', 'Zwierzęta dozwolone',
+                                    'Z balkonem', 'dla 🚬', 'dla 🚭'],
+                 "responses_apartment": ['Nie, wystarczy', 'Od zaraz', 'Umeblowane', 'Z miejscem postojowym',
+                                         'Na parterze', 'Zwierzęta dozwolone', 'Dwupokojowe', 'Stan deweloperski',
+                                         'dla 🚬', 'dla 🚭']}
 }
-
 
 bot_phrases = {
     "greeting": ["{greeting} {first_name}! Jestem Roomek i jestem na bieżąco z rynkiem nieruchomości.",
@@ -232,8 +235,9 @@ query_scheme = {
     "query_no": {"db": "int(1) NOT NULL", 'to_compare': False, 'comparator': '=', 'is_feature': False},
     "facebook_id": {"db": "char(100) NOT NULL", 'to_compare': False, 'comparator': '=', 'is_feature': False},
     "city": {"db": "varchar(50)", 'to_compare': True, 'comparator': '=', 'is_feature': False},
-    "housing_type": {"db": "varchar(50)", 'to_compare': True, 'comparator': '=', 'is_feature': False},          # room, apartment
-    "business_type": {"db": "varchar(50)", 'to_compare': True, 'comparator': '=', 'is_feature': False},         # rent, sale
+    "housing_type": {"db": "varchar(50)", 'to_compare': True, 'comparator': '=', 'is_feature': False},
+    # room, apartment
+    "business_type": {"db": "varchar(50)", 'to_compare': True, 'comparator': '=', 'is_feature': False},  # rent, sale
     "price": {"db": "int(1)", 'to_compare': True, 'comparator': '<=', 'is_feature': False},
     # address:
     "country": {"db": "varchar(50)", 'to_compare': False, 'comparator': '=', 'is_feature': False},
