@@ -16,39 +16,43 @@ class Parse_Offer_Pipeline(object):
 
 class Get_Location_Pipeline(object):
     def process_item(self, item, spider):
-        lowest_location_level = ''
         try:
-            city = item['city'][0]
+            item['location_latitude']
+            item['location_longitude']
         except KeyError:
-            logging.ERROR('No city info in the offer')
-        try:
-            lowest_location_level = item['street'][0] if item['street'][0] is not None else ''
-        except KeyError:
-            pass
-        if lowest_location_level:
-            geolocate_data = geolocate.recognize_location(location=lowest_location_level, city=city)
+            lowest_location_level = ''
             try:
-                if not item['location_latitude']:
+                city = item['city'][0]
+            except KeyError:
+                logging.ERROR('No city info in the offer')
+            try:
+                lowest_location_level = item['street'][0] if item['street'][0] is not None else ''
+            except KeyError:
+                pass
+            if lowest_location_level:
+                geolocate_data = geolocate.recognize_location(location=lowest_location_level, city=city)
+                try:
+                    if not item['location_latitude']:
+                        item['location_latitude'] = [float(geolocate_data['lat'])]
+                        try:
+                            item['parsed_fields'] = item['parsed_fields'] + ', location_latitude'
+                        except:
+                            item['parsed_fields'] = 'location_latitude'
+                    if not item['location_longitude']:
+                        item['location_longitude'] = [float(geolocate_data['lon'])]
+                        try:
+                            item['parsed_fields'] = item['parsed_fields'] + ', location_longitude'
+                        except:
+                            item['parsed_fields'] = 'location_longitude'
+                except KeyError:
                     item['location_latitude'] = [float(geolocate_data['lat'])]
-                    try:
-                        item['parsed_fields'] = item['parsed_fields'] + ', location_latitude'
-                    except:
-                        item['parsed_fields'] = 'location_latitude'
-                if not item['location_longitude']:
                     item['location_longitude'] = [float(geolocate_data['lon'])]
                     try:
+                        item['parsed_fields'] = item['parsed_fields'] + ', location_latitude'
                         item['parsed_fields'] = item['parsed_fields'] + ', location_longitude'
                     except:
+                        item['parsed_fields'] = 'location_latitude'
                         item['parsed_fields'] = 'location_longitude'
-            except KeyError:
-                item['location_latitude'] = [float(geolocate_data['lat'])]
-                item['location_longitude'] = [float(geolocate_data['lon'])]
-                try:
-                    item['parsed_fields'] = item['parsed_fields'] + ', location_latitude'
-                    item['parsed_fields'] = item['parsed_fields'] + ', location_longitude'
-                except:
-                    item['parsed_fields'] = 'location_latitude'
-                    item['parsed_fields'] = 'location_longitude'
         return item
 
 

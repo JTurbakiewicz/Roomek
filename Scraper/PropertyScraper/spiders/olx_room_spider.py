@@ -4,6 +4,7 @@ from Scraper.PropertyScraper.itemloaders import OlxRoomLoader, OtodomOfferLoader
 from scrapy.linkextractors import LinkExtractor
 import Databases.mysql_connection as db
 from schemas import offer_scheme
+from Scraper.PropertyScraper.settings import PAGES_TO_SCRAPE
 
 
 def prepare_metadata(request, response):
@@ -16,17 +17,11 @@ already_scraped_urls_dicts = db.get_all(table_name='offers', fields_to_get='offe
 already_scraped_urls = [url['offer_url'] for url in already_scraped_urls_dicts]
 
 OLX_extractor_subpage = LinkExtractor(allow=('olx.pl/oferta/'), deny=(';promoted'), unique=True)
-OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=23|page=33'), unique=True,
-                                                  restrict_xpaths=(
-                                                      ['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
-                                                       '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a']))
-# OLX_main_page_extractor_next_page = LinkExtractor(allow=(r'page=2|page=3|page=4|page=5'), unique=True,
-#                                                   restrict_xpaths=(
-#                                                   ['//*[@id="body-container"]/div[3]/div/div[8]/span[3]/a',
-#                                                    '//*[@id="body-container"]/div[3]/div/div[8]/span[4]/a',
-#                                                    '//*[@id="body-container"]/div[3]/div/div[8]/span[5]/a',
-#                                                    '//*[@id="body-container"]/div[3]/div/div[8]/span[6]/a']))
 
+OLX_extractor_next_page = LinkExtractor(
+    allow=[f'page={x}' for x in (range(2, PAGES_TO_SCRAPE + 1) if PAGES_TO_SCRAPE > 1 else range(1))], unique=True,
+    restrict_xpaths=[f'//*[@id="body-container"]/div[3]/div/div[8]/span[{x + 1}]/a'
+                     for x in range(2, PAGES_TO_SCRAPE + 1)])
 
 links_to_main_page = set()
 links_to_olx_offers = set()
@@ -45,16 +40,16 @@ class OlxRoomSpider(scrapy.Spider):
 
     def start_requests(self):
         for url in self.urls:
-            request = scrapy.Request(url=url, callback=self.parse_initial_page)
+            request = scrapy.Request(url=url, callback=self.parse_main_pages)
             request.meta['housing_type'] = url.split('/')[-3]
             request.meta['city'] = url.split('/')[-2]
             yield request
 
-    def parse_initial_page(self, response):
-        next_page_links = OLX_main_page_extractor_next_page.extract_links(response)
+    def parse_main_pages(self, response):
+        next_page_links = OLX_extractor_next_page.extract_links(response)
         for link in next_page_links:
-            links_to_main_page.add(link.url)
-            if link is not None and link.url:
+            if link is not None and link.url and link.url not in links_to_main_page:
+                links_to_main_page.add(link.url)
                 request = scrapy.Request(link.url, callback=self.parse_main_pages)
                 yield prepare_metadata(request, response)
 

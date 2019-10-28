@@ -9,5 +9,3 @@ reset_db_at_start = False
 
 cities_scope = ['Warszawa', 'Kraków', 'Łódź', 'Wrocław', 'Poznań', 'Gdańsk', 'Szczecin', 'Bydgoszcz', 'Lublin',
                 'Białystok', 'Katowice']
-
-cities_scope = ['Warszawa']
