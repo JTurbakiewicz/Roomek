@@ -60,7 +60,7 @@ def collect_information(message, user, bot):
                     user.set_param("person_type", entity['value'])
 
                 if entity['entity'] == "feature":
-                    user.add_feature(entity['value'])
+                    user.add_feature(entity)
 
                 # TODO Add more yes/no contexts.
                 if entity['entity'] == "boolean":

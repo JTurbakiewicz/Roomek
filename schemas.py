@@ -41,18 +41,19 @@ user_questions = {
               "responses": ['Do 1000 zł', 'Do 2000 zł', 'Do 3000 zł', 'Do 5000 zł', 'Dowolna kwota'],
               "responses_rent_room": ['Do 700 zł', 'Do 1000 zł', 'Do 1500 zł', 'Do 2000 zł', 'Dowolna kwota'],
               "responses_rent_apartment": ['Do 1000 zł', 'Do 2000 zł', 'Do 3000 zł', 'Do 4000 zł', 'Dowolna kwota'],
-              "responses_buy_apartment": ['Do 100\'000 zł', 'Do 250\'000 zł', 'Do 500\'000 zł', 'Do 750\'000 zł', 'Dowolna kwota'],
-              "responses_buy_house": ['Do 200\'000 zł', 'Do 400\'000 zł', 'Do 700\'000 zł', 'Do miliona zł', 'Dowolna kwota']},
+              "responses_buy_apartment": ['Do 100\'000 zł', 'Do 250\'000 zł', 'Do 500\'000 zł', 'Do 750\'000 zł',
+                                          'Dowolna kwota'],
+              "responses_buy_house": ['Do 200\'000 zł', 'Do 400\'000 zł', 'Do 700\'000 zł', 'Do miliona zł',
+                                      'Dowolna kwota']},
     "city": {"question": ["Które miasto Cię interesuje?"],
              "responses": cities_scope},
     "features": {"question": ["Czy masz jakieś szczególne preferencje?", "Na czymś jeszcze Ci zależy?"],
                  "responses_room": ['Nie, wystarczy', 'Od zaraz', 'Umeblowany', 'Nieprzechodni', 'Zwierzęta dozwolone',
-                                    'Z balkonem', 'dla 🚬', 'dla 🚭'],
+                                    'Z balkonem', 'Dla palących', 'Dla niepalących'],
                  "responses_apartment": ['Nie, wystarczy', 'Od zaraz', 'Umeblowane', 'Z miejscem postojowym',
-                                         'Na parterze', 'Zwierzęta dozwolone', 'Dwupokojowe', 'Stan deweloperski',
-                                         'dla 🚬', 'dla 🚭']}
+                                         'Na parterze', 'Zwierzęta dozwolone', 'Dwupokojowe',
+                                         'Dla palących', 'Dla niepalących']}
 }
-
 
 bot_phrases = {
     "greeting": ["{greeting} {first_name}! Jestem Roomek i jestem na bieżąco z rynkiem nieruchomości.",
@@ -240,7 +241,8 @@ query_scheme = {
     "query_no": {"db": "int(1) NOT NULL", 'to_compare': False, 'comparator': '=', 'is_feature': False},
     "facebook_id": {"db": "char(100) NOT NULL", 'to_compare': False, 'comparator': '=', 'is_feature': False},
     "city": {"db": "varchar(50)", 'to_compare': True, 'comparator': '=', 'is_feature': False},
-    "housing_type": {"db": "varchar(50)", 'to_compare': True, 'comparator': '=', 'is_feature': False},  # room, apartment
+    "housing_type": {"db": "varchar(50)", 'to_compare': True, 'comparator': '=', 'is_feature': False},
+    # room, apartment
     "business_type": {"db": "varchar(50)", 'to_compare': True, 'comparator': '=', 'is_feature': False},  # rent, buy
     "price": {"db": "int(1)", 'to_compare': True, 'comparator': '<=', 'is_feature': False},
     # address:

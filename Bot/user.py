@@ -78,12 +78,21 @@ class User(UserTemplate):
         except TypeError:
             logging.warning("Probably item was misinterpeted as location by wit")
 
-    def add_feature(self, feature, value=None):
-        feature = replace_emojis(feature)
-        if feature == 'asap':
-            feature = 'ready_from'
+    def add_feature(self, entity, value=None):
+        feature = replace_emojis(entity['role'])
+        value = entity['value']
+        if feature == 'ready_from':
             value = datetime.datetime.today()
-        db.update_query(facebook_id=self.facebook_id, field_name=feature, field_value=value)
+        elif feature in ['furniture', 'connecting_room', 'pet_friendly', 'balcony', 'non_smokers_only',
+                         'parking_space']:
+            value = True if value == 'True' else False
+        elif feature in ['apartment_level', 'amount_of_rooms']:
+            value = int(value)
+        try:
+            db.update_query(facebook_id=self.facebook_id, field_name=feature, field_value=value)
+        except:
+            logging.error(
+                f'Received feature {feature} could not be saved in DB. Probably formatting needs to be adjusted')
 
     def restart(self, restart):
         if restart:
