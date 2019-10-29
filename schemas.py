@@ -50,9 +50,23 @@ user_questions = {
     "features": {"question": ["Czy masz jakieś szczególne preferencje?", "Na czymś jeszcze Ci zależy?"],
                  "responses_room": ['Nie, wystarczy', 'Od zaraz', 'Umeblowany', 'Nieprzechodni', 'Zwierzęta dozwolone',
                                     'Z balkonem', 'Dla palących', 'Dla niepalących'],
-                 "responses_apartment": ['Nie, wystarczy', 'Od zaraz', 'Umeblowane', 'Z miejscem postojowym',
+                 "responses_apartment": ['Nie, wystarczy', 'Od zaraz', 'Umeblowane', 'Miejsce postojowe',
                                          'Na parterze', 'Zwierzęta dozwolone', 'Dwupokojowe',
                                          'Dla palących', 'Dla niepalących']}
+}
+
+user_questions_translations = {
+    'Od zaraz': 'ready_from',
+    'Umeblowany': 'furniture',
+    'Umeblowane': 'furniture',
+    'Nieprzechodni': 'connecting_room',
+    'Zwierzęta dozwolone': 'pet_friendly',
+    'Z balkonem': 'balcony',
+    'Dla palących': 'non_smokers_only',
+    'Dla niepalących': 'non_smokers_only',
+    'Z miejscem postojowym': 'parking_space',
+    'Na parterze': 'apartment_level',
+    'Dwupokojowe': 'amount_of_rooms',
 }
 
 bot_phrases = {

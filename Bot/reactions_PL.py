@@ -10,7 +10,7 @@ from settings import *
 from RatingEngine.best_offer import best_offer
 from OfferParser.translator import translate
 from time import sleep
-from schemas import user_questions, bot_phrases, months
+from schemas import user_questions, bot_phrases, months, user_questions_translations
 from Bot.geolocate import child_locations
 from Databases import mysql_connection as db
 import datetime
@@ -124,8 +124,13 @@ def ask_for_more_features(message, user, bot, meta=""):
         responses = user_questions['features'][custom]
     else:
         responses = user_questions['features']['responses']
-
-    # TODO powinno wiedzieć jakie już padły
+    already_asked_for_eng = [x[0] for x in db.get_all_queries(facebook_id=user.facebook_id)]
+    already_asked_for_pl = []
+    for asked_in_eng in already_asked_for_eng:
+        for polish, english in user_questions_translations.items():
+            if english == asked_in_eng:
+                already_asked_for_pl.append(polish)
+    responses = [i for i in responses if i not in already_asked_for_pl]
     bot.fb_send_quick_replies(message.facebook_id, question, responses)
 
 
