@@ -57,7 +57,8 @@ def ask_for_information(message, user, bot):
         if len(features_recorded) == 0:
             response.ask_for(message, user, bot, param="features", meta=f"{db.user_query(user.facebook_id,'housing_type')}")
         else:
-            response.ask_for_more_features(message, user, bot)
+            response.ask_for_more_features(message, user, bot,
+                                           meta=f"{db.user_query(user.facebook_id, 'housing_type')}")
 
     elif not user.wants_more_features and not user.confirmed_data:
         response.show_input_data(message, user, bot)

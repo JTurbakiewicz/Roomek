@@ -117,11 +117,16 @@ def restart(message, user, bot):
 
 
 @response_decorator
-def ask_for_more_features(message, user, bot):
+def ask_for_more_features(message, user, bot, meta=""):
     question = random.choice(["Coś oprócz tego?", "Ok, jeszcze coś?", "Zanotowałem, chciałbyś coś dodać?"])
-    replies = user_questions['features']['responses']
+    custom = f'responses_{meta}'
+    if meta != "" and custom in user_questions['features']:
+        responses = user_questions['features'][custom]
+    else:
+        responses = user_questions['features']['responses']
+
     # TODO powinno wiedzieć jakie już padły
-    bot.fb_send_quick_replies(message.facebook_id, question, replies)
+    bot.fb_send_quick_replies(message.facebook_id, question, responses)
 
 
 @response_decorator
