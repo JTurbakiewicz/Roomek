@@ -62,6 +62,18 @@ class MySQL_Offer_RatePipeline(object):
         return item
 
 
+class Total_Price_Pipeline(object):
+    def process_item(self, item, spider):
+        try:
+            price = item['price'][0]
+            additional_price = item['additional_rent'][0]
+            if price != additional_price:
+                item['total_price'] = [price + additional_price]
+        except KeyError:
+            item['total_price'] = [price]
+        return item
+
+
 class MySQL_Offer_SQLPipeline(object):
     def process_item(self, item, spider):
         db.create_offer(item)

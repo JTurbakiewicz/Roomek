@@ -16,7 +16,7 @@ NEWSPIDER_MODULE = 'PropertyScraper.spiders'
 
 LOG_LEVEL = 40
 
-CUSTOM_LOGGING = True
+CUSTOM_LOGGING = False
 
 PAGES_TO_SCRAPE = 3
 
@@ -74,7 +74,8 @@ ITEM_PIPELINES = {
     'PropertyScraper.pipelines.MySQL_Offer_RatePipeline': 299,
     'PropertyScraper.pipelines.Parse_Offer_Pipeline': 300,
     'PropertyScraper.pipelines.Get_Location_Pipeline': 301,
-    'PropertyScraper.pipelines.MySQL_Offer_SQLPipeline': 302,
+    'PropertyScraper.pipelines.Total_Price_Pipeline': 302,
+    'PropertyScraper.pipelines.MySQL_Offer_SQLPipeline': 303,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
