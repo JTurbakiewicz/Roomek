@@ -6,7 +6,7 @@ import os
 import logging
 import datetime
 import re
-from Bot.cognition import recognize_sticker, replace_emojis
+from Bot.cognition import replace_emojis
 from Bot.geolocate import recognize_location
 from OfferParser.translator import translate
 from Databases import mysql_connection as db
