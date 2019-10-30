@@ -5,7 +5,7 @@
 import os
 import random
 import logging
-from Bot.cognition import collect_information
+from Bot.cognition import collect_information, recognize_sticker
 from settings import *
 from RatingEngine.best_offer import best_offer
 from OfferParser.translator import translate
@@ -14,7 +14,7 @@ from schemas import user_questions, bot_phrases, months, user_questions_translat
 from Bot.geolocate import child_locations
 from Databases import mysql_connection as db
 import datetime
-
+# from Bot.respond import ask_for_information
 
 def response_decorator(original_function):
     def wrapper(message, user, bot, **kwargs):
@@ -225,8 +225,8 @@ def url(message, user, bot):
 
 # @response_decorator
 def sticker_response(message, user, bot):
-    sticker_name = 'thumb'  # TODO
-    # sticker_name = cog.recognize_sticker(message.stickerID)
+    # TODO !!! Problemy z naklejkami, rozumieniem "thumb", zapisem do bazy oraz z odpowiadaniem na naklejke.
+    sticker_name = recognize_sticker(message.stickerID)
     if sticker_name == 'thumb' or sticker_name == 'thumb+' or sticker_name == 'thumb++':
         # Fake message NLP:
         message.NLP_entities = [{'entity': "boolean", "value": "yes"}]
@@ -246,9 +246,9 @@ def sticker_response(message, user, bot):
             'fox': "what does the fox say?!",
             'kungfurry': "Kung fury! 👊👊👊",
             'sloth': "moooogggęęę woooollllniiiieeeejjj"
-        }.get(sticker_name, ["Fajna naklejka :)", "Czy to jest opowiedź na moje pytanie?"])
+        }.get(sticker_name, ["Fajna naklejka :)", "Haha!"])
         bot.fb_send_text_message(str(message.facebook_id), response)
-
+        #ask_for_information(message, user, bot)
 
 def show_user_object(message, user, bot):
     reply = "*MESSAGE*\n"
