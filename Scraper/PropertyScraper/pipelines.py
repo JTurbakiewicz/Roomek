@@ -2,6 +2,7 @@ from RatingEngine.scraped_ranker import initial_rating
 import Databases.mysql_connection as db
 from OfferParser.regex_parser import parse_offer
 from Bot import geolocate
+import math
 import logging
 
 
@@ -59,6 +60,18 @@ class Get_Location_Pipeline(object):
 class MySQL_Offer_RatePipeline(object):
     def process_item(self, item, spider):
         item = initial_rating(item)
+        return item
+
+
+class Total_Price_Pipeline(object):
+    def process_item(self, item, spider):
+        try:
+            price = item['price'][0]
+            additional_price = item['additional_rent'][0]
+            if price != additional_price:
+                item['total_price'] = [math.ceil(price + additional_price / 10) * 10]
+        except KeyError:
+            item['total_price'] = [price]
         return item
 
 

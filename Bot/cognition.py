@@ -51,7 +51,7 @@ def collect_information(message, user, bot):
                     regex3 = re.compile(r"\s*(mln)|[m]|(mln)|(milion)", re.IGNORECASE)
                     entity['value'] = regex3.sub(r"000000", str(entity['value']))
 
-                    user.set_param("price", float(entity['value']))
+                    user.set_param("total_price", float(entity['value']))
 
                 elif entity['entity'] == "number" and user.context == "show_offers":
                     logging.warning(f"User liked the {entity['value']} offer but we don't use that info yet!")

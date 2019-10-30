@@ -106,6 +106,10 @@ offer_scheme = {
               'scraping_path_olx': '//*[@id="offeractions"]/div[1]/strong/text()', 'misc': [],
               'scraping_path_otodom': '//*[@id="root"]/article/header/div[2]/div[1]/div[2]/text()',
               'scraping_path_olxroom': '//*[@id="offeractions"]/div[1]/strong/text()'},
+    "total_price": {"db": "int(1)", 'item_loaders': [],
+                    'scraping_path_olx': '', 'misc': [],
+                    'scraping_path_otodom': '',
+                    'scraping_path_olxroom': ''},
     "street": {"db": "varchar(50)", 'item_loaders': ['street_it'], 'scraping_path_olx': '', 'misc': [],
                'scraping_path_otodom': '', 'scraping_path_olxroom': ''},
     "district": {"db": "varchar(50)", 'item_loaders': ['district'],
@@ -259,6 +263,7 @@ query_scheme = {
     # room, apartment
     "business_type": {"db": "varchar(50)", 'to_compare': True, 'comparator': '=', 'is_feature': False},  # rent, buy
     "price": {"db": "int(1)", 'to_compare': True, 'comparator': '<=', 'is_feature': False},
+    "total_price": {"db": "int(1)", 'to_compare': True, 'comparator': '<=', 'is_feature': False},
     # address:
     "country": {"db": "varchar(50)", 'to_compare': False, 'comparator': '=', 'is_feature': False},
     "district": {"db": "varchar(50)", 'to_compare': False, 'comparator': '=', 'is_feature': False},
@@ -353,6 +358,7 @@ ratings_scheme = {
     "offer_name": {"db": "float(4,3)"},
     "offer_thumbnail_url": {"db": "float(4,3)"},
     "price": {"db": "float(4,3)"},
+    "total_price": {"db": "float(4,3)"},
     "street": {"db": "float(4,3)"},
     "district": {"db": "float(4,3)"},
     "date_of_the_offer": {"db": "float(4,3)"},
@@ -420,6 +426,7 @@ regex_scheme = {
     # "offer_name": {'regex': []},
     # "offer_thumbnail_url": {'regex': []},
     # "price": {'regex': []},
+    # "total_price": {'regex': []},
     "street": {'street': [r'(ul\.\s{,1})(.{,25})', r'(al\.\s{,1})(.{,25})', r'(ulic[ay]\s{,1})(.{,25})',
                           r'(ale[ja]\s{,1})(.{,25})', r'(alei\s{,1})(.{,25})']},
     "district": {'Center': ['centrum']},

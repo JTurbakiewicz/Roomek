@@ -36,7 +36,7 @@ class User(UserTemplate):
 
     def set_param(self, name, value):
 
-        if name == "price":
+        if name == "total_price":
             self.set_price(value)
         elif name in user_scheme.keys():
             setattr(self, name, value)
@@ -50,7 +50,7 @@ class User(UserTemplate):
             if "-" in str(price) and ":" in str(price):
                 price = price[0:5]
             clean = re.sub("[^0-9]", "", str(price))
-            db.update_query(facebook_id=self.facebook_id, field_name='price', field_value=int(clean))
+            db.update_query(facebook_id=self.facebook_id, field_name='total_price', field_value=int(clean))
         except:
             logging.warning(
                 f"Couldn't set the price limit using: '{price}', so it remains at {self.price}.")
