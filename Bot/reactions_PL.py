@@ -30,6 +30,8 @@ def response_decorator(original_function):
             for key, value in kwargs.items():
                 if key == "param":
                     user.set_param("context", "ask_for_" + str(value))
+                elif key == "meta":
+                    pass
                 else:
                     user.set_param("context", original_function.__name__)
         else:
@@ -80,7 +82,7 @@ def ask_for_location(message, user, bot):
     districts = child_locations(city)
     if districts:
         replies = replies + child_locations(city)[0:9]
-    bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies, location=True)
+    bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies)
 
 
 @response_decorator
@@ -91,7 +93,7 @@ def ask_more_locations(message, user, bot):
     districts = child_locations(city)
     if districts:
         replies = replies + child_locations(city)[0:9]
-    bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies, location=True)
+    bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies)
     # TODO powinno wiedzieć co już padło
 
 
@@ -192,10 +194,10 @@ def show_offers(message, user, bot):
         bot.fb_send_offers_carousel(message.facebook_id, best['offers'])
         sleep(4)    # TODO asyncio!
         bot.fb_fake_typing(message.facebook_id, 0.7)
-        response = random.choice(["Znalazłeś to czego szukałeś, czy pokazać następne?", "Masz jakiegoś faworyta, czy pokazać kolejne oferty?"])
+        response = random.choice(["Czy znalazłeś to czego szukałeś, czy pokazać następne?", "Masz jakiegoś faworyta, czy pokazać kolejne oferty?"])
         # "Która z powyższych najbardziej Ci odpowiada?""Która z powyższych najbardziej Ci odpowiada?"
         bot.fb_send_quick_replies(message.facebook_id, response,
-                                  ['pokaż następne oferty', 'zacznijmy od nowa'])
+                                  ['Pokaż następne', 'Zacznijmy od nowa'])
     else:
         bot.fb_send_text_message(message.facebook_id, "Niestety nie znalazłem ofert spełniających Twoje kryteria :(")
 

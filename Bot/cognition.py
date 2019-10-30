@@ -9,7 +9,7 @@ from settings import MINIMUM_CONFIDENCE
 # import Bot.reactions_PL as response
 from OfferParser.translator import translate
 from pprint import pprint
-
+import re
 
 def collect_information(message, user, bot):
     """
@@ -43,16 +43,16 @@ def collect_information(message, user, bot):
                 if entity['entity'] == "location":
                     user.add_location(location=entity['value'])
 
-                if entity['entity'] == "amount_of_money" or entity['entity'] == "number" or entity[
-                    'entity'] == "any_amount" and user.context != "show_offers":
-                    if "'" in str(entity['value']) or " " in str(entity['value']) or "zł" in str(entity['value']):
-                        entity['value'].replace("'","")
-                        entity['value'].replace(" ", "")
-                        entity['value'].replace("zł", "")
-                    if "milion" in str(entity['value']):
-                            user.set_param("price", 1000000)
-                    else:
-                        user.set_param("price", entity['value'])
+                if entity['entity'] == "amount_of_money" or entity['entity'] == "number" or entity['entity'] == "any_amount" and user.context != "show_offers":
+                    regex1 = re.compile(r"\s*(tys)|[k]", re.IGNORECASE)
+                    entity['value'] = regex1.sub(r"000", str(entity['value']))
+                    regex2 = re.compile(r"\s*(z[lł])|[ ',.]", re.IGNORECASE)
+                    entity['value'] = regex2.sub(r"", str(entity['value']))
+                    regex3 = re.compile(r"\s*(mln)|[m]|(mln)|(milion)", re.IGNORECASE)
+                    entity['value'] = regex3.sub(r"000000", str(entity['value']))
+
+                    user.set_param("price", float(entity['value']))
+
                 elif entity['entity'] == "number" and user.context == "show_offers":
                     logging.warning(f"User liked the {entity['value']} offer but we don't use that info yet!")
 

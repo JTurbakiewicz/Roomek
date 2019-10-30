@@ -318,8 +318,7 @@ class Bot:
     # def fb_send_quick_replies(self, userid, reply_message = "", replies = ['a','b','c'], location=False, notification_type=NotificationType.regular):
 
     # TODO Temp:
-    def fb_send_quick_replies(self, userid, reply_message="", replies=['a', 'b', 'c'], location=False,
-                              notification_type=NotificationType.regular):
+    def fb_send_quick_replies(self, userid, reply_message="", replies=['a', 'b', 'c'], notification_type=NotificationType.regular):
 
         """Send quick replies to the specified recipient.
         https://developers.facebook.com/docs/messenger-platform/send-api-reference/quick-replies
@@ -331,10 +330,7 @@ class Bot:
             Response from API as <dict>
         """
 
-        # TODO add icon near quick replies: {...,"image_url":"http://example.com/img/red.png"}
         reply_options = []
-        if location:
-            reply_options.append({"content_type": "location", "title": "mapka"})
         for option in replies:
             content = {
                 "content_type": "text",
