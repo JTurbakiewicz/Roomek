@@ -171,7 +171,7 @@ def show_input_data(message, user, bot):
                 response2 += ", którego " + str(feature[0]) + " to " + str(feature[1])
         bot.fb_send_text_message(str(message.facebook_id), response2)
 
-    response3 = f"i kosztuje do {db.user_query(user.facebook_id, field_name='price')}zł."
+    response3 = f"i kosztuje do {db.user_query(user.facebook_id, field_name='total_price')}zł."
     bot.fb_send_text_message(str(message.facebook_id), response3)
     # TODO add more params
 

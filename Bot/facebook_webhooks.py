@@ -155,7 +155,7 @@ class Bot:
     def fb_send_offers_carousel(self, userid, offers):
         elements = []
         for offer in offers:
-            t = f"{str(offer['area']) + ' m2 ' if offer['area'] else ''}za {offer['price']}zł,{' ' + offer['district'] if offer['district'] else ''}{' ul. ' + offer['street'] if offer['street'] else ''} z {offer['date_of_the_offer'].date()}"
+            t = f"{str(offer['area']) + ' m2 ' if offer['area'] else ''}za {offer['total_price']}zł,{' ' + offer['district'] if offer['district'] else ''}{' ul. ' + offer['street'] if offer['street'] else ''} z {offer['date_of_the_offer'].date()}"
             print(t)
             st = f"{offer['offer_name']}"
             buttons = [self.fb_create_button(title="Sprawdź", url=offer['offer_url']),
