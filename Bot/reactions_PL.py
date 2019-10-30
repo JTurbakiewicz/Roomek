@@ -93,6 +93,8 @@ def ask_more_locations(message, user, bot):
     districts = child_locations(city)
     if districts:
         replies = replies + child_locations(city)[0:9]
+    already_asked_for = db.user_query(facebook_id=user.facebook_id, field_name='district').split(',')
+    replies = [i for i in replies if i not in already_asked_for]
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies)
     # TODO powinno wiedzieć co już padło
 
