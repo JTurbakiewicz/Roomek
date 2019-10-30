@@ -147,7 +147,7 @@ def show_input_data(message, user, bot):
     else:
         location = f"miejsca o współrzędnych: {db.user_query(user.facebook_id, field_name='latitude')}, {db.user_query(user.facebook_id, field_name='longitude')}"
 
-    if location != 'no_district' and location != 'no_street':
+    if location != '' and location != '':
         response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {db.user_query(user.facebook_id, field_name='city')} w okolicy {location}"
     else:
         response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {db.user_query(user.facebook_id, field_name='city')}"

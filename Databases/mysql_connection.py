@@ -229,10 +229,9 @@ def update_query(facebook_id, field_name, field_value, query_no=1):
                      """ % ("'" + facebook_id + "'",)
             cursor.execute(query_to_get_all_current_offers)
             districts_in_db = cursor.fetchone()['district']
-            if field_value in districts_in_db:
-                field_value = districts_in_db
-            else:
-                field_value = districts_in_db + ',' + field_value
+            if districts_in_db:
+                if field_value not in districts_in_db:
+                    field_value = districts_in_db + ',' + field_value
 
         query = f"""
             INSERT INTO queries

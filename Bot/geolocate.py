@@ -35,9 +35,9 @@ def recognize_location(location="", lat=0.00, long=0.00, city=""):
         loc = loc[0]
 
     if "lat" in loc:
-        loca = {"name": "no_name", "lat": loc["lat"], "lon": loc["lon"], "street": "no_street", "city": "no_city",
+        loca = {"name": "no_name", "lat": loc["lat"], "lon": loc["lon"], "street": "", "city": "no_city",
                 "county": "no_county", "state": "no_state", "country": "no_country", "boundingbox": "", "place_id": "",
-                "osm_id": "", "district": "no_district"}
+                "osm_id": "", "district": ""}
     else:
         return False
 
