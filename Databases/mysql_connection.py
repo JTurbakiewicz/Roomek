@@ -71,8 +71,9 @@ def set_up_db(db_config):
                 logging.info(f"Table '{table_name}' already exists.")
             else:
                 logging.error(str(err.msg))
-        else:
-            logging.info("OK")
+        # TODO po co to?
+        # else:
+        #     logging.info("OK")
     cnx.close()
 
 
