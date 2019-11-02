@@ -96,7 +96,6 @@ def ask_more_locations(message, user, bot):
     already_asked_for = db.user_query(facebook_id=user.facebook_id, field_name='district').split(',')
     replies = [i for i in replies if i not in already_asked_for]
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies)
-    # TODO powinno wiedzieć co już padło
 
 
 @response_decorator
@@ -124,6 +123,7 @@ def restart(message, user, bot):
 def ask_for_more_features(message, user, bot, meta=""):
     question = random.choice(["Coś oprócz tego?", "Ok, jeszcze coś?", "Zanotowałem, chciałbyś coś dodać?"])
     custom = f'responses_{meta}'
+    user.set_param("context", "ask_for_more_features")
     if meta != "" and custom in user_questions['features']:
         responses = user_questions['features'][custom]
     else:

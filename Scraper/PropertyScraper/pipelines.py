@@ -69,7 +69,7 @@ class Total_Price_Pipeline(object):
             price = item['price'][0]
             additional_price = item['additional_rent'][0]
             if price != additional_price:
-                item['total_price'] = [math.ceil(price + additional_price / 10) * 10]
+                item['total_price'] = [math.ceil((price + additional_price) / 10) * 10]
         except KeyError:
             item['total_price'] = [price]
         return item
