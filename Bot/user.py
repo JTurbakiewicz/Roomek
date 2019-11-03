@@ -46,6 +46,10 @@ class User(UserTemplate):
 
     def set_price(self, price):
         try:
+            price = int(price)
+        except ValueError:
+            pass
+        try:
             # workaround for witai returning date instead of price:
             if "-" in str(price) and ":" in str(price):
                 price = price[0:5]
