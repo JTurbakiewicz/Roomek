@@ -22,6 +22,8 @@ def handle_message(message, user):
 
     if message.is_echo:
         pass
+    elif db.msg_in(message.facebook_id, message.mid):
+        logging.info("this message has been already processed.")
     else:
 
         bot.fb_send_action(str(message.facebook_id), 'mark_seen')

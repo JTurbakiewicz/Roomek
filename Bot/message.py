@@ -67,7 +67,6 @@ class Message:
             else:
                 self.facebook_id = self.messaging['sender']['id']
 
-
             if 'delivery' in self.messaging:
                 self.type = "Delivery"
                 # TODO: delivery has mids not mid

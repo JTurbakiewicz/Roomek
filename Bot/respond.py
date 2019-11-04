@@ -8,6 +8,7 @@ from Databases import mysql_connection as db
 from schemas import user_questions, bot_phrases, query_scheme
 import random
 
+
 # TODO bug: adding place yes/no returns nothing
 def respond(message, user, bot):
 

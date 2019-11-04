@@ -81,7 +81,7 @@ def ask_for_location(message, user, bot):
     replies = ['Blisko centrum']
     districts = child_locations(city)
     if districts:
-        replies = replies + child_locations(city)[0:9]
+        replies = replies + child_locations(city)[0:11]
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies)
 
 
@@ -92,7 +92,7 @@ def ask_more_locations(message, user, bot):
     replies = ['Nie', 'Blisko centrum']
     districts = child_locations(city)
     if districts:
-        replies = replies + child_locations(city)[0:9]
+        replies = replies + child_locations(city)[0:10]
     already_asked_for = db.user_query(facebook_id=user.facebook_id, field_name='district').split(',')
     replies = [i for i in replies if i not in already_asked_for]
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies)
@@ -149,20 +149,22 @@ def show_input_data(message, user, bot):
     else:
         location = f"miejsca o współrzędnych: {db.user_query(user.facebook_id, field_name='latitude')}, {db.user_query(user.facebook_id, field_name='longitude')}"
 
-    if location != '' and location != '':
-        response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {db.user_query(user.facebook_id, field_name='city')} w okolicy {location}"
-    else:
-        response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {db.user_query(user.facebook_id, field_name='city')}"
+    response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {db.user_query(user.facebook_id, field_name='city')}"
+
+    if location != '':
+        response1 += f" w okolicy {location}"
 
     bot.fb_send_text_message(str(message.facebook_id), response1)
 
     if db.get_all_queries(user.facebook_id):
-        response2 = "które ma "
+        response2 = "które "
         for feature in db.get_all_queries(user.facebook_id):
+            # TODO popraw jak prezentuje
+            #   print(feature)
             if feature[1] == 1:
-                response2 += ", ma " + str(feature[0])
+                response2 += " ma " + str(feature[0])
             elif feature[1] == 0:
-                response2 += ", nie ma " + str(feature[0])
+                response2 += " nie ma " + str(feature[0])
             elif feature[0] == 'ready_from':
                 time_now = datetime.datetime.now()
                 if feature[1] < time_now:
@@ -175,7 +177,6 @@ def show_input_data(message, user, bot):
 
     response3 = f"i kosztuje do {db.user_query(user.facebook_id, field_name='total_price')}zł."
     bot.fb_send_text_message(str(message.facebook_id), response3)
-    # TODO add more params
 
     bot.fb_send_quick_replies(message.facebook_id, "Czy wszystko się zgadza?", ['Tak 👍', '👎 Nie'])
 

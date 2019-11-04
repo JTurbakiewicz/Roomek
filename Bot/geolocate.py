@@ -69,7 +69,10 @@ def child_locations(city):
     cities = [x['city'] for x in db.get_all(table_name='districts', fields_to_get='city')]
     if city in cities:
         children = db.get_custom(f"select district from districts where city = '{city}'")
+        # TODO show most popular first
+        #  sorted(student_tuples, key=lambda student: student[2])  # sort by number of searches
         children = [x['district'] for x in children]
+
     else:
         children = []
         try:
@@ -97,6 +100,7 @@ def child_locations(city):
     else:
         return False
 
+child_locations("Poznań")
 
 def place_boundaries(location):
     # try:
@@ -117,12 +121,14 @@ try:
 except (KeyError, TypeError) as e:
     logging.warning(f"GEOLOCATION NOT WORKING! {e}")
 
+print(str(child_locations(city="Poznań")) + "\n")
 
 if __name__ == "__main__":
+    pass
     # print(str(recognize_location(lat="51", long="21"))+"\n")
     # print(str(recognize_location(location="Warszawa"))+"\n")
     # print(str(recognize_location(location="Mokotów", city="Warszawa"))+"\n")
     # print(str(recognize_location(location="Stare Miasto"))+"\n")
     # print(str(recognize_location(location="Stare Miasto", city="Kraków"))+"\n")
     # print(str(child_locations(city="Warszawa")) + "\n")
-    print(place_boundaries(location="Mokotów"))
+    # print(place_boundaries(location="Mokotów"))
