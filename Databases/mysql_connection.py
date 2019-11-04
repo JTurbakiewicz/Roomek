@@ -457,6 +457,18 @@ def get_custom(sql_query):
         return cursor.fetchall()
 
 
+def msg_in(facebook_id, mid):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        query = """SELECT count(*)
+                 FROM conversations
+                 WHERE facebook_id = %s
+                 AND mid = %s
+                 """ % ("'" + facebook_id + "'", "'" + mid + "'")
+        cursor.execute(query)
+        data = cursor.fetchone()['count(*)']
+        return data
+
+
 def user_query(facebook_id, field_name, query_no=1):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """SELECT %s
