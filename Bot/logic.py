@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-""" Functions for basic bot behaviours. """
+""" Functions for basic bot behaviours. How it reacts to certain messages, depending on the context. """
 
 from settings import *
 import tokens
 from Databases import mysql_connection as db
 import Bot.cognition as cog
 import Bot.reactions_pl as rea
-import Bot.respond as res
 from Bot.facebook_webhooks import Bot
+from schemas import bot_phrases, query_scheme
+import random
+
 
 bot = Bot(tokens.fb_access)
 
@@ -20,10 +22,7 @@ def handle_message(message, user):
 
     if message.is_echo:
         pass
-    elif db.msg_in(message.facebook_id, message.mid):
-        logging.info("this message has been already processed.")
     else:
-
         bot.fb_send_action(str(message.facebook_id), 'mark_seen')
 
         if message.type == "Delivery":
@@ -53,7 +52,7 @@ def handle_text(message, user, bot):
     if message.NLP:
         logging.info(f"-NLP→ intent: {str(message.NLP_intent)}, entities: {str(message.NLP_entities)}")
         cog.collect_information(message, user, bot)
-        res.respond(message, user, bot)
+        respond(message, user, bot)
     else:
         rea.default_message(message, user, bot)
 
@@ -82,7 +81,7 @@ def handle_location(message, user, bot):
         user.add_location(message.latitude, message.longitude, city_known=False)
     elif user.context == "ask_for_location":
         user.add_location(message.latitude, message.longitude, city_known=True)
-    res.respond(message, user, bot)
+    respond(message, user, bot)
 
 
 def handle_devmode(message, user, bot):
@@ -101,3 +100,72 @@ def handle_devmode(message, user, bot):
         rea.show_user_object(message, user, bot)
     else:
         bot.fb_send_text_message(str(message.facebook_id), 'Hello world!')
+
+
+# TODO bug: adding place yes/no returns nothing
+def respond(message, user, bot):
+
+    if message.NLP_intent == "greeting":
+        rea.greeting(message, user, bot)
+    elif not message.NLP_intent and not message.NLP_entities:   # nie zrozumiał, więc ponawia pytanie
+        rea.default_message(message, user, bot)
+        response2 = random.choice(bot_phrases['back_to_context'])
+        bot.fb_send_text_message(str(message.facebook_id), response2)
+        ask_for_information(message, user, bot)
+    elif message.NLP_intent == "restart":
+        rea.ask_if_restart(message, user, bot)
+    elif user.wants_restart:
+        rea.restart(message, user, bot)
+    elif user.confirmed_data:
+        rea.show_offers(message, user, bot)
+    else:
+        ask_for_information(message, user, bot)
+
+
+def ask_for_information(message, user, bot):
+
+    if db.user_query(user.facebook_id, "business_type") is None:
+        rea.ask_for(message, user, bot, param="business_type")
+
+    elif db.user_query(user.facebook_id, "city") is None:
+        rea.ask_for(message, user, bot, param="city")
+
+    # TODO not the best approach
+    elif user.context == "ask_for_city":
+        rea.ask_for_location(message, user, bot)
+
+    elif user.wants_more_locations:
+        rea.ask_more_locations(message, user, bot)
+
+    elif db.user_query(user.facebook_id, "housing_type") is None:
+        rea.ask_for(message, user, bot, param="housing_type")
+
+    elif db.user_query(user.facebook_id, "total_price") is None:
+        rea.ask_for(message, user, bot, param="price", meta=f"{db.user_query(user.facebook_id,'business_type')}_{db.user_query(user.facebook_id,'housing_type')}")
+
+    elif user.wants_more_features:
+        features_in_schema = [field_name for field_name, field_value in query_scheme.items() if
+                              field_value['is_feature']]
+        user_features_queried = [query_tuple[0] for query_tuple in db.get_all_queries(facebook_id=user.facebook_id)]
+        features_recorded = [i for i in user_features_queried if i in features_in_schema]
+        if len(features_recorded) == 0:
+            rea.ask_for(message, user, bot, param="features",
+                             meta=f"{db.user_query(user.facebook_id, 'housing_type')}")
+        else:
+            rea.ask_for_more_features(message, user, bot,
+                             meta=f"{db.user_query(user.facebook_id, 'housing_type')}")
+
+    elif not user.wants_more_features and not user.confirmed_data:
+        rea.show_input_data(message, user, bot)
+
+    # TODO rea.ask_what_wrong(message, user, bot)
+
+    elif user.confirmed_data and not user.wants_restart:
+        rea.show_offers(message, user, bot)
+
+    elif user.wants_restart:
+        db.drop_user(user.facebook_id)
+        rea.restart(message, user, bot)
+
+    else:
+        rea.default_message(message, user, bot)

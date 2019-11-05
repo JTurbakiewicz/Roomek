@@ -23,7 +23,7 @@ from Databases import mysql_connection as db
 from Bot.logic import handle_message
 from Bot.message import Message
 from Bot.user import User
-from Bot.facebook_webhooks import verify_fb_token
+import Bot.facebook_webhooks as fb
 
 # initiate the web app
 app = Flask(__name__)
@@ -34,7 +34,7 @@ def receive_message():
     logging.debug(request.get_json())          # Full json content
     if request.method == 'GET':            # if type is 'GET' it means FB wants to verify tokens
         token_sent = request.args.get("hub.verify_token")
-        return verify_fb_token(request, token_sent)
+        return fb.verify_fb_token(request, token_sent)
     else:                                  # if type is not 'GET' it must be 'POST' - we have a message
         json_message = request.get_json()  # read message as json
         message = Message(json_message)
@@ -47,7 +47,7 @@ def receive_message():
             user = User(88888888)
             logging.warning(f"Message without facebook_id: {json_message}")
 
-        if message.mid and message.mid not in db.get(table='conversations', fields_to_get='mid'):
+        if message.mid not in db.get(table='conversations', fields_to_get='mid'):
             handle_message(message, user)  # process the message and respond
         else:
             logging.warning(f"Message was already processed and was probably resent by facebook: {json_message}")
