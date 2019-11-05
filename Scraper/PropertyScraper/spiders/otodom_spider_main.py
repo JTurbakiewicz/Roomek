@@ -52,7 +52,6 @@ class OtodomSpiderMain(scrapy.Spider):
         for link in next_page_links:
             if link is not None and link.url not in links_to_main_page:
                 links_to_main_page.add(link.url)
-                print('making request')
                 request = scrapy.Request(link.url, callback=self.parse_main_pages)
                 yield prepare_metadata(request, response)
 

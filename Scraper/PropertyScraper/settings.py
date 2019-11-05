@@ -16,7 +16,7 @@ NEWSPIDER_MODULE = 'PropertyScraper.spiders'
 
 LOG_LEVEL = 40
 
-CUSTOM_LOGGING = False
+CUSTOM_LOGGING = 1
 
 PAGES_TO_SCRAPE = 3
 
