@@ -1,7 +1,8 @@
-from RatingEngine.scraped_ranker import initial_rating
+
+import RatingEngine.scraped_ranker as sra
 import Databases.mysql_connection as db
-from OfferParser.regex_parser import parse_offer
-from Bot import geolocate
+import OfferParser.regex_parser as rxp
+import Bot.geolocate as geo
 import math
 import logging
 
@@ -9,7 +10,7 @@ import logging
 class Parse_Offer_Pipeline(object):
     def process_item(self, item, spider):
         try:
-            item = parse_offer(item)
+            item = rxp.parse_offer(item)
         except KeyError:
             pass
         return item
@@ -31,7 +32,7 @@ class Get_Location_Pipeline(object):
             except KeyError:
                 pass
             if lowest_location_level:
-                geolocate_data = geolocate.recognize_location(location=lowest_location_level, city=city)
+                geolocate_data = geo.recognize_location(location=lowest_location_level, city=city)
                 try:
                     if not item['location_latitude']:
                         item['location_latitude'] = [float(geolocate_data['lat'])]
@@ -59,7 +60,7 @@ class Get_Location_Pipeline(object):
 
 class MySQL_Offer_RatePipeline(object):
     def process_item(self, item, spider):
-        item = initial_rating(item)
+        item = sra.initial_rating(item)
         return item
 
 

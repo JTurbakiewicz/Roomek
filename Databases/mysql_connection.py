@@ -5,11 +5,13 @@ import logging
 import tokens
 import sys
 import emoji
-from Bot.user import User
-from Bot.message import Message
+
+from settings import reset_db_at_start
 from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, conversations_scheme, ratings_scheme, \
     query_scheme, districts_scheme
-from settings import reset_db_at_start
+
+from Bot.user import User
+from Bot.message import Message
 
 # logging.basicConfig(level='DEBUG')
 """Funtion definition"""

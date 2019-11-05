@@ -5,13 +5,11 @@
 from settings import *
 import tokens
 from Databases import mysql_connection as db
-from Bot.cognition import *
-from Bot.reactions_PL import *
-from Bot.respond import *
-from Bot.message import Message
+import Bot.cognition as cog
+import Bot.reactions_pl as rea
+import Bot.respond as res
 from Bot.facebook_webhooks import Bot
 
-# initiate the bot object:
 bot = Bot(tokens.fb_access)
 
 
@@ -54,16 +52,16 @@ def handle_text(message, user, bot):
     """ React when the user sends any text. """
     if message.NLP:
         logging.info(f"-NLP→ intent: {str(message.NLP_intent)}, entities: {str(message.NLP_entities)}")
-        collect_information(message, user, bot)
-        respond(message, user, bot)
+        cog.collect_information(message, user, bot)
+        res.respond(message, user, bot)
     else:
-        default_message(message, user, bot)
+        rea.default_message(message, user, bot)
 
 
 def handle_sticker(message, user, bot):
     """ React when the user sends a sticker. """
     bot.fb_fake_typing(str(message.facebook_id), 0.5)
-    response = sticker_response(message, user, bot)
+    response = rea.sticker_response(message, user, bot)
     if response != "already sent":
         bot.fb_send_text_message(str(message.facebook_id), response)
     logging.info(f"Message <sticker> from {str(message.facebook_id)[0:5]} recognized as '{message.sticker_name}' sticker (id={message.stickerID})")
@@ -84,7 +82,7 @@ def handle_location(message, user, bot):
         user.add_location(message.latitude, message.longitude, city_known=False)
     elif user.context == "ask_for_location":
         user.add_location(message.latitude, message.longitude, city_known=True)
-    respond(message, user, bot)
+    res.respond(message, user, bot)
 
 
 def handle_devmode(message, user, bot):
@@ -100,6 +98,6 @@ def handle_devmode(message, user, bot):
         bot.fb_send_text_message(str(message.facebook_id), 'Your data has been erased.')
         db.drop_user(message.facebook_id)
     elif 's' in message.text:
-        response.show_user_object(message, user, bot)
+        rea.show_user_object(message, user, bot)
     else:
         bot.fb_send_text_message(str(message.facebook_id), 'Hello world!')

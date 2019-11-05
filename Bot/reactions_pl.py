@@ -5,16 +5,18 @@
 import os
 import random
 import logging
-from Bot.cognition import collect_information, recognize_sticker
+from time import sleep
+import datetime
+
 from settings import *
+from schemas import user_questions, bot_phrases, months, user_questions_translations
+
+import Bot.cognition as cog
+import Bot.geolocate as geo
 from RatingEngine.best_offer import best_offer
 from OfferParser.translator import translate
-from time import sleep
-from schemas import user_questions, bot_phrases, months, user_questions_translations
-from Bot.geolocate import child_locations
 from Databases import mysql_connection as db
-import datetime
-# from Bot.respond import ask_for_information
+
 
 def response_decorator(original_function):
     def wrapper(message, user, bot, **kwargs):
@@ -79,9 +81,9 @@ def ask_for_location(message, user, bot):
     question = random.choice(bot_phrases['ask_location'])
     city = db.user_query(user.facebook_id, "city")
     replies = ['Blisko centrum']
-    districts = child_locations(city)
+    districts = geo.child_locations(city)
     if districts:
-        replies = replies + child_locations(city)[0:11]
+        replies = replies + geo.child_locations(city)[0:11]
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies)
 
 
@@ -90,9 +92,9 @@ def ask_more_locations(message, user, bot):
     question = random.choice(["Czy chciałbyś dodać jeszcze jakieś miejsce?", "Zanotowałem, coś oprócz tego?"])
     city = db.user_query(user.facebook_id, "city")
     replies = ['Nie', 'Blisko centrum']
-    districts = child_locations(city)
+    districts = geo.child_locations(city)
     if districts:
-        replies = replies + child_locations(city)[0:10]
+        replies = replies + geo.child_locations(city)[0:10]
     already_asked_for = db.user_query(facebook_id=user.facebook_id, field_name='district').split(',')
     replies = [i for i in replies if i not in already_asked_for]
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies)
@@ -217,23 +219,14 @@ def unable_to_answer(message, user, bot):
     bot.fb_send_text_message(str(message.facebook_id), response)
 
 
-@response_decorator
-def url(message, user, bot):
-    response = random.choice([
-        "mam to otworzyć?",
-        "co to za link?"
-    ])
-    bot.fb_send_text_message(str(message.facebook_id), response)
-
-
 # @response_decorator
 def sticker_response(message, user, bot):
     # TODO !!! Problemy z naklejkami, rozumieniem "thumb", zapisem do bazy oraz z odpowiadaniem na naklejke.
-    sticker_name = recognize_sticker(message.stickerID)
+    sticker_name = cog.recognize_sticker(message.stickerID)
     if sticker_name == 'thumb' or sticker_name == 'thumb+' or sticker_name == 'thumb++':
         # Fake message NLP:
         message.NLP_entities = [{'entity': "boolean", "value": "yes"}]
-        collect_information(message, user, bot)
+        cog.collect_information(message, user, bot)
     else:
         response = {
             'cactus': "Czy ten kaktus ma drugie znaczenie? :)",

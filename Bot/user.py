@@ -6,11 +6,11 @@ import os
 import logging
 import datetime
 import re
-from Bot.cognition import replace_emojis
-from Bot.geolocate import recognize_location
+import Bot.cognition as cog
+import Bot.geolocate as geo
 from OfferParser.translator import translate
 from Databases import mysql_connection as db
-from Bot.facebook_webhooks import get_user_info
+import Bot.facebook_webhooks as fb
 from schemas import user_scheme
 
 UserTemplate = type('UserTemplate', (object,), dict([(x, y["init"]) for x, y in user_scheme.items()]))
@@ -24,7 +24,7 @@ class User(UserTemplate):
         self.facebook_id = facebook_id
 
         if not db.user_exists(self.facebook_id):
-            info = get_user_info(facebook_id)
+            info = fb.get_user_info(facebook_id)
             logging.debug("User data gathered from facebook: " + str(info))
             for n in info.keys():
                 try:
@@ -63,15 +63,15 @@ class User(UserTemplate):
     def add_location(self, location="", lat=0, long=0, city_known=False):
 
         if lat != 0 and long != 0:
-            loc = recognize_location(lat=lat, long=long)
+            loc = geo.recognize_location(lat=lat, long=long)
         # TODO
         elif "entrum" in str(location):
             if hasattr(self, 'city'):
-                loc = recognize_location(location="centrum", city=self.city)
+                loc = geo.recognize_location(location="centrum", city=self.city)
             else:
-                loc = recognize_location(location=str(location))
+                loc = geo.recognize_location(location=str(location))
         else:
-            loc = recognize_location(location=str(location))
+            loc = geo.recognize_location(location=str(location))
         try:
             db.update_query(facebook_id=self.facebook_id, field_name='latitude', field_value=float(loc['lat']))
             db.update_query(facebook_id=self.facebook_id, field_name='longitude', field_value=float(loc['lon']))
@@ -83,7 +83,7 @@ class User(UserTemplate):
             logging.warning("Probably item was misinterpeted as location by wit")
 
     def add_feature(self, entity, value=None):
-        feature = replace_emojis(entity['role'])
+        feature = cog.replace_emojis(entity['role'])
         value = entity['value']
         if feature == 'ready_from':
             value = datetime.datetime.today()

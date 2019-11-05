@@ -1,7 +1,7 @@
 import logging
 import json
 import requests
-from Databases import mysql_connection as db
+# from Databases import mysql_connection as db
 
 
 # TODO add zoom parameter
@@ -100,7 +100,6 @@ def child_locations(city):
     else:
         return False
 
-child_locations("Poznań")
 
 def place_boundaries(location):
     # try:
@@ -112,16 +111,16 @@ def place_boundaries(location):
 
 
 """ test indicators """
-try:
-    if recognize_location(lat=52.2319237, long=21.0067265)['city'] == "Warszawa" and \
-            recognize_location(location="Warszawa")['city'] == "Warszawa":
-        logging.info("Geolocation: OK")
-    else:
-        logging.warning("NOMINATIM NOT WORKING!")
-except (KeyError, TypeError) as e:
-    logging.warning(f"GEOLOCATION NOT WORKING! {e}")
-
-print(str(child_locations(city="Poznań")) + "\n")
+# try:
+#     if recognize_location(lat=52.2319237, long=21.0067265)['city'] == "Warszawa" and \
+#             recognize_location(location="Warszawa")['city'] == "Warszawa":
+#         logging.info("Geolocation: OK")
+#     else:
+#         logging.warning("NOMINATIM NOT WORKING!")
+# except (KeyError, TypeError) as e:
+#     logging.warning(f"GEOLOCATION NOT WORKING! {e}")
+#
+# print(str(child_locations(city="Poznań")) + "\n")
 
 if __name__ == "__main__":
     pass

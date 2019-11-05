@@ -5,11 +5,10 @@
 import os
 import logging
 from datetime import date
-from Bot.cognition import recognize_sticker
-from Bot.user import *
+import Bot.cognition as cog
 import tokens
 from settings import MINIMUM_CONFIDENCE
-from pprint import pprint
+
 
 class Message:
     """
@@ -79,7 +78,7 @@ class Message:
                     if 'sticker_id' in self.messaging['message']:
                         self.type = "StickerMessage"
                         self.stickerID = self.messaging['message']['sticker_id']
-                        self.sticker_name = recognize_sticker(self.stickerID)
+                        self.sticker_name = cog.recognize_sticker(self.stickerID)
                     elif self.messaging['message']['attachments'][0]['type'] == "location":
                         self.type = "LocationAnswer"
                         self.latitude = self.messaging['message']['attachments'][0]['payload']['coordinates']['lat']

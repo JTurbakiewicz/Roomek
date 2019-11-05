@@ -2,13 +2,10 @@
 # -*- coding: utf-8 -*-
 """ Functions enabling the Bot to understand messages and intents. """
 
-# from Bot.bot_responses_PL import *
+
 import logging
-# from Databases import mysql_connection as db
 from settings import MINIMUM_CONFIDENCE
-# import Bot.reactions_PL as response
 from OfferParser.translator import translate
-from pprint import pprint
 import re
 
 def collect_information(message, user, bot):
