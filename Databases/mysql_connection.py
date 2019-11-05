@@ -10,9 +10,6 @@ from settings import reset_db_at_start
 from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, conversations_scheme, ratings_scheme, \
     query_scheme, districts_scheme
 
-from Bot.user import User
-from Bot.message import Message
-
 # logging.basicConfig(level='DEBUG')
 """Funtion definition"""
 
@@ -117,9 +114,7 @@ def create_table_scheme(table_name, table_scheme, primary_key='facebook_id'):
     return sql_query
 
 
-def create_message(msg_obj=None, update=False):
-    if msg_obj is None:
-        msg_obj = Message('default')
+def create_message(msg_obj, update=False):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         fields_to_add = ''
         msg_data = []
@@ -459,18 +454,6 @@ def get_custom(sql_query):
         return cursor.fetchall()
 
 
-def msg_in(facebook_id, mid):
-    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-        query = """SELECT count(*)
-                 FROM conversations
-                 WHERE facebook_id = %s
-                 AND mid = %s
-                 """ % ("'" + facebook_id + "'", "'" + mid + "'")
-        cursor.execute(query)
-        data = cursor.fetchone()['count(*)']
-        return data
-
-
 def user_query(facebook_id, field_name, query_no=1):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """SELECT %s
@@ -496,7 +479,7 @@ def get_all_queries(facebook_id, query_no=1):
                 (x != 'creation_time' and x != 'modification_time' and y is not None and query_scheme[x]['to_compare'])]
 
 
-def get_user(facebook_id):
+def get_user_data(facebook_id):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """SELECT *
                  FROM users
@@ -505,18 +488,7 @@ def get_user(facebook_id):
 
         cursor.execute(query)
         data = cursor.fetchone()
-
-        if data:
-            if len(data) != 0:
-                # TODO Jeśli będzie po każdej wiadomości tworzył obiekt User to zawsze pyta FB o jego imie.
-                created_user = User(data['facebook_id'])
-                for field_name in user_scheme.keys():
-                    setattr(created_user, field_name, data[field_name])
-                return created_user
-            else:
-                return False
-        else:
-            return False
+        return data
 
 
 def get_messages(facebook_id):
@@ -527,13 +499,13 @@ def get_messages(facebook_id):
                  """ % (facebook_id)
         cursor.execute(query)
         data = cursor.fetchall()
-        created_messages = []
-        created_message = Message(json_data={'entry': 'default'})
-        for message in data:
-            for field_name, field_value in message.items():
-                setattr(created_message, field_name, message[field_name])
-            created_messages.append(created_message)
-        return created_messages
+        # created_messages = []
+        # created_message = Message(json_data={'entry': 'default'})
+        # for message in data:
+        #     for field_name, field_value in message.items():
+        #         setattr(created_message, field_name, message[field_name])
+        #     created_messages.append(created_message)
+        return data
 
 
 def update_field(table_name, field_name, field_value, where_field, where_value, if_null_required=False):

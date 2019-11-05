@@ -5,6 +5,7 @@
 import os
 import logging
 from settings import *
+from schemas import user_scheme
 
 logging.basicConfig(level=logging_level,
                     # filename='/folder/myapp.log',
@@ -40,7 +41,10 @@ def receive_message():
         message = Message(json_message)
 
         if db.user_exists(message.facebook_id):
-            user = db.get_user(message.facebook_id)
+            user = User(message.facebook_id)
+            user_data = db.get_user_data(message.facebook_id)
+            for field_name in user_scheme.keys():
+                setattr(user, field_name, user_data[field_name])
         elif json_message['facebook_id']:
             user = User(message.facebook_id)
         else:

@@ -1,7 +1,7 @@
 import logging
 import json
 import requests
-# from Databases import mysql_connection as db
+from Databases import mysql_connection as db
 
 
 # TODO add zoom parameter
