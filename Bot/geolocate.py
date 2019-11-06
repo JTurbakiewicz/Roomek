@@ -90,7 +90,7 @@ def child_locations(city):
                         # if len(nazwa) > 20:
                         #     nazwa
                         children.append(nazwa)
-            db.add_districts(city, children)
+            db.create_districts(city, children)
         except (KeyError, TypeError, requests.exceptions.ChunkedEncodingError) as e:
             logging.info(f"Couldn't find locations children for: {city}")
 

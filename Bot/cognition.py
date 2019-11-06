@@ -64,7 +64,9 @@ def collect_information(message, user, bot):
                     if user.context == "show_input_data":
                         if entity['value'] == "yes":
                             user.set_param("confirmed_data", True)
+                            user.set_param("wrong_data", False)
                         else:
+                            user.set_param("wrong_data", True)
                             user.set_param("confirmed_data", False)
                     elif user.context == "ask_more_locations":
                         if entity['value'] == "yes":

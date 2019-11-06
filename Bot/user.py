@@ -31,7 +31,7 @@ class User(UserTemplate):
                     setattr(self, n, info[n])
                 except KeyError:
                     logging.warning(f"User {facebook_id} has no parameter {n}.")
-            db.push_user(user_obj=self, update=False)
+            db.create_user(user_obj=self, update=False)
             db.create_query(facebook_id=facebook_id)
 
     def set_param(self, name, value):

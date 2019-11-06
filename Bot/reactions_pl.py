@@ -79,23 +79,23 @@ def greeting(message, user, bot):
 @response_decorator
 def ask_for_location(message, user, bot):
     question = random.choice(bot_phrases['ask_location'])
-    city = db.user_query(user.facebook_id, "city")
+    city = db.get_query(user.facebook_id, "city")
     replies = ['Blisko centrum']
     districts = geo.child_locations(city)
     if districts:
-        replies = replies + geo.child_locations(city)[0:11]
+        replies = replies + geo.child_locations(city)[0:10]
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies)
 
 
 @response_decorator
 def ask_more_locations(message, user, bot):
     question = random.choice(["Czy chciałbyś dodać jeszcze jakieś miejsce?", "Zanotowałem, coś oprócz tego?"])
-    city = db.user_query(user.facebook_id, "city")
+    city = db.get_query(user.facebook_id, "city")
     replies = ['Nie', 'Blisko centrum']
     districts = geo.child_locations(city)
     if districts:
-        replies = replies + geo.child_locations(city)[0:10]
-    already_asked_for = db.user_query(facebook_id=user.facebook_id, field_name='district').split(',')
+        replies = replies + geo.child_locations(city)[0:9]
+    already_asked_for = db.get_query(facebook_id=user.facebook_id, field_name='district').split(',')
     replies = [i for i in replies if i not in already_asked_for]
     bot.fb_send_quick_replies(message.facebook_id, reply_message=question, replies=replies)
 
@@ -103,7 +103,7 @@ def ask_more_locations(message, user, bot):
 @response_decorator
 def ask_if_new_housing_type(message, user, bot, new_value):
     bot.fb_send_quick_replies(message.facebook_id,
-                              f"Czy chcesz zmienić typ z {db.user_query(facebook_id=message.facebook_id)} na {new_value}?",
+                              f"Czy chcesz zmienić typ z {db.get_query(facebook_id=message.facebook_id)} na {new_value}?",
                               ['Tak', 'Nie'])
 
 
@@ -143,42 +143,57 @@ def ask_for_more_features(message, user, bot, meta=""):
 @response_decorator
 def show_input_data(message, user, bot):
     user.shown_input = True
-    housing_type = translate(db.user_query(user.facebook_id, field_name='housing_type'), "D")
-    if db.user_query(user.facebook_id, field_name='street'):
-        location = db.user_query(user.facebook_id, field_name='street')
-    elif db.user_query(user.facebook_id, field_name='district'):
-        location = db.user_query(user.facebook_id, field_name='district')
+    housing_type = translate(db.get_query(user.facebook_id, field_name='housing_type'), "D")
+    business_type = db.get_query(user.facebook_id, field_name='business_type')
+    if business_type == 'rent':
+        business_type = "na wynajem"
+    elif business_type == 'buy':
+        business_type = "do kupienia"
+
+    response1 = f"Zanotowałem, że szukasz {housing_type} {business_type} w mieście {db.get_query(user.facebook_id, field_name='city')}"
+
+    street = db.get_query(user.facebook_id, field_name='street')
+    district = db.get_query(user.facebook_id, field_name='district')
+    if street:
+        response1 += f", blisko ulicy {street}"
+    elif district:
+        response1 += f", najlepiej w dzielnicy {district}"
     else:
-        location = f"miejsca o współrzędnych: {db.user_query(user.facebook_id, field_name='latitude')}, {db.user_query(user.facebook_id, field_name='longitude')}"
-
-    response1 = f"Zanotowałem, że szukasz {housing_type} w mieście {db.user_query(user.facebook_id, field_name='city')}"
-
-    if location != '':
-        response1 += f" w okolicy {location}"
+        response1 += f", blisko miejsca o współrzędnych: {db.get_query(user.facebook_id, field_name='latitude')}, {db.get_query(user.facebook_id, field_name='longitude')}"
 
     bot.fb_send_text_message(str(message.facebook_id), response1)
 
-    if db.get_all_queries(user.facebook_id):
-        response2 = "które "
-        for feature in db.get_all_queries(user.facebook_id):
-            # TODO popraw jak prezentuje
-            #   print(feature)
+    price = db.get_query(user.facebook_id, field_name='total_price')
+    if price < 99999998:
+        response2 = f"które kosztuje do {price}zł"
+    else:
+        response2 = f"którego cena nie gra roli 🤑"
+    bot.fb_send_text_message(str(message.facebook_id), response2)
+
+    features = db.get_all_queries(user.facebook_id)
+    remove = ['business_type', 'city', 'total_price', 'street', 'district', 'latitude', 'longitude', 'housing_type']
+    features = [f for f in features if f[0] not in remove]
+
+    if features:
+        response3 = []
+        for feature in features:
             if feature[1] == 1:
-                response2 += " ma " + str(feature[0])
+                response3.append("które ma " + str(feature[0]))
             elif feature[1] == 0:
-                response2 += " nie ma " + str(feature[0])
+                response3.append("które nie ma " + str(feature[0]))
             elif feature[0] == 'ready_from':
                 time_now = datetime.datetime.now()
                 if feature[1] < time_now:
-                    response2 += ", które jest dostępne od zaraz "
+                    response3.append("które jest dostępne od zaraz ")
                 else:
-                    response2 += f", które będzie dostępne od {months[feature[1]].month}"
+                    response3.append(f"które będzie dostępne od {months[feature[1]].month}")
             else:
-                response2 += ", którego " + str(feature[0]) + " to " + str(feature[1])
-        bot.fb_send_text_message(str(message.facebook_id), response2)
+                response3.append("którego " + str(feature[0]) + " to " + str(feature[1]))
 
-    response3 = f"i kosztuje do {db.user_query(user.facebook_id, field_name='total_price')}zł."
-    bot.fb_send_text_message(str(message.facebook_id), response3)
+        response3 = ', '.join(response3)
+        response3 = "i " + response3 + "."
+
+        bot.fb_send_text_message(str(message.facebook_id), response3)
 
     bot.fb_send_quick_replies(message.facebook_id, "Czy wszystko się zgadza?", ['Tak 👍', '👎 Nie'])
 
@@ -186,16 +201,17 @@ def show_input_data(message, user, bot):
 @response_decorator
 def ask_what_wrong(message, user, bot):
     bot.fb_send_quick_replies(message.facebook_id, "Coś pomyliłem?",
-                              ['nie, jest ok', 'zła okolica', 'złe parametry', 'zła cena'])
+                              ['jest ok', 'zła okolica', 'złe parametry', 'zła cena'])
 
 
 @response_decorator
 def show_offers(message, user, bot):
     best = best_offer(user_obj=user, count=3)
+    city = db.get_query(user.facebook_id, field_name='city')
     if len(best['offers']) != 0:
         bot.fb_send_text_message(message.facebook_id, [
-            f"Spośród {best['offers_count_city']} ofert w Twoim mieście jest {best['offers_count']} ofert, które spełniają Twoje kryteria. Moim zdaniem te są najciekawsze:",
-            f"Spośród {best['offers_count_city']} ofert w Twoim mieście, takich ofert znalazłem {best['offers_count']}. Co powiesz o tych:"])
+            f"Spośród {best['offers_count_city']} ofert w mieście {city} jest {best['offers_count']} ofert, które spełniają Twoje kryteria. Moim zdaniem te są najciekawsze:",
+            f"Spośród {best['offers_count_city']} ofert w mieście {city}, takich ofert znalazłem {best['offers_count']}. Co powiesz o tych:"])
         bot.fb_send_offers_carousel(message.facebook_id, best['offers'])
         sleep(4)    # TODO asyncio!
         bot.fb_fake_typing(message.facebook_id, 0.7)

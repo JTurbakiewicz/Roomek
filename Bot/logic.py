@@ -116,18 +116,22 @@ def respond(message, user, bot):
         rea.ask_if_restart(message, user, bot)
     elif user.wants_restart:
         rea.restart(message, user, bot)
+    elif user.wrong_data:
+        rea.ask_what_wrong(message, user, bot)
     elif user.confirmed_data:
         rea.show_offers(message, user, bot)
+    elif user.wrong_data:
+        rea.ask_what_wrong(message, user, bot)
     else:
         ask_for_information(message, user, bot)
 
 
 def ask_for_information(message, user, bot):
 
-    if db.user_query(user.facebook_id, "business_type") is None:
+    if db.get_query(user.facebook_id, "business_type") is None:
         rea.ask_for(message, user, bot, param="business_type")
 
-    elif db.user_query(user.facebook_id, "city") is None:
+    elif db.get_query(user.facebook_id, "city") is None:
         rea.ask_for(message, user, bot, param="city")
 
     # TODO not the best approach
@@ -137,11 +141,11 @@ def ask_for_information(message, user, bot):
     elif user.wants_more_locations:
         rea.ask_more_locations(message, user, bot)
 
-    elif db.user_query(user.facebook_id, "housing_type") is None:
+    elif db.get_query(user.facebook_id, "housing_type") is None:
         rea.ask_for(message, user, bot, param="housing_type")
 
-    elif db.user_query(user.facebook_id, "total_price") is None:
-        rea.ask_for(message, user, bot, param="price", meta=f"{db.user_query(user.facebook_id,'business_type')}_{db.user_query(user.facebook_id,'housing_type')}")
+    elif db.get_query(user.facebook_id, "total_price") is None:
+        rea.ask_for(message, user, bot, param="price", meta=f"{db.get_query(user.facebook_id,'business_type')}_{db.get_query(user.facebook_id,'housing_type')}")
 
     elif user.wants_more_features:
         features_in_schema = [field_name for field_name, field_value in query_scheme.items() if
@@ -150,10 +154,10 @@ def ask_for_information(message, user, bot):
         features_recorded = [i for i in user_features_queried if i in features_in_schema]
         if len(features_recorded) == 0:
             rea.ask_for(message, user, bot, param="features",
-                             meta=f"{db.user_query(user.facebook_id, 'housing_type')}")
+                             meta=f"{db.get_query(user.facebook_id, 'housing_type')}")
         else:
             rea.ask_for_more_features(message, user, bot,
-                             meta=f"{db.user_query(user.facebook_id, 'housing_type')}")
+                             meta=f"{db.get_query(user.facebook_id, 'housing_type')}")
 
     elif not user.wants_more_features and not user.confirmed_data:
         rea.show_input_data(message, user, bot)

@@ -191,7 +191,7 @@ def create_record(table_name, field_name, field_value, offer_url):
 
 
 # TODO uproscic uniwersalnym create_record
-def add_districts(city, districts):
+def create_districts(city, districts):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         for district in districts:
             query = """
@@ -266,7 +266,7 @@ def create_rating(rating):
         cnx.commit()
 
 
-def push_user(user_obj=None, update=False):
+def create_user(user_obj=None, update=False):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         fields_to_add = ''
         user_data = []
@@ -454,7 +454,7 @@ def get_custom(sql_query):
         return cursor.fetchall()
 
 
-def user_query(facebook_id, field_name, query_no=1):
+def get_query(facebook_id, field_name, query_no=1):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """SELECT %s
                  FROM queries
@@ -475,7 +475,7 @@ def get_all_queries(facebook_id, query_no=1):
                  """ % ("'" + facebook_id + "'")  # TODO change
         cursor.execute(query)
         data = cursor.fetchone()
-        return [(x, y) for x, y in data.items() if
+        return [[x, y] for x, y in data.items() if
                 (x != 'creation_time' and x != 'modification_time' and y is not None and query_scheme[x]['to_compare'])]
 
 

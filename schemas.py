@@ -17,6 +17,7 @@ user_scheme = {
     "wants_more_locations": {"init": True, "db": "BOOLEAN"},
     "asked_for_restart": {"init": False, "db": "BOOLEAN"},
     "wants_restart": {"init": False, "db": "BOOLEAN"},
+    "wrong_data": {"init": False, "db": "BOOLEAN"},
     "confirmed_data": {"init": False, "db": "BOOLEAN"},
     "add_more": {"init": False, "db": "BOOLEAN"},
     "queries_no": {"init": False, "db": "BOOLEAN"}
