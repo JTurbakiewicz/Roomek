@@ -7,14 +7,13 @@ import logging
 from settings import MINIMUM_CONFIDENCE
 from OfferParser.translator import translate
 import re
+from schemas import query_scheme
 
 def collect_information(message, user, bot):
     """
     Function that parses message to find as many information as possible and add as parameters to the user object.
     """
-
     if message.NLP:
-
         if message.NLP_intent is not None:
             if message.NLP_intent == "greeting":
                 pass
@@ -59,6 +58,28 @@ def collect_information(message, user, bot):
                 if entity['entity'] == "feature":
                     user.add_feature(entity)
 
+                if entity['entity'] == "something_wrong":
+                    if entity['value'] == "price":
+                        user.set_param("context", 'ask_for_price')
+                        user.set_param("total_price", 0)
+                        user.set_param("wrong_data", None)
+                        user.set_param("shown_input", None)
+                    if entity['value'] == "location":
+                        user.set_param("context", 'ask_for_city')
+                        user.set_param("wants_more_locations", None)
+                        user.set_param("city", None)
+                        user.set_param("wrong_data", None)
+                        user.set_param("shown_input", None)
+                    if entity['value'] == "feature":
+                        user.set_param("context", 'ask_for_features')
+                        for x, y in query_scheme.items():
+                            if y['is_feature']:
+                                user.set_param(x, None)
+                        user.set_param("wrong_data", None)
+                        user.set_param("shown_input", None)
+                        user.set_param("wants_more_features", True)
+                        user.set_param("confirmed_data", False)
+
                 # TODO Add more yes/no contexts.
                 if entity['entity'] == "boolean":
                     if user.context == "show_input_data":
@@ -81,6 +102,10 @@ def collect_information(message, user, bot):
                     elif user.context == "ask_if_restart":
                         if entity['value'] == "yes":
                             user.restart(True)
+                    elif user.context == "ask_what_wrong":
+                        if entity['value'] == "yes":
+                            user.set_param("confirmed_data", True)
+                            user.set_param("wrong_data", False)
 
 
 """

@@ -201,7 +201,7 @@ def show_input_data(message, user, bot):
 @response_decorator
 def ask_what_wrong(message, user, bot):
     bot.fb_send_quick_replies(message.facebook_id, "Coś pomyliłem?",
-                              ['jest ok', 'zła okolica', 'złe parametry', 'zła cena'])
+                              ['Jednak jest ok', 'Błędna lokalizacja', 'Błędne parametry', 'Błędna cena'])
 
 
 @response_decorator
@@ -221,6 +221,22 @@ def show_offers(message, user, bot):
                                   ['Pokaż następne', 'Zacznijmy od nowa'])
     else:
         bot.fb_send_text_message(message.facebook_id, "Niestety nie znalazłem ofert spełniających Twoje kryteria :(")
+        user.context = 'ask_for_interest'
+        user.shown_input = None
+        user.wants_more_features = None
+        user.wants_more_locations = None
+        user.asked_for_restart = None
+        user.wants_restart = None
+        user.wrong_data = None
+        user.confirmed_data = None
+        user.add_more = None
+        db.create_user(user_obj=user, update=True)
+        db.execute_custom(query=f'delete from queries where facebook_id = {user.facebook_id}')
+        db.create_query(facebook_id=user.facebook_id)
+        sleep(1.5)
+        bot.fb_send_text_message(message.facebook_id, "Spróbuj rozszerzyć trochę zakres poszukiwań")
+        sleep(1.5)
+        ask_for(message, user, bot, param="interest")
 
 
 @response_decorator

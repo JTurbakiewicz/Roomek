@@ -144,7 +144,7 @@ def ask_for_information(message, user, bot):
     elif db.get_query(user.facebook_id, "housing_type") is None:
         rea.ask_for(message, user, bot, param="housing_type")
 
-    elif db.get_query(user.facebook_id, "total_price") is None:
+    elif db.get_query(user.facebook_id, "total_price") in [None, 0]:
         rea.ask_for(message, user, bot, param="price", meta=f"{db.get_query(user.facebook_id,'business_type')}_{db.get_query(user.facebook_id,'housing_type')}")
 
     elif user.wants_more_features:
