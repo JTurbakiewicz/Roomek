@@ -7,7 +7,6 @@ import unicodedata
 ParsingResult = namedtuple('ParsingResult', ["field_name", "field_value"])
 
 
-
 def parse_offer(item):
     try:
         offer_name = item['offer_name'][0]
@@ -16,7 +15,7 @@ def parse_offer(item):
     except KeyError:
         parsing_input = ''
 
-    parsed_results = find_dict_key_regex(parsing_input)
+    parsed_results = find_dict_key_regex(parsing_input, item)
 
     if parsed_results is not None:
         for result in parsed_results:
@@ -29,7 +28,7 @@ def parse_offer(item):
     return item
 
 
-def find_dict_key_regex(text):
+def find_dict_key_regex(text, item):
     list_of_results = []
     for field_name, re_dict in rs.items():
         for field_value, regexes in re_dict.items():
@@ -43,10 +42,29 @@ def find_dict_key_regex(text):
                     if field_name == 'area' and field_value == 'm2':
                         parsing_result = ParsingResult(field_name=field_name,
                                                        field_value=str(pattern.search(text).group(1)))
+                    elif field_name == 'security_deposit' and field_value == 'zł':
+                        found_value = pattern.search(text).group(2)
+                        if found_value:
+                            try:
+                                found_value = found_value.replace(" ", "")
+                                if found_value == "1":
+                                    found_value = item["price"][0]
+                                    parsing_result = ParsingResult(field_name=field_name,
+                                                                   field_value=found_value)
+                                elif len(found_value) < 3:
+                                    parsing_result = ParsingResult(field_name=field_name,
+                                                                   field_value=None)
+                                else:
+                                    parsing_result = ParsingResult(field_name=field_name,
+                                                                   field_value=found_value)
+                            except:
+                                pass
+                        else:
+                            parsing_result = ParsingResult(field_name=field_name, field_value=None)
+
                     elif field_name == 'street' and field_value == 'street':
                         parsing_result = ParsingResult(field_name=field_name,
                                                        field_value=str(pattern.search(text).group(2)))
-                        print(parsing_result)
                         street_found = False
                         for street in streets:
 

@@ -11,6 +11,8 @@ mysql.connector
 scrapy
 scrapy-fake-useragent
 twisted
+Unidecode
+emoji
 
 tokens.py in root
 

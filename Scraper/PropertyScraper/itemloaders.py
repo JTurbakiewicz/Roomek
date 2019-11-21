@@ -147,6 +147,24 @@ def furniture(input):
         return None
 
 
+def location_latitude_olx(input):
+    pattern = re.compile('(data-lat=")(.+)(" data-lon=")')
+    found_value = pattern.search(str(input)).group(2)
+    try:
+        yield float(found_value)
+    except Exception as e:
+        print(e)
+
+
+def location_longitude_olx(input):
+    pattern = re.compile('(data-lon=")(.+)(" data-rad=")')
+    found_value = pattern.search(str(input)).group(2)
+    try:
+        yield float(found_value)
+    except Exception as e:
+        print(e)
+
+
 def location_latitude_otodom(input):
     pattern = re.compile(r'"geo":{"@type":"GeoCoordinates","latitude":.*?,"')
     try:

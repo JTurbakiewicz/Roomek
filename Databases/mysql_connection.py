@@ -4,10 +4,11 @@ from mysql.connector import errorcode
 import logging
 import tokens
 import sys
-from Bot.user import User
-from Bot.message import Message
+import emoji
+
+from settings import reset_db_at_start
 from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, conversations_scheme, ratings_scheme, \
-    query_scheme
+    query_scheme, districts_scheme
 
 # logging.basicConfig(level='DEBUG')
 """Funtion definition"""
@@ -33,7 +34,7 @@ def set_up_db(db_config):
     try:
         cnx = mysql.connector.connect(**db_config)
         cursor = cnx.cursor()
-        logging.info("Connection succeeded")
+        logging.info("Connection: OK")
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             logging.error("Something is wrong with your user name or password")
@@ -46,28 +47,32 @@ def set_up_db(db_config):
                        "DEFAULT CHARACTER SET utf8mb4".format(DB_NAME))
         logging.info("Database created")
     except mysql.connector.Error as err:
-        logging.info("Failed creating database: {}".format(err))
+        if "database exists" in str(err):
+            logging.info(f"Database {DB_NAME} exists.")
+        else:
+            logging.info("Failed creating database: {}".format(err))
     except UnboundLocalError:
         logging.info("No connection estabilished")
         sys.exit()
     try:
         cursor.execute("USE {}".format(DB_NAME))
-        logging.info("Database chosen")
+        logging.info(f"Database in use: {DB_NAME}")
     except mysql.connector.Error as err:
         logging.error("Failed choosing database: {}".format(err))
 
     for table_name in db_tables:
         table_description = db_tables[table_name]
         try:
-            logging.info("Creating table {0}".format(table_name))
             cursor.execute(table_description)
+            logging.info(f"Created table: {table_name}")
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-                logging.info("Table already exists")
+                logging.info(f"Table '{table_name}' already exists.")
             else:
                 logging.error(str(err.msg))
-        else:
-            logging.info("OK")
+        # TODO po co to?
+        # else:
+        #     logging.info("OK")
     cnx.close()
 
 
@@ -109,49 +114,70 @@ def create_table_scheme(table_name, table_scheme, primary_key='facebook_id'):
     return sql_query
 
 
-def create_message(msg_obj=None, update=False):
-    pass  # TODO -> fix UTF with stickers
-    # if msg_obj is None:
-    #     msg_obj = Message('default')
-    #
-    # with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
-    #     fields_to_add = ''
-    #     msg_data = []
-    #
-    #     for field_name in conversations_scheme.keys():
-    #         try:
-    #             if isinstance(getattr(msg_obj, field_name), list) or isinstance(getattr(msg_obj, field_name), dict):
-    #                 msg_data.append(str(getattr(msg_obj, field_name)))
-    #             else:
-    #                 msg_data.append(getattr(msg_obj, field_name))
-    #             fields_to_add = fields_to_add + f',{field_name}'
-    #         except AttributeError:
-    #             logging.info(f"Message had no attribute {field_name} while saving.")
-    #
-    #     fields_to_add = fields_to_add[1:]
-    #     placeholders = '%s,' * len(fields_to_add.split(','))
-    #     placeholders = placeholders[:-1]
-    #
-    #     if update:
-    #         duplicate_condition = ''
-    #         for field in fields_to_add.split(','):
-    #             duplicate_condition = duplicate_condition + field + '=%s,'
-    #         duplicate_condition = duplicate_condition[:-1]
-    #         query = f"""
-    #                     INSERT INTO conversations
-    #                     ({fields_to_add})
-    #                     VALUES ({placeholders})
-    #                     ON DUPLICATE KEY UPDATE {duplicate_condition}
-    #                  """
-    #         cursor.execute(query, msg_data*2)
-    #     else:
-    #         query = """INSERT INTO conversations
-    #                 ({})
-    #                 VALUES ({})""".format(fields_to_add, placeholders)
-    #         cursor.execute(query, msg_data)
-    #     cnx.commit()
+def create_message(msg_obj, update=False):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        fields_to_add = ''
+        msg_data = []
+
+        for field_name in conversations_scheme.keys():
+            try:
+                if isinstance(getattr(msg_obj, field_name), list) or isinstance(getattr(msg_obj, field_name), dict):
+                    if field_name == 'text' or field_name == 'messaging':
+                        value = str(getattr(msg_obj, field_name))
+                        try:
+                            value = emoji.demojize(value)
+                        except TypeError:
+                            try:
+                                value = msg_obj.sticker_name
+                            except:
+                                value = 'failed_sticker'
+                        msg_data.append(value)
+                    else:
+                        msg_data.append(str(getattr(msg_obj, field_name)))
+                else:
+                    if field_name == 'text' or field_name == 'messaging':
+                        value = getattr(msg_obj, field_name)
+                        try:
+                            value = emoji.demojize(value)
+                        except TypeError:
+                            try:
+                                value = msg_obj.sticker_name
+                            except:
+                                value = 'failed_sticker'
+                        msg_data.append(value)
+                    else:
+                        msg_data.append(getattr(msg_obj, field_name))
+                fields_to_add = fields_to_add + f',{field_name}'
+            except AttributeError:
+                logging.info(f"Message had no attribute {field_name} while saving.")
+
+        fields_to_add = fields_to_add[1:]
+        placeholders = '%s,' * len(fields_to_add.split(','))
+        placeholders = placeholders[:-1]
+        try:
+            if update:
+                duplicate_condition = ''
+                for field in fields_to_add.split(','):
+                    duplicate_condition = duplicate_condition + field + '=%s,'
+                duplicate_condition = duplicate_condition[:-1]
+                query = f"""
+                            INSERT INTO conversations
+                            ({fields_to_add})
+                            VALUES ({placeholders})
+                            ON DUPLICATE KEY UPDATE {duplicate_condition}
+                         """
+                cursor.execute(query, msg_data * 2)
+            else:
+                query = """INSERT INTO conversations
+                        ({})
+                        VALUES ({})""".format(fields_to_add, placeholders)
+                cursor.execute(query, msg_data)
+            cnx.commit()
+        except:
+            logging.debug(f"Message not able to be saved")
 
 
+# TODO uniwersalne nie powinno korzystac z offer_url
 def create_record(table_name, field_name, field_value, offer_url):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """
@@ -164,16 +190,57 @@ def create_record(table_name, field_name, field_value, offer_url):
         cnx.commit()
 
 
-def update_query(query_no, facebook_id, field_name, field_value):
+# TODO uproscic uniwersalnym create_record
+def create_districts(city, districts):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        for district in districts:
+            query = """
+                INSERT INTO districts
+                (id, city, district, searches)
+                VALUES (%s, %s, %s, 0)
+            """
+            try:
+                cursor.execute(query, (f"{city}_{district}", city, district))
+                cnx.commit()
+            except mysql.connector.errors.IntegrityError as e:
+                logging.warning(f"Record already in Districts database ({e}).")
+
+
+# TODO uproscic uniwersalnym create_record
+def create_query(facebook_id, query_no=1):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        query = """
+            INSERT INTO queries
+            (query_no, facebook_id)
+            VALUES (%s, %s)
+         """
+        cursor.execute(query, (query_no, facebook_id))
+        cnx.commit()
+
+
+def update_query(facebook_id, field_name, field_value, query_no=1):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        if field_name == 'district':
+            query_to_get_all_current_offers = """SELECT district
+                     FROM queries
+                     WHERE facebook_id = %s
+                     """ % ("'" + facebook_id + "'",)
+            cursor.execute(query_to_get_all_current_offers)
+            districts_in_db = cursor.fetchone()['district']
+            if districts_in_db:
+                if field_value not in districts_in_db:
+                    field_value = districts_in_db + ',' + field_value
+
         query = f"""
             INSERT INTO queries
             (query_no, facebook_id, {field_name})
             VALUES (%s, %s, %s)
             ON DUPLICATE KEY UPDATE {field_name}=%s
          """
+
         cursor.execute(query, (query_no, facebook_id, field_value, field_value))
         cnx.commit()
+        logging.info(f"Query.{field_name} = '{field_value}' ({facebook_id})")
 
 
 def create_rating(rating):
@@ -199,7 +266,7 @@ def create_rating(rating):
         cnx.commit()
 
 
-def push_user(user_obj=None, update=False):
+def create_user(user_obj=None, update=False):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         fields_to_add = ''
         user_data = []
@@ -265,7 +332,8 @@ def get_all(table_name='offers', fields_to_get='*'):
         return result
 
 
-def get(fields_to_get='*', amount_of_items=5, fields_to_compare=None, value_to_compare_to=None, comparator=None):
+def get(table='offers', fields_to_get='*', amount_of_items=None, fields_to_compare=None, value_to_compare_to=None,
+        comparator=None):
     """ Gets rows from DB that meet the specific criteria.
 
     A function that wraps MySQL query into a python function. It lets you to easly return
@@ -350,12 +418,15 @@ def get(fields_to_get='*', amount_of_items=5, fields_to_compare=None, value_to_c
         query = """SELECT 
                         %s
                     FROM 
-                        offers
+                        %s
                     %s
-                    """ % (fields_to_get_clean, comparative_string)
+                    """ % (fields_to_get_clean, table, comparative_string)
         # TODO -> change in a MySQL secure way
         cursor.execute(query)
-        return cursor.fetchmany(amount_of_items)
+        if amount_of_items:
+            return cursor.fetchmany(amount_of_items)
+        else:
+            return cursor.fetchall()
 
 
 def get_like(like_field, like_phrase, fields_to_get='*'):
@@ -383,7 +454,32 @@ def get_custom(sql_query):
         return cursor.fetchall()
 
 
-def get_user(facebook_id):
+def get_query(facebook_id, field_name, query_no=1):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        query = """SELECT %s
+                 FROM queries
+                 WHERE facebook_id = %s
+                 """ % (field_name, "'" + facebook_id + "'")  # TODO change
+
+        logging.debug(f"Query is: {query}")
+        cursor.execute(query)
+        data = cursor.fetchone()
+        return data[field_name]
+
+
+def get_all_queries(facebook_id, query_no=1):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        query = """SELECT *
+                 FROM queries
+                 WHERE facebook_id = %s
+                 """ % ("'" + facebook_id + "'")  # TODO change
+        cursor.execute(query)
+        data = cursor.fetchone()
+        return [[x, y] for x, y in data.items() if
+                (x != 'creation_time' and x != 'modification_time' and y is not None and query_scheme[x]['to_compare'])]
+
+
+def get_user_data(facebook_id):
     with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
         query = """SELECT *
                  FROM users
@@ -392,17 +488,7 @@ def get_user(facebook_id):
 
         cursor.execute(query)
         data = cursor.fetchone()
-
-        if data:
-            if len(data) != 0:
-                created_user = User(data['facebook_id'])
-                for field_name in user_scheme.keys():
-                    setattr(created_user, field_name, data[field_name])
-                return created_user
-            else:
-                return False
-        else:
-            return False
+        return data
 
 
 def get_messages(facebook_id):
@@ -413,13 +499,13 @@ def get_messages(facebook_id):
                  """ % (facebook_id)
         cursor.execute(query)
         data = cursor.fetchall()
-        created_messages = []
-        created_message = Message(json_data={'entry': 'default'})
-        for message in data:
-            for field_name, field_value in message.items():
-                setattr(created_message, field_name, message[field_name])
-            created_messages.append(created_message)
-        return created_messages
+        # created_messages = []
+        # created_message = Message(json_data={'entry': 'default'})
+        # for message in data:
+        #     for field_name, field_value in message.items():
+        #         setattr(created_message, field_name, message[field_name])
+        #     created_messages.append(created_message)
+        return data
 
 
 def update_field(table_name, field_name, field_value, where_field, where_value, if_null_required=False):
@@ -446,6 +532,7 @@ def update_user(facebook_id, field_to_update, field_value, if_null_required=Fals
             query = query + 'AND ' + field_to_update + ' IS NULL'
         cursor.execute(query, (field_value, facebook_id))
         cnx.commit()
+        logging.info(f"User.{field_to_update} = '{field_value}' ({facebook_id})")
 
 
 def user_exists(facebook_id):
@@ -467,10 +554,25 @@ def drop_user(facebook_id=None):
             query = f"""Delete from users where facebook_id = {facebook_id}"""
             cursor.execute(query)
             cnx.commit()
-            logging.info(f"User {facebook_id} has just been removed from the database.")
-
+            logging.info(f"User {facebook_id} has just been removed from the USERS database.")
         except mysql.connector.Error as error:
             logging.warning("Failed to delete record from table: {}".format(error))
+        try:
+            query = f"""Delete from queries where facebook_id = {facebook_id}"""
+            cursor.execute(query)
+            cnx.commit()
+            logging.info(f"User {facebook_id} has just been removed from the QUERIES database.")
+        except mysql.connector.Error as error:
+            logging.warning("Failed to delete record from table: {}".format(error))
+
+
+def execute_custom(query, *args, **kwargs):
+    with DB_Connection(db_config, DB_NAME) as (cnx, cursor):
+        try:
+            cursor.execute(query)
+            cnx.commit()
+        except mysql.connector.Error as error:
+            logging.warning("Failed to execute custom command: {}".format(error))
 
 
 """DATA"""
@@ -483,9 +585,17 @@ db_tables = {'offers': create_table_scheme(table_name='offers', table_scheme=off
              'conversations': create_table_scheme(table_name='conversations', table_scheme=conversations_scheme,
                                                   primary_key='conversation_no'),
              'ratings': create_table_scheme(table_name='ratings', table_scheme=ratings_scheme, primary_key='offer_url'),
-             'queries': create_table_scheme(table_name='queries', table_scheme=query_scheme, primary_key='query_no')}
+             'districts': create_table_scheme(table_name='districts', table_scheme=districts_scheme, primary_key='id'),
+             'queries': create_table_scheme(table_name='queries', table_scheme=query_scheme, primary_key='facebook_id')}
 
 """SETUP"""
-
 db_config = tokens.sql_config
 set_up_db(db_config)
+if reset_db_at_start:
+    execute_custom("DROP TABLE users")
+    user_table_query = create_table_scheme(table_name='users', table_scheme=user_scheme)
+    execute_custom(query=user_table_query)
+    execute_custom("DROP TABLE queries")
+    queries_table_query = create_table_scheme(table_name='queries', table_scheme=query_scheme,
+                                              primary_key='facebook_id')
+    execute_custom(query=queries_table_query)

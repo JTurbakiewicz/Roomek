@@ -1,252 +1,133 @@
 import logging
-from geopy.geocoders import Nominatim, GoogleV3, OpenCage, GeoNames
-from geopy.point import Point
-from geopy.exc import GeocoderTimedOut, GeocoderUnavailable, GeocoderQuotaExceeded, GeocoderAuthenticationFailure
 import json
-import urllib.parse
-import urllib.request
 import requests
-from pprint import pprint
+from Databases import mysql_connection as db
 
 
-def recognize_location(location="", lat=0, long=0, city=""):
+# TODO add zoom parameter
+def recognize_location(location="", lat=0.00, long=0.00, city=""):
+    """ Geocoding using https://nominatim.org/release-docs/develop/api/Search/ """
 
-    # TODO Reverse geocoding (mając lat i long zwróć adres) using https://nominatim.org/release-docs/develop/api/Search/
     if lat != 0 or long != 0:
-        # https://nominatim.org/release-docs/develop/api/Reverse/
-        zoom = 10       # 3	country, 10	city, 14 suburb, 16	major streets, 17 major and minor streets, 18 building
-        req = requests.get(url=f"https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat={lat}&lon={long}&zoom={zoom}&limit=5")
+        zoom = 10  # 3	country, 10	city, 14 suburb, 16	major streets, 17 major and minor streets, 18 building
+        req = requests.get(
+            url=f"https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat={lat}&lon={long}&zoom={zoom}&limit=5")
 
-    # elif city != "":
-    #     # using https://nominatim.org/release-docs/develop/api/Search/
-    #     req = requests.get(url=f"https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q={city}&limit=5")
-    #     tloc = json.loads(req.text)
-    #     if isinstance(tloc, list):
-    #         tloc = loc[0]
-    #     box = # x1, y1, x2, y2
-    #     req = requests.get(url=f"https://nominatim.openstreetmap.org/?format=json&bounded=1&viewbox={box}&addressdetails=1&q={location}&limit=5")
+    elif city != "":
+        req = requests.get(url=f"https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q={city}&limit=5")
+        tloc = json.loads(req.text)
+        if isinstance(tloc, list):
+            tloc = tloc[0]
+            req = requests.get(url=f"https://nominatim.openstreetmap.org/search/pl/{tloc['address']['city']}/{location}?format=json&addressdetails=1&limit=5")
     else:
-        # using https://nominatim.org/release-docs/develop/api/Search/
-        req = requests.get(url=f"https://nominatim.openstreetmap.org/?format=json&addressdetails=1&q={location}&limit=5")
+        req = requests.get(
+            url=f"https://nominatim.openstreetmap.org/search/pl/{location}?format=json&addressdetails=1&limit=5")
 
     loc = json.loads(req.text)
 
-    if isinstance(loc, list):
-        logging.info(f"loc object: {loc}")
-        # TODO co jeśli szukane nie jest pierwsze na liście?
-        # for n in loc:
-        #     print(n["display_name"])
-        # TODO co jesli loc jest pusty?
+    if not loc:
+        logging.info(f"Couldn't find location: {location} {lat} {long}")
+        return False
+    elif lat == 0 and long == 0:
+        for n in loc:
+            if n['type'] == "city":
+                loc = [n]
         loc = loc[0]
 
-    loca = {
-        "name": "",
-        "lat": "",
-        "lon": "",
-        "street": "",
-        "city": "",
-        "county": "",
-        "state": "",
-        "country": "",
-        "boundingbox": "",
-        "place_id": "",
-        "osm_id": ""
-    }
+    if "lat" in loc:
+        loca = {"name": "no_name", "lat": loc["lat"], "lon": loc["lon"], "street": "", "city": "no_city",
+                "county": "no_county", "state": "no_state", "country": "no_country", "boundingbox": "", "place_id": "",
+                "osm_id": "", "district": ""}
+    else:
+        return False
 
     if "display_name" in loc:
         loca["name"] = loc["display_name"]
-
-    if "lat" in loc:
-        loca["lat"] = loc["lat"]
-
-    if "lon" in loc:
-        loca["lon"] = loc["lon"]
-
-    if "road" in loc["address"]:
-        loca["street"] = loc["address"]["road"]
-
-    if "city" in loc["address"]:
-        loca["city"] = loc["address"]["city"]
-
-    if "county" in loc["address"]:
-        loca["county"] = loc["address"]["county"]
-
-    if "state" in loc["address"]:
-        loca["state"] = loc["address"]["state"]
-
-    if "country" in loc["address"]:
-        loca["country"] = loc["address"]["country"]
-
-    if "boundingbox" in loc["address"]:
-        loca["boundingbox"] = loc["address"]["boundingbox"]
-
     if "place_id" in loc:
         loca["place_id"] = loc["place_id"]
-
     if "osm_id" in loc:
         loca["osm_id"] = loc["osm_id"]
-
+    if "boundingbox" in loc:
+        loca["boundingbox"] = loc["boundingbox"]
+    if "address" in loc:
+        if "road" in loc["address"]:
+            loca["street"] = loc["address"]["road"]
+        if "city" in loc["address"]:
+            loca["city"] = loc["address"]["city"]
+        if "county" in loc["address"]:
+            loca["county"] = loc["address"]["county"]
+        if "state" in loc["address"]:
+            loca["state"] = loc["address"]["state"]
+        if "country" in loc["address"]:
+            loca["country"] = loc["address"]["country"]
+        if "city_district" in loc["address"]:
+            loca["district"] = loc["address"]["city_district"]
     return loca
 
-""" TEST """
 
-# pprint(recognize_location(lat=52.205691, long=21.036662))
-# pprint(recognize_location(lat=51.154191, long=22.036662))
-# pprint(recognize_location(lat=52.205691, long=19.836662))
-# print()
-# pprint(recognize_location(location="Warszawa"))
-# pprint(recognize_location(location="Plewiska"))
-# pprint(recognize_location(location="Płock"))
-# print()
-# pprint(recognize_location(location="Warszawie"))
-# pprint(recognize_location(location="Poznaniu"))
-# pprint(recognize_location(location="Krakowie"))
+def child_locations(city):
+    cities = [x['city'] for x in db.get_all(table_name='districts', fields_to_get='city')]
+    if city in cities:
+        children = db.get_custom(f"select district from districts where city = '{city}'")
+        # TODO show most popular first
+        #  sorted(student_tuples, key=lambda student: student[2])  # sort by number of searches
+        children = [x['district'] for x in children]
+
+    else:
+        children = []
+        try:
+            place_id = recognize_location(location=city)["place_id"]
+            places = requests.get(
+                url=f"https://nominatim.openstreetmap.org/details.php?osmtype=W&place_id={place_id}&format=json&hierarchy=1&pretty=1&addressdetails=1&keywords=1&linkedplaces=1&group_hierarchy=1&polygon_geojson=0")
+            for e in json.loads(places.text)["hierarchy"]["administrative"]:
+                if e["admin_level"] == 9:
+                    place_id = e["place_id"]
+                    district = requests.get(
+                        url=f"https://nominatim.openstreetmap.org/details.php?osmtype=W&place_id={place_id}&format=json&hierarchy=1&pretty=1&addressdetails=1&keywords=1&linkedplaces=1&group_hierarchy=1&polygon_geojson=0")
+                    if json.loads(district.text)["importance"] > 0.1:
+                        nazwa = json.loads(district.text)["localname"].replace("Osiedle ", "")
+                        # TODO skróć nazwę (usuń po myślinku i zastąp skrótem z kropką lub Płd. Płn. itd
+                        # if len(nazwa) > 20:
+                        #     nazwa
+                        children.append(nazwa)
+            db.create_districts(city, children)
+        except (KeyError, TypeError, requests.exceptions.ChunkedEncodingError) as e:
+            logging.info(f"Couldn't find locations children for: {city}")
+
+    if children:
+        # TODO powinno zwracać wraz z rankingiem searches
+        return children
+    else:
+        return False
 
 
+def place_boundaries(location):
+    # try:
+    place_id = recognize_location(location=location)["place_id"]
+    boundaries = requests.get(url=f"https://nominatim.openstreetmap.org/details.php?osmtype=W&place_id={place_id}&format=json&hierarchy=1&pretty=1&addressdetails=1&polygon_geojson=1&keywords=1&linkedplaces=1&group_hierarchy=1&polygon_geojson=0")
+    return boundaries.text
+    # except:
+    #     return False
 
 
-
-
-
-
-
-
-
-
-
-# TODO wariant z geopy:
-# DEFAULT_SENTINEL = None
-# geolocator = Nominatim(user_agent="Roomek", format_string=None, view_box=None, bounded=None, country_bias=None, timeout=DEFAULT_SENTINEL, proxies=DEFAULT_SENTINEL, domain='nominatim.openstreetmap.org', scheme=None, ssl_context=DEFAULT_SENTINEL)
-# geolocator = GeoNames(country_bias=None, username='ar3i', timeout=3, proxies=None, user_agent='geopy/1.20.0', format_string=None, ssl_context=None, scheme='http')
-# geolocator = OpenCage(api_key='9426f4964f6c416e924e3486879c1e49', domain='api.opencagedata.com', scheme='https', timeout=1, proxies=None)
-# loc = geolocator.reverse(Point(lat, long), exactly_one=True, timeout=1, language=False, addressdetails=True)
-# recognize the place by name:
-# loc = geolocator.geocode(location, exactly_one=True, timeout=2, limit=None, addressdetails=False, language=False, geometry=None, extratags=False, country_codes=None, viewbox=None, bounded=None)
-
-
-# Narrow search when city is known:
-# elif city != "":
-# loc = geolocator.geocode(location, exactly_one=True, timeout=3, country=None, country_bias=None)
-
-# TODO get subregions (dzielnice żeby zasugerować) http://www.geonames.org/export/place-hierarchy.html#children
-# def child_locations(location=""):
-#     loc = recognize_location(location=location)
-#     geoId = loc.raw['place_id']
-#     user = "ar3i"
-#     req = requests.get(url="http://api.geonames.org/children?format=JSON&username="+user+"&geonameId="+str(geoId))
-#     return req  #json.loads(req.text)
-
-# dzielnice Warszawy:
-# print(child_locations(location="Warszawa"))
-
-# # https://www.geonames.org/export/place-hierarchy.html
-# username = "ar3i"
-# placeID = "7531926"
-# print("\n4) Miejsca podrzędne na podstawie ID:")
-# geolocate = requests.get(url="http://api.geonames.org/children?format=JSON&username=ar3i&geonameId=7531926")
-#
-# g = json.loads(geolocate.text)
-# print(g)
-
-""" TEST """
-
-# print("\n1) Miejsce na podstawie Lat i Long:")
+""" test indicators """
 # try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']))
-# except KeyError:
-#     print("keyerror")
+#     if recognize_location(lat=52.2319237, long=21.0067265)['city'] == "Warszawa" and \
+#             recognize_location(location="Warszawa")['city'] == "Warszawa":
+#         logging.info("Geolocation: OK")
+#     else:
+#         logging.warning("NOMINATIM NOT WORKING!")
+# except (KeyError, TypeError) as e:
+#     logging.warning(f"GEOLOCATION NOT WORKING! {e}")
 #
-# print("\n1) Miejsce na podstawie Lat i Long:")
-# try:
-#     print(" -->  "+str(recognize_location(location="Łódź").raw))
-# except KeyError:
-#     print("keyerror")
+# print(str(child_locations(city="Poznań")) + "\n")
 
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']['road']))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']['suburb']))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']['hamlet']))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']['state']))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']['county']))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(lat=52, long=19).raw['address']['country']))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(location="Mokotów").latitude))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(location="Mokotów").longitude))
-# except KeyError:
-#     print("keyerror")
-#
-# try:
-#     print(" -->  "+str(recognize_location(location="Mokotów").address))
-# except KeyError:
-#     print("keyerror")
-
-# print("\n2) Miejsce na podstawie nazwy:")
-# print(" -->  "+str(recognize_location(location="Mokotów")))
-#
-# print("\n3) Miejsce na podstawie nazwy, odmienione:")
-# print(" -->  "+str(recognize_location(location="Warszawie")))
-#
-
-
-# print("\n4) Miejsce na podstawie nazwy 2:")
-# geolocate = requests.get(url = "http://api.geonames.org/search"+format+"?"+"q="+querry+"&fuzzy=0.7&username="+username)
-# for n in geolocate.json()['geonames']:
-#     print(" -->  "+n["name"])
-#
-# print("\n5) Neighbours na podstawie nazwy 3:")
-# geoId = 764484
-# geolocate = requests.get(url = "http://api.geonames.org/neighbours"+format+"?"+"q="+querry+"&geonameId="+str(geoId)+"&username="+username)
-# print(geolocate.json())
-# for n in geolocate.json()['geonames']:
-#     print(" -->  "+n["name"])
-#
-# print("\n6) Neighbours na podstawie nazwy 4:")
-# geolocate = requests.get(url = "http://api.geonames.org/containsJSON"+format+"?"+"q="+querry+"&username="+username)
-# print(geolocate.json())
-#
-# print("\n7) Neighbours na podstawie nazwy 5:")
-# geolocate = requests.get(url = "http://api.geonames.org/siblings"+format+"?"+"q="+querry+"&username="+username)
-# for n in geolocate.json()['geonames']:
-#     print(" -->  "+n["name"])
-#
-# print("\n8) Miejsca pokrewne:")
-# geolocate = requests.get(url = "http://api.geonames.org/search"+format+"?"+"q="+querry+"&username="+username)
-# for n in geolocate.json()['geonames']:
-#     print(" -->  "+n["name"])
-#
-# print("\n9) Miejsca równorzędne (siblings):")
-# siblings = requests.get(url="http://api.geonames.org/siblings"+format+"?"+"geonameId="+str(geoId)+"&username="+username)
-# print(siblings.json())
-
+if __name__ == "__main__":
+    pass
+    # print(str(recognize_location(lat="51", long="21"))+"\n")
+    # print(str(recognize_location(location="Warszawa"))+"\n")
+    # print(str(recognize_location(location="Mokotów", city="Warszawa"))+"\n")
+    # print(str(recognize_location(location="Stare Miasto"))+"\n")
+    # print(str(recognize_location(location="Stare Miasto", city="Kraków"))+"\n")
+    # print(str(child_locations(city="Warszawa")) + "\n")
+    # print(place_boundaries(location="Mokotów"))

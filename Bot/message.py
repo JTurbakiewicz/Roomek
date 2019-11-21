@@ -5,11 +5,10 @@
 import os
 import logging
 from datetime import date
-from Bot.cognition import recognize_sticker
-from Bot.user import *
+import Bot.cognition as cog
 import tokens
 from settings import MINIMUM_CONFIDENCE
-from pprint import pprint
+
 
 class Message:
     """
@@ -67,21 +66,19 @@ class Message:
             else:
                 self.facebook_id = self.messaging['sender']['id']
 
-
             if 'delivery' in self.messaging:
                 self.type = "Delivery"
+                # TODO: delivery has mids not mid
             elif 'read' in self.messaging:
                 self.type = "ReadConfirmation"
             elif 'message' in self.messaging:
-                self.mid = 1234567890   # TODO mid z wiadomości
-                # TODO: delivery has mids not mid
-                # self.mid = self.messaging['message']['mid']
-
+                if 'mid' in self.messaging['message']:
+                    self.mid = self.messaging['message']['mid']
                 if 'attachments' in self.messaging['message']:
                     if 'sticker_id' in self.messaging['message']:
                         self.type = "StickerMessage"
                         self.stickerID = self.messaging['message']['sticker_id']
-                        self.sticker_name = recognize_sticker(self.stickerID)
+                        self.sticker_name = cog.recognize_sticker(self.stickerID)
                     elif self.messaging['message']['attachments'][0]['type'] == "location":
                         self.type = "LocationAnswer"
                         self.latitude = self.messaging['message']['attachments'][0]['payload']['coordinates']['lat']
@@ -111,7 +108,7 @@ class Message:
                 else:
 
                     self.text = self.messaging['message']['text']
-                    if self.text.startswith('$okoń$'):
+                    if self.text.startswith('///'):
                         self.type = "DevMode"
                     else:
                         self.type = "TextMessage"
@@ -127,7 +124,7 @@ class Message:
                                 for n in self.messaging['message']['nlp']['detected_locales']:
                                     self.NLP_language.append([n['locale'], n['confidence']])
                             except:
-                                logging.warning(str(self.messaging))
+                                logging.debug(f"Didn't find the language in: ' {str(self.messaging)}")
 
                             if 'intent' in entities:
                                 if nlp['intent'][0]['confidence'] >= MINIMUM_CONFIDENCE:
@@ -139,14 +136,16 @@ class Message:
                                 self.NLP_intent = None
 
                             for e in entities:
-                                print(e)
                                 if float(nlp[e][0]['confidence']) >= MINIMUM_CONFIDENCE:
                                     if e != 'datetime':
-                                        self.NLP_entities.append({
-                                            'entity': nlp[e][0]['_entity'],
-                                            'value': nlp[e][0]['value'],
-                                            'confidence': nlp[e][0]['confidence'],
-                                            'body': nlp[e][0]['_body']})
+                                        try:
+                                            self.NLP_entities.append({
+                                                'entity': nlp[e][0]['_entity'],
+                                                'value': nlp[e][0]['value'],
+                                                'confidence': nlp[e][0]['confidence'],
+                                                'body': nlp[e][0]['_body']})
+                                        except KeyError:
+                                            logging.warning(nlp[e][0])
                                         if '_role' in nlp[e][0]:
                                             self.NLP_entities[-1]['role'] = nlp[e][0]['_role']
                                     else:   # process date and time entities:
@@ -156,7 +155,7 @@ class Message:
                                             'confidence': nlp[e][0]['confidence'],
                                             'body': nlp[e][0]['_body']})
                                 else:
-                                    logging.warning(f"NLP entity not correct: {e}")
+                                    logging.debug(f"NLP entity: {e} id below confidence limit.")
             else:
                 self.type = "UnknownType"
         else:

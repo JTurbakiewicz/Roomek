@@ -5,6 +5,7 @@
 import os
 import logging
 from settings import *
+from schemas import user_scheme
 
 logging.basicConfig(level=logging_level,
                     # filename='/folder/myapp.log',
@@ -23,7 +24,7 @@ from Databases import mysql_connection as db
 from Bot.logic import handle_message
 from Bot.message import Message
 from Bot.user import User
-from Bot.facebook_webhooks import verify_fb_token
+import Bot.facebook_webhooks as fb
 
 # initiate the web app
 app = Flask(__name__)
@@ -34,24 +35,36 @@ def receive_message():
     logging.debug(request.get_json())          # Full json content
     if request.method == 'GET':            # if type is 'GET' it means FB wants to verify tokens
         token_sent = request.args.get("hub.verify_token")
-        return verify_fb_token(request, token_sent)
+        return fb.verify_fb_token(request, token_sent)
     else:                                  # if type is not 'GET' it must be 'POST' - we have a message
         json_message = request.get_json()  # read message as json
         message = Message(json_message)
+
         if db.user_exists(message.facebook_id):
-            user = db.get_user(message.facebook_id)
-        else:
             user = User(message.facebook_id)
-        handle_message(message, user)       # process the message and respond
+            user_data = db.get_user_data(message.facebook_id)
+            for field_name in user_scheme.keys():
+                setattr(user, field_name, user_data[field_name])
+        elif json_message['facebook_id']:
+            user = User(message.facebook_id)
+        else:
+            user = User(88888888)
+            logging.warning(f"Message without facebook_id: {json_message}")
+
+        if message.mid not in db.get(table='conversations', fields_to_get='mid'):
+            handle_message(message, user)  # process the message and respond
+        else:
+            logging.warning(f"Message was already processed and was probably resent by facebook: {json_message}")
+
     return "Message Processed"
 
 # TODO dodać API żeby np. zacząć od nowa po kliknięciu w menu
-@app.route("/api/", methods=['GET', 'POST'])
-def call_api():
-    logging.debug(request.get_json())       # Full json content
-    json_message = request.get_json()       # read message as json
-    print(json_message)
-    return "Message Processed"
+# @app.route("/api/", methods=['GET', 'POST'])
+# def call_api():
+#     logging.debug(request.get_json())       # Full json content
+#     json_message = request.get_json()       # read message as json
+#     print(json_message)
+#     return "Message Processed"
 
 # If the program is executed (double-clicked), it will set name to main, thus run app:
 if __name__ == "__main__":

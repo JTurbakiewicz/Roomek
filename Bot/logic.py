@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-""" Functions for basic bot behaviours. """
+""" Functions for basic bot behaviours. How it reacts to certain messages, depending on the context. """
 
 from settings import *
 import tokens
 from Databases import mysql_connection as db
-from Bot.cognition import *
-from Bot.reactions_PL import *
-from Bot.respond import *
-from Bot.message import Message
+import Bot.cognition as cog
+import Bot.reactions_pl as rea
 from Bot.facebook_webhooks import Bot
+from schemas import bot_phrases, query_scheme
+import random
 
-# initiate the bot object:
+
 bot = Bot(tokens.fb_access)
 
 
@@ -23,7 +23,6 @@ def handle_message(message, user):
     if message.is_echo:
         pass
     else:
-
         bot.fb_send_action(str(message.facebook_id), 'mark_seen')
 
         if message.type == "Delivery":
@@ -52,16 +51,16 @@ def handle_text(message, user, bot):
     """ React when the user sends any text. """
     if message.NLP:
         logging.info(f"-NLP→ intent: {str(message.NLP_intent)}, entities: {str(message.NLP_entities)}")
-        collect_information(message, user, bot)
+        cog.collect_information(message, user, bot)
         respond(message, user, bot)
     else:
-        default_message(message, user, bot)
+        rea.default_message(message, user, bot)
 
 
 def handle_sticker(message, user, bot):
     """ React when the user sends a sticker. """
     bot.fb_fake_typing(str(message.facebook_id), 0.5)
-    response = sticker_response(message, user, bot)
+    response = rea.sticker_response(message, user, bot)
     if response != "already sent":
         bot.fb_send_text_message(str(message.facebook_id), response)
     logging.info(f"Message <sticker> from {str(message.facebook_id)[0:5]} recognized as '{message.sticker_name}' sticker (id={message.stickerID})")
@@ -78,10 +77,10 @@ def handle_attachment(message, user, bot):
 
 def handle_location(message, user, bot):
     """ React when the user replies with location."""
-    if user.context == "ask_for_location":
-        user.add_location(message.latitude, message.longitude)
-    elif user.context == "ask_for_city":
-        user.add_city(message.latitude, message.longitude)
+    if user.context == "ask_for_city":
+        user.add_location(message.latitude, message.longitude, city_known=False)
+    elif user.context == "ask_for_location":
+        user.add_location(message.latitude, message.longitude, city_known=True)
     respond(message, user, bot)
 
 
@@ -94,10 +93,83 @@ def handle_devmode(message, user, bot):
     #     bot.fb_send_button_message(message.facebook_id, "test", ['test_value_1', 'test_value_2'])  # TODO not working
     # elif 'generic' in message.text:
     #     bot.fb_send_generic_message(message.facebook_id, ['Test_value_1', 'Test_value_2'])
-    elif 'dropme' in message.text:
+    elif 'd' in message.text:
         bot.fb_send_text_message(str(message.facebook_id), 'Your data has been erased.')
         db.drop_user(message.facebook_id)
-    elif 'showme' in message.text:
-        response.show_user_object(message, user, bot)
+    elif 's' in message.text:
+        rea.show_user_object(message, user, bot)
     else:
         bot.fb_send_text_message(str(message.facebook_id), 'Hello world!')
+
+
+# TODO bug: adding place yes/no returns nothing
+def respond(message, user, bot):
+
+    if message.NLP_intent == "greeting":
+        rea.greeting(message, user, bot)
+    elif not message.NLP_intent and not message.NLP_entities:   # nie zrozumiał, więc ponawia pytanie
+        rea.default_message(message, user, bot)
+        response2 = random.choice(bot_phrases['back_to_context'])
+        bot.fb_send_text_message(str(message.facebook_id), response2)
+        ask_for_information(message, user, bot)
+    elif message.NLP_intent == "restart":
+        rea.ask_if_restart(message, user, bot)
+    elif user.wants_restart:
+        rea.restart(message, user, bot)
+    elif user.wrong_data:
+        rea.ask_what_wrong(message, user, bot)
+    elif user.confirmed_data:
+        rea.show_offers(message, user, bot)
+    elif user.wrong_data:
+        rea.ask_what_wrong(message, user, bot)
+    else:
+        ask_for_information(message, user, bot)
+
+
+def ask_for_information(message, user, bot):
+
+    if db.get_query(user.facebook_id, "business_type") is None:
+        rea.ask_for(message, user, bot, param="business_type")
+
+    elif db.get_query(user.facebook_id, "city") is None:
+        rea.ask_for(message, user, bot, param="city")
+
+    # TODO not the best approach
+    elif user.context == "ask_for_city":
+        rea.ask_for_location(message, user, bot)
+
+    elif user.wants_more_locations:
+        rea.ask_more_locations(message, user, bot)
+
+    elif db.get_query(user.facebook_id, "housing_type") is None:
+        rea.ask_for(message, user, bot, param="housing_type")
+
+    elif db.get_query(user.facebook_id, "total_price") in [None, 0]:
+        rea.ask_for(message, user, bot, param="price", meta=f"{db.get_query(user.facebook_id,'business_type')}_{db.get_query(user.facebook_id,'housing_type')}")
+
+    elif user.wants_more_features:
+        features_in_schema = [field_name for field_name, field_value in query_scheme.items() if
+                              field_value['is_feature']]
+        user_features_queried = [query_tuple[0] for query_tuple in db.get_all_queries(facebook_id=user.facebook_id)]
+        features_recorded = [i for i in user_features_queried if i in features_in_schema]
+        if len(features_recorded) == 0:
+            rea.ask_for(message, user, bot, param="features",
+                             meta=f"{db.get_query(user.facebook_id, 'housing_type')}")
+        else:
+            rea.ask_for_more_features(message, user, bot,
+                             meta=f"{db.get_query(user.facebook_id, 'housing_type')}")
+
+    elif not user.wants_more_features and not user.confirmed_data:
+        rea.show_input_data(message, user, bot)
+
+    # TODO rea.ask_what_wrong(message, user, bot)
+
+    elif user.confirmed_data and not user.wants_restart:
+        rea.show_offers(message, user, bot)
+
+    elif user.wants_restart:
+        db.drop_user(user.facebook_id)
+        rea.restart(message, user, bot)
+
+    else:
+        rea.default_message(message, user, bot)
