@@ -9,6 +9,7 @@ from OfferParser.translator import translate
 import re
 from schemas import query_scheme
 
+
 def collect_information(message, user, bot):
     """
     Function that parses message to find as many information as possible and add as parameters to the user object.
