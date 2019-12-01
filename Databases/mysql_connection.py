@@ -5,10 +5,11 @@ import logging
 import tokens
 import sys
 import emoji
+import datetime
 
 from settings import reset_db_at_start
 from schemas import user_scheme, db_scheme, offer_scheme, db_utility_scheme, conversations_scheme, ratings_scheme, \
-    query_scheme, districts_scheme
+    query_scheme, districts_scheme, weights_scheme
 
 # logging.basicConfig(level='DEBUG')
 """Funtion definition"""
@@ -103,12 +104,14 @@ def create_offer(item):
         cnx.commit()
 
 
-def create_table_scheme(table_name, table_scheme, primary_key='facebook_id'):
+def create_table_scheme(table_name, table_scheme, primary_key='facebook_id', defaults=False):
     sql_query = db_scheme["beggining"]["text"].format(table_name=table_name)
     for field_name, field_values in table_scheme.items():
-        addition = f" `{field_name}` {field_values['db']},"
+        if defaults:
+            addition = f" `{field_name}` {field_values['db']} DEFAULT  {field_values['default']},"
+        else:
+            addition = f" `{field_name}` {field_values['db']},"
         sql_query = ''.join((sql_query, addition))
-
     sql_query = sql_query + " `creation_time` datetime default current_timestamp, `modification_time` datetime on update current_timestamp, "
     sql_query = sql_query + '' + db_scheme["end"]["text"].format(primary_key=primary_key)
     return sql_query
@@ -476,7 +479,7 @@ def get_all_queries(facebook_id, query_no=1):
         cursor.execute(query)
         data = cursor.fetchone()
         return [[x, y] for x, y in data.items() if
-                (x != 'creation_time' and x != 'modification_time' and y is not None and query_scheme[x]['to_compare'])]
+                (x != 'creation_time' and x != 'modification_time' and y is not None)]
 
 
 def get_user_data(facebook_id):
@@ -506,6 +509,7 @@ def get_messages(facebook_id):
         #         setattr(created_message, field_name, message[field_name])
         #     created_messages.append(created_message)
         return data
+
 
 
 def update_field(table_name, field_name, field_value, where_field, where_value, if_null_required=False):
@@ -586,7 +590,10 @@ db_tables = {'offers': create_table_scheme(table_name='offers', table_scheme=off
                                                   primary_key='conversation_no'),
              'ratings': create_table_scheme(table_name='ratings', table_scheme=ratings_scheme, primary_key='offer_url'),
              'districts': create_table_scheme(table_name='districts', table_scheme=districts_scheme, primary_key='id'),
-             'queries': create_table_scheme(table_name='queries', table_scheme=query_scheme, primary_key='facebook_id')}
+             'queries': create_table_scheme(table_name='queries', table_scheme=query_scheme, primary_key='facebook_id'),
+             'weights': create_table_scheme(table_name='weights', table_scheme=weights_scheme,
+                                            primary_key='modification_time', defaults=True),
+             }
 
 """SETUP"""
 db_config = tokens.sql_config
@@ -599,3 +606,9 @@ if reset_db_at_start:
     queries_table_query = create_table_scheme(table_name='queries', table_scheme=query_scheme,
                                               primary_key='facebook_id')
     execute_custom(query=queries_table_query)
+    execute_custom("DROP TABLE weights")
+    queries_table_query = create_table_scheme(table_name='weights', table_scheme=query_scheme,
+                                              primary_key='modification_time', defaults=True)
+    execute_custom(query=queries_table_query)
+
+execute_custom(f"INSERT INTO `roomekbot$offers`.`weights` (`modification_time`) VALUES ('2019-12-01 00:00:0');")

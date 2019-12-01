@@ -13,24 +13,32 @@ def best_offer(user_obj=None, count=1):
 
     for field in queries:
         comparator = query_scheme[field[0]]['comparator']
-        if 'int' in query_scheme[field[0]]['db'].lower():
-            query = query + f' and {field[0]} {comparator} {field[1]}'
-        elif 'char' in query_scheme[field[0]]['db'].lower():
-            query = query + f" and {field[0]} {comparator} '{field[1]}'"
-        elif 'bool' in query_scheme[field[0]]['db'].lower():
-            query = query + f' and {field[0]} {comparator} {field[1]}'
-        elif 'date' in query_scheme[field[0]]['db'].lower():
-            query = query + f' and ({field[0]} {comparator} "{field[1] + timedelta(days=5)}" or {field[0]} is null)'
-        else:
-            print('TODO')
-            print(query_scheme[field[0]]['db'])
+        to_compare = query_scheme[field[0]]['to_compare']
+        if to_compare:
+            if 'int' in query_scheme[field[0]]['db'].lower():
+                query = query + f' and {field[0]} {comparator} {field[1]}'
+            elif 'char' in query_scheme[field[0]]['db'].lower():
+                query = query + f" and {field[0]} {comparator} '{field[1]}'"
+            elif 'bool' in query_scheme[field[0]]['db'].lower():
+                query = query + f' and {field[0]} {comparator} {field[1]}'
+            elif 'date' in query_scheme[field[0]]['db'].lower():
+                query = query + f' and ({field[0]} {comparator} "{field[1] + timedelta(days=5)}" or {field[0]} is null)'
+            else:
+                print('TODO')
+                print(query_scheme[field[0]]['db'])
 
-        if field[0] == 'city':
-            city = field[1]
+            if field[0] == 'city':
+                city = field[1]
 
     print(query)
-
+    print(queries)
     offers = db.get_custom(query)
+    try:
+        print(offers[0:3])
+    except:
+        pass
+
+
 
     offers_count_city = db.get_custom(f"SELECT COUNT(IF(city = '{city}', 1, NULL)) '{city}' FROM offers;")
     offers_count_city = offers_count_city[0][city]
