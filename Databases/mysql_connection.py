@@ -105,15 +105,21 @@ def create_offer(item):
 
 
 def create_table_scheme(table_name, table_scheme, primary_key='facebook_id', defaults=False):
+    print(table_scheme)
     sql_query = db_scheme["beggining"]["text"].format(table_name=table_name)
+    print(sql_query)
     for field_name, field_values in table_scheme.items():
+        print(field_name)
         if defaults:
             addition = f" `{field_name}` {field_values['db']} DEFAULT  {field_values['default']},"
         else:
             addition = f" `{field_name}` {field_values['db']},"
         sql_query = ''.join((sql_query, addition))
+
     sql_query = sql_query + " `creation_time` datetime default current_timestamp, `modification_time` datetime on update current_timestamp, "
     sql_query = sql_query + '' + db_scheme["end"]["text"].format(primary_key=primary_key)
+
+    print(sql_query)
     return sql_query
 
 
@@ -580,19 +586,19 @@ def execute_custom(query, *args, **kwargs):
 
 
 """DATA"""
-
+print(query_scheme)
 DB_NAME = 'RoomekBot$offers'
-db_tables = {'offers': create_table_scheme(table_name='offers', table_scheme=offer_scheme, primary_key='offer_url'),
-             'utility': create_table_scheme(table_name='utility', table_scheme=db_utility_scheme,
-                                            primary_key='offer_url'),
-             'users': create_table_scheme(table_name='users', table_scheme=user_scheme),
-             'conversations': create_table_scheme(table_name='conversations', table_scheme=conversations_scheme,
-                                                  primary_key='conversation_no'),
-             'ratings': create_table_scheme(table_name='ratings', table_scheme=ratings_scheme, primary_key='offer_url'),
-             'districts': create_table_scheme(table_name='districts', table_scheme=districts_scheme, primary_key='id'),
+db_tables = {#'offers': create_table_scheme(table_name='offers', table_scheme=offer_scheme, primary_key='offer_url'),
+             # 'utility': create_table_scheme(table_name='utility', table_scheme=db_utility_scheme,
+             #                                primary_key='offer_url'),
+             # 'users': create_table_scheme(table_name='users', table_scheme=user_scheme),
+             # 'conversations': create_table_scheme(table_name='conversations', table_scheme=conversations_scheme,
+             #                                      primary_key='conversation_no'),
+             # 'ratings': create_table_scheme(table_name='ratings', table_scheme=ratings_scheme, primary_key='offer_url'),
+             # 'districts': create_table_scheme(table_name='districts', table_scheme=districts_scheme, primary_key='id'),
              'queries': create_table_scheme(table_name='queries', table_scheme=query_scheme, primary_key='facebook_id'),
-             'weights': create_table_scheme(table_name='weights', table_scheme=weights_scheme,
-                                            primary_key='modification_time', defaults=True),
+             # 'weights': create_table_scheme(table_name='weights', table_scheme=weights_scheme,
+             #                                primary_key='modification_time', defaults=True),
              }
 
 """SETUP"""
