@@ -1,5 +1,6 @@
 from settings import cities_scope
 import datetime
+import copy
 
 today = datetime.date.today()
 
@@ -598,8 +599,7 @@ months = {
     11: 'listopada',
     12: 'grudnia',
 }
-
-weights_scheme = query_scheme
+weights_scheme = copy.deepcopy(query_scheme)
 to_delete = []
 
 for x, y in weights_scheme.items():
